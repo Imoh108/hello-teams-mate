@@ -242,8 +242,18 @@ export const submitAnswer = createServerFn({ method: "POST" })
       flagged: !!data.flagged,
     }, { onConflict: "session_id,question_id,user_id" });
     if (error) throw new Error(error.message);
+    if (points > 0) {
+      const { data: sessionRow } = await supabase.from("sessions")
+        .select("org_id").eq("id", data.session_id).single();
+      await supabase.rpc("award_points", {
+        _user: userId,
+        _org: (sessionRow?.org_id ?? null) as string,
+        _source: "quiz_answer",
+        _delta: points,
+        _ref: data.question_id,
+      });
+    }
     if (data.flagged) {
-      await supabase.rpc; // placeholder for typing
       await supabase.from("session_players").update({ flagged_count: (await flaggedCount(supabase, data.session_id, userId)) })
         .eq("session_id", data.session_id).eq("user_id", userId);
     }
