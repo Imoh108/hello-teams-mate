@@ -29,6 +29,7 @@ import { Route as AuthenticatedAdminMembersRouteImport } from './routes/_authent
 import { Route as AuthenticatedAdminItemsRouteImport } from './routes/_authenticated/admin.items'
 import { Route as AuthenticatedAdminDocumentsRouteImport } from './routes/_authenticated/admin.documents'
 import { Route as AuthenticatedAdminDepartmentsRouteImport } from './routes/_authenticated/admin.departments'
+import { Route as AuthenticatedAdminChallengesRouteImport } from './routes/_authenticated/admin.challenges'
 import { Route as AuthenticatedAdminBanksRouteImport } from './routes/_authenticated/admin.banks'
 import { Route as AuthenticatedAdminBadgesRouteImport } from './routes/_authenticated/admin.badges'
 import { Route as AuthenticatedAdminBanksBankIdRouteImport } from './routes/_authenticated/admin.banks.$bankId'
@@ -139,6 +140,12 @@ const AuthenticatedAdminDepartmentsRoute =
     path: '/departments',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminChallengesRoute =
+  AuthenticatedAdminChallengesRouteImport.update({
+    id: '/challenges',
+    path: '/challenges',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminBanksRoute = AuthenticatedAdminBanksRouteImport.update({
   id: '/banks',
   path: '/banks',
@@ -168,6 +175,7 @@ export interface FileRoutesByFullPath {
   '/shop': typeof AuthenticatedShopRoute
   '/admin/badges': typeof AuthenticatedAdminBadgesRoute
   '/admin/banks': typeof AuthenticatedAdminBanksRouteWithChildren
+  '/admin/challenges': typeof AuthenticatedAdminChallengesRoute
   '/admin/departments': typeof AuthenticatedAdminDepartmentsRoute
   '/admin/documents': typeof AuthenticatedAdminDocumentsRoute
   '/admin/items': typeof AuthenticatedAdminItemsRoute
@@ -191,6 +199,7 @@ export interface FileRoutesByTo {
   '/shop': typeof AuthenticatedShopRoute
   '/admin/badges': typeof AuthenticatedAdminBadgesRoute
   '/admin/banks': typeof AuthenticatedAdminBanksRouteWithChildren
+  '/admin/challenges': typeof AuthenticatedAdminChallengesRoute
   '/admin/departments': typeof AuthenticatedAdminDepartmentsRoute
   '/admin/documents': typeof AuthenticatedAdminDocumentsRoute
   '/admin/items': typeof AuthenticatedAdminItemsRoute
@@ -217,6 +226,7 @@ export interface FileRoutesById {
   '/_authenticated/shop': typeof AuthenticatedShopRoute
   '/_authenticated/admin/badges': typeof AuthenticatedAdminBadgesRoute
   '/_authenticated/admin/banks': typeof AuthenticatedAdminBanksRouteWithChildren
+  '/_authenticated/admin/challenges': typeof AuthenticatedAdminChallengesRoute
   '/_authenticated/admin/departments': typeof AuthenticatedAdminDepartmentsRoute
   '/_authenticated/admin/documents': typeof AuthenticatedAdminDocumentsRoute
   '/_authenticated/admin/items': typeof AuthenticatedAdminItemsRoute
@@ -243,6 +253,7 @@ export interface FileRouteTypes {
     | '/shop'
     | '/admin/badges'
     | '/admin/banks'
+    | '/admin/challenges'
     | '/admin/departments'
     | '/admin/documents'
     | '/admin/items'
@@ -266,6 +277,7 @@ export interface FileRouteTypes {
     | '/shop'
     | '/admin/badges'
     | '/admin/banks'
+    | '/admin/challenges'
     | '/admin/departments'
     | '/admin/documents'
     | '/admin/items'
@@ -291,6 +303,7 @@ export interface FileRouteTypes {
     | '/_authenticated/shop'
     | '/_authenticated/admin/badges'
     | '/_authenticated/admin/banks'
+    | '/_authenticated/admin/challenges'
     | '/_authenticated/admin/departments'
     | '/_authenticated/admin/documents'
     | '/_authenticated/admin/items'
@@ -453,6 +466,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminDepartmentsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/challenges': {
+      id: '/_authenticated/admin/challenges'
+      path: '/challenges'
+      fullPath: '/admin/challenges'
+      preLoaderRoute: typeof AuthenticatedAdminChallengesRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/banks': {
       id: '/_authenticated/admin/banks'
       path: '/banks'
@@ -494,6 +514,7 @@ const AuthenticatedAdminBanksRouteWithChildren =
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminBadgesRoute: typeof AuthenticatedAdminBadgesRoute
   AuthenticatedAdminBanksRoute: typeof AuthenticatedAdminBanksRouteWithChildren
+  AuthenticatedAdminChallengesRoute: typeof AuthenticatedAdminChallengesRoute
   AuthenticatedAdminDepartmentsRoute: typeof AuthenticatedAdminDepartmentsRoute
   AuthenticatedAdminDocumentsRoute: typeof AuthenticatedAdminDocumentsRoute
   AuthenticatedAdminItemsRoute: typeof AuthenticatedAdminItemsRoute
@@ -504,6 +525,7 @@ interface AuthenticatedAdminRouteChildren {
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminBadgesRoute: AuthenticatedAdminBadgesRoute,
   AuthenticatedAdminBanksRoute: AuthenticatedAdminBanksRouteWithChildren,
+  AuthenticatedAdminChallengesRoute: AuthenticatedAdminChallengesRoute,
   AuthenticatedAdminDepartmentsRoute: AuthenticatedAdminDepartmentsRoute,
   AuthenticatedAdminDocumentsRoute: AuthenticatedAdminDocumentsRoute,
   AuthenticatedAdminItemsRoute: AuthenticatedAdminItemsRoute,
@@ -555,3 +577,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
