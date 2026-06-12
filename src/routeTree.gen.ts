@@ -13,6 +13,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
+import { Route as AuthenticatedPlayIndexRouteImport } from './routes/_authenticated/play.index'
 import { Route as AuthenticatedResultsSessionIdRouteImport } from './routes/_authenticated/results.$sessionId'
 import { Route as AuthenticatedQuizzesIdRouteImport } from './routes/_authenticated/quizzes.$id'
 import { Route as AuthenticatedPlaySessionIdRouteImport } from './routes/_authenticated/play.$sessionId'
@@ -35,6 +36,11 @@ const IndexRoute = IndexRouteImport.update({
 const AuthenticatedAppRoute = AuthenticatedAppRouteImport.update({
   id: '/app',
   path: '/app',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedPlayIndexRoute = AuthenticatedPlayIndexRouteImport.update({
+  id: '/play/',
+  path: '/play/',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedResultsSessionIdRoute =
@@ -69,6 +75,7 @@ export interface FileRoutesByFullPath {
   '/play/$sessionId': typeof AuthenticatedPlaySessionIdRoute
   '/quizzes/$id': typeof AuthenticatedQuizzesIdRoute
   '/results/$sessionId': typeof AuthenticatedResultsSessionIdRoute
+  '/play/': typeof AuthenticatedPlayIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -78,6 +85,7 @@ export interface FileRoutesByTo {
   '/play/$sessionId': typeof AuthenticatedPlaySessionIdRoute
   '/quizzes/$id': typeof AuthenticatedQuizzesIdRoute
   '/results/$sessionId': typeof AuthenticatedResultsSessionIdRoute
+  '/play': typeof AuthenticatedPlayIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -89,6 +97,7 @@ export interface FileRoutesById {
   '/_authenticated/play/$sessionId': typeof AuthenticatedPlaySessionIdRoute
   '/_authenticated/quizzes/$id': typeof AuthenticatedQuizzesIdRoute
   '/_authenticated/results/$sessionId': typeof AuthenticatedResultsSessionIdRoute
+  '/_authenticated/play/': typeof AuthenticatedPlayIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -100,6 +109,7 @@ export interface FileRouteTypes {
     | '/play/$sessionId'
     | '/quizzes/$id'
     | '/results/$sessionId'
+    | '/play/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -109,6 +119,7 @@ export interface FileRouteTypes {
     | '/play/$sessionId'
     | '/quizzes/$id'
     | '/results/$sessionId'
+    | '/play'
   id:
     | '__root__'
     | '/'
@@ -119,6 +130,7 @@ export interface FileRouteTypes {
     | '/_authenticated/play/$sessionId'
     | '/_authenticated/quizzes/$id'
     | '/_authenticated/results/$sessionId'
+    | '/_authenticated/play/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -155,6 +167,13 @@ declare module '@tanstack/react-router' {
       path: '/app'
       fullPath: '/app'
       preLoaderRoute: typeof AuthenticatedAppRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/play/': {
+      id: '/_authenticated/play/'
+      path: '/play'
+      fullPath: '/play/'
+      preLoaderRoute: typeof AuthenticatedPlayIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/results/$sessionId': {
@@ -194,6 +213,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPlaySessionIdRoute: typeof AuthenticatedPlaySessionIdRoute
   AuthenticatedQuizzesIdRoute: typeof AuthenticatedQuizzesIdRoute
   AuthenticatedResultsSessionIdRoute: typeof AuthenticatedResultsSessionIdRoute
+  AuthenticatedPlayIndexRoute: typeof AuthenticatedPlayIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -202,6 +222,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedPlaySessionIdRoute: AuthenticatedPlaySessionIdRoute,
   AuthenticatedQuizzesIdRoute: AuthenticatedQuizzesIdRoute,
   AuthenticatedResultsSessionIdRoute: AuthenticatedResultsSessionIdRoute,
+  AuthenticatedPlayIndexRoute: AuthenticatedPlayIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
@@ -215,13 +236,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
