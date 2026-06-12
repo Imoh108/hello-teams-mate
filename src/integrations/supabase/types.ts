@@ -68,24 +68,197 @@ export type Database = {
           },
         ]
       }
+      departments: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          org_id: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          org_id: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          org_id?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "departments_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organization_invites: {
+        Row: {
+          accepted_at: string | null
+          created_at: string
+          department_id: string | null
+          email: string
+          expires_at: string
+          id: string
+          invited_by: string
+          org_id: string
+          org_role: Database["public"]["Enums"]["org_role"]
+          token: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          created_at?: string
+          department_id?: string | null
+          email: string
+          expires_at?: string
+          id?: string
+          invited_by: string
+          org_id: string
+          org_role?: Database["public"]["Enums"]["org_role"]
+          token?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          created_at?: string
+          department_id?: string | null
+          email?: string
+          expires_at?: string
+          id?: string
+          invited_by?: string
+          org_id?: string
+          org_role?: Database["public"]["Enums"]["org_role"]
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_invites_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_invites_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organization_members: {
+        Row: {
+          created_at: string
+          department_id: string | null
+          id: string
+          org_id: string
+          org_role: Database["public"]["Enums"]["org_role"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          department_id?: string | null
+          id?: string
+          org_id: string
+          org_role?: Database["public"]["Enums"]["org_role"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          department_id?: string | null
+          id?: string
+          org_id?: string
+          org_role?: Database["public"]["Enums"]["org_role"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_members_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_members_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organizations: {
+        Row: {
+          created_at: string
+          created_by: string
+          data_backend: Database["public"]["Enums"]["org_data_backend"]
+          default_locale: string
+          id: string
+          logo_url: string | null
+          name: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          data_backend?: Database["public"]["Enums"]["org_data_backend"]
+          default_locale?: string
+          id?: string
+          logo_url?: string | null
+          name: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          data_backend?: Database["public"]["Enums"]["org_data_backend"]
+          default_locale?: string
+          id?: string
+          logo_url?: string | null
+          name?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
           created_at: string
           display_name: string
           id: string
+          preferred_locale: string
         }
         Insert: {
           avatar_url?: string | null
           created_at?: string
           display_name: string
           id: string
+          preferred_locale?: string
         }
         Update: {
           avatar_url?: string | null
           created_at?: string
           display_name?: string
           id?: string
+          preferred_locale?: string
         }
         Relationships: []
       }
@@ -133,32 +306,53 @@ export type Database = {
       quizzes: {
         Row: {
           created_at: string
+          department_id: string | null
           description: string | null
           id: string
           is_public: boolean
+          org_id: string | null
           owner_id: string | null
           title: string
           topic_pack: Database["public"]["Enums"]["topic_pack"]
         }
         Insert: {
           created_at?: string
+          department_id?: string | null
           description?: string | null
           id?: string
           is_public?: boolean
+          org_id?: string | null
           owner_id?: string | null
           title: string
           topic_pack?: Database["public"]["Enums"]["topic_pack"]
         }
         Update: {
           created_at?: string
+          department_id?: string | null
           description?: string | null
           id?: string
           is_public?: boolean
+          org_id?: string | null
           owner_id?: string | null
           title?: string
           topic_pack?: Database["public"]["Enums"]["topic_pack"]
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "quizzes_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quizzes_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       session_players: {
         Row: {
@@ -199,10 +393,12 @@ export type Database = {
         Row: {
           created_at: string
           current_question_id: string | null
+          department_id: string | null
           ended_at: string | null
           host_id: string
           id: string
           join_code: string
+          org_id: string | null
           question_started_at: string | null
           quiz_id: string
           status: Database["public"]["Enums"]["session_status"]
@@ -211,10 +407,12 @@ export type Database = {
         Insert: {
           created_at?: string
           current_question_id?: string | null
+          department_id?: string | null
           ended_at?: string | null
           host_id: string
           id?: string
           join_code: string
+          org_id?: string | null
           question_started_at?: string | null
           quiz_id: string
           status?: Database["public"]["Enums"]["session_status"]
@@ -223,10 +421,12 @@ export type Database = {
         Update: {
           created_at?: string
           current_question_id?: string | null
+          department_id?: string | null
           ended_at?: string | null
           host_id?: string
           id?: string
           join_code?: string
+          org_id?: string | null
           question_started_at?: string | null
           quiz_id?: string
           status?: Database["public"]["Enums"]["session_status"]
@@ -238,6 +438,20 @@ export type Database = {
             columns: ["current_question_id"]
             isOneToOne: false
             referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sessions_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sessions_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
           {
@@ -272,6 +486,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      has_org_role: {
+        Args: {
+          _org: string
+          _role: Database["public"]["Enums"]["org_role"]
+          _user: string
+        }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -279,6 +501,8 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_org_admin: { Args: { _org: string; _user: string }; Returns: boolean }
+      is_org_member: { Args: { _org: string; _user: string }; Returns: boolean }
       is_session_host: {
         Args: { _session_id: string; _user_id: string }
         Returns: boolean
@@ -290,6 +514,8 @@ export type Database = {
     }
     Enums: {
       app_role: "manager" | "player"
+      org_data_backend: "lovable_cloud" | "dataverse"
+      org_role: "owner" | "admin" | "hr" | "team_lead" | "member"
       session_status: "lobby" | "active" | "reveal" | "ended"
       topic_pack:
         | "company_trivia"
@@ -424,6 +650,8 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["manager", "player"],
+      org_data_backend: ["lovable_cloud", "dataverse"],
+      org_role: ["owner", "admin", "hr", "team_lead", "member"],
       session_status: ["lobby", "active", "reveal", "ended"],
       topic_pack: [
         "company_trivia",
