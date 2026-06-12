@@ -68,6 +68,82 @@ export type Database = {
           },
         ]
       }
+      bank_questions: {
+        Row: {
+          bank_id: string
+          choices: Json
+          correct_index: number
+          created_at: string
+          difficulty: number
+          explanation: string | null
+          id: string
+          position: number
+          prompt: string
+          updated_at: string
+        }
+        Insert: {
+          bank_id: string
+          choices?: Json
+          correct_index?: number
+          created_at?: string
+          difficulty?: number
+          explanation?: string | null
+          id?: string
+          position?: number
+          prompt: string
+          updated_at?: string
+        }
+        Update: {
+          bank_id?: string
+          choices?: Json
+          correct_index?: number
+          created_at?: string
+          difficulty?: number
+          explanation?: string | null
+          id?: string
+          position?: number
+          prompt?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bank_questions_bank_id_fkey"
+            columns: ["bank_id"]
+            isOneToOne: false
+            referencedRelation: "question_banks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bank_tags: {
+        Row: {
+          bank_id: string
+          created_at: string
+          id: string
+          tag: string
+        }
+        Insert: {
+          bank_id: string
+          created_at?: string
+          id?: string
+          tag: string
+        }
+        Update: {
+          bank_id?: string
+          created_at?: string
+          id?: string
+          tag?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bank_tags_bank_id_fkey"
+            columns: ["bank_id"]
+            isOneToOne: false
+            referencedRelation: "question_banks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       departments: {
         Row: {
           created_at: string
@@ -261,6 +337,54 @@ export type Database = {
           preferred_locale?: string
         }
         Relationships: []
+      }
+      question_banks: {
+        Row: {
+          created_at: string
+          created_by: string
+          department_id: string | null
+          description: string | null
+          id: string
+          name: string
+          org_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          department_id?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          org_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          department_id?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          org_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "question_banks_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "question_banks_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       questions: {
         Row: {
@@ -459,6 +583,79 @@ export type Database = {
             columns: ["quiz_id"]
             isOneToOne: false
             referencedRelation: "quizzes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      training_documents: {
+        Row: {
+          bank_id: string | null
+          created_at: string
+          department_id: string | null
+          error: string | null
+          extracted_text: string | null
+          file_name: string
+          file_path: string
+          id: string
+          mime_type: string
+          org_id: string
+          size_bytes: number
+          status: string
+          updated_at: string
+          uploaded_by: string
+        }
+        Insert: {
+          bank_id?: string | null
+          created_at?: string
+          department_id?: string | null
+          error?: string | null
+          extracted_text?: string | null
+          file_name: string
+          file_path: string
+          id?: string
+          mime_type: string
+          org_id: string
+          size_bytes?: number
+          status?: string
+          updated_at?: string
+          uploaded_by: string
+        }
+        Update: {
+          bank_id?: string | null
+          created_at?: string
+          department_id?: string | null
+          error?: string | null
+          extracted_text?: string | null
+          file_name?: string
+          file_path?: string
+          id?: string
+          mime_type?: string
+          org_id?: string
+          size_bytes?: number
+          status?: string
+          updated_at?: string
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_documents_bank_id_fkey"
+            columns: ["bank_id"]
+            isOneToOne: false
+            referencedRelation: "question_banks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "training_documents_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "training_documents_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
