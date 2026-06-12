@@ -45,18 +45,18 @@ function AdminLayout() {
   const current = orgs?.find((o) => o.id === orgId) ?? null;
 
   const nav = [
-    { to: "/admin", label: "Overview", icon: LayoutDashboard },
-    { to: "/admin/banks", label: "Question banks", icon: Library },
-    { to: "/admin/documents", label: "Training docs", icon: FileText },
-    { to: "/admin/items", label: "Shop items", icon: ShoppingBag },
-    { to: "/admin/badges", label: "Badges", icon: Trophy },
-    { to: "/admin/challenges", label: "Challenges", icon: Flame },
-    { to: "/admin/members", label: "Members", icon: Users },
-    { to: "/admin/departments", label: "Departments", icon: FolderTree },
+    { to: "/admin", label: t("admin.overview"), icon: LayoutDashboard },
+    { to: "/admin/banks", label: t("admin.questionBanks"), icon: Library },
+    { to: "/admin/documents", label: t("admin.trainingDocs"), icon: FileText },
+    { to: "/admin/items", label: t("admin.shopItems"), icon: ShoppingBag },
+    { to: "/admin/badges", label: t("admin.badges"), icon: Trophy },
+    { to: "/admin/challenges", label: t("admin.challenges"), icon: Flame },
+    { to: "/admin/members", label: t("admin.members"), icon: Users },
+    { to: "/admin/departments", label: t("admin.departments"), icon: FolderTree },
   ];
 
   if (orgs === null) {
-    return <div className="min-h-screen grid place-items-center text-muted-foreground">Loading…</div>;
+    return <div className="min-h-screen grid place-items-center text-muted-foreground">{t("common.loading")}</div>;
   }
 
   return (
