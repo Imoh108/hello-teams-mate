@@ -43,3 +43,51 @@ export interface OrganizationInvite {
   accepted_at: string | null;
   created_at: string;
 }
+
+// --- CMS ---
+export interface QuestionBank {
+  id: string;
+  org_id: string;
+  department_id: string | null;
+  name: string;
+  description: string | null;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface BankQuestion {
+  id: string;
+  bank_id: string;
+  prompt: string;
+  choices: string[];
+  correct_index: number;
+  explanation: string | null;
+  difficulty: number;
+  position: number;
+}
+
+export interface BankTag {
+  id: string;
+  bank_id: string;
+  tag: string;
+}
+
+export type DocumentStatus = "uploaded" | "parsing" | "ready" | "error";
+
+export interface TrainingDocument {
+  id: string;
+  org_id: string;
+  department_id: string | null;
+  bank_id: string | null;
+  uploaded_by: string;
+  file_name: string;
+  file_path: string;
+  mime_type: string;
+  size_bytes: number;
+  status: DocumentStatus;
+  extracted_text: string | null;
+  error: string | null;
+  created_at: string;
+  updated_at: string;
+}

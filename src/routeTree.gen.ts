@@ -23,7 +23,10 @@ import { Route as AuthenticatedPlaySessionIdRouteImport } from './routes/_authen
 import { Route as AuthenticatedInviteTokenRouteImport } from './routes/_authenticated/invite.$token'
 import { Route as AuthenticatedHostSessionIdRouteImport } from './routes/_authenticated/host.$sessionId'
 import { Route as AuthenticatedAdminMembersRouteImport } from './routes/_authenticated/admin.members'
+import { Route as AuthenticatedAdminDocumentsRouteImport } from './routes/_authenticated/admin.documents'
 import { Route as AuthenticatedAdminDepartmentsRouteImport } from './routes/_authenticated/admin.departments'
+import { Route as AuthenticatedAdminBanksRouteImport } from './routes/_authenticated/admin.banks'
+import { Route as AuthenticatedAdminBanksBankIdRouteImport } from './routes/_authenticated/admin.banks.$bankId'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -99,11 +102,28 @@ const AuthenticatedAdminMembersRoute =
     path: '/members',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminDocumentsRoute =
+  AuthenticatedAdminDocumentsRouteImport.update({
+    id: '/documents',
+    path: '/documents',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminDepartmentsRoute =
   AuthenticatedAdminDepartmentsRouteImport.update({
     id: '/departments',
     path: '/departments',
     getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminBanksRoute = AuthenticatedAdminBanksRouteImport.update({
+  id: '/banks',
+  path: '/banks',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
+const AuthenticatedAdminBanksBankIdRoute =
+  AuthenticatedAdminBanksBankIdRouteImport.update({
+    id: '/$bankId',
+    path: '/$bankId',
+    getParentRoute: () => AuthenticatedAdminBanksRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -112,7 +132,9 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/app': typeof AuthenticatedAppRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/admin/banks': typeof AuthenticatedAdminBanksRouteWithChildren
   '/admin/departments': typeof AuthenticatedAdminDepartmentsRoute
+  '/admin/documents': typeof AuthenticatedAdminDocumentsRoute
   '/admin/members': typeof AuthenticatedAdminMembersRoute
   '/host/$sessionId': typeof AuthenticatedHostSessionIdRoute
   '/invite/$token': typeof AuthenticatedInviteTokenRoute
@@ -121,13 +143,16 @@ export interface FileRoutesByFullPath {
   '/results/$sessionId': typeof AuthenticatedResultsSessionIdRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/play/': typeof AuthenticatedPlayIndexRoute
+  '/admin/banks/$bankId': typeof AuthenticatedAdminBanksBankIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/app': typeof AuthenticatedAppRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/admin/banks': typeof AuthenticatedAdminBanksRouteWithChildren
   '/admin/departments': typeof AuthenticatedAdminDepartmentsRoute
+  '/admin/documents': typeof AuthenticatedAdminDocumentsRoute
   '/admin/members': typeof AuthenticatedAdminMembersRoute
   '/host/$sessionId': typeof AuthenticatedHostSessionIdRoute
   '/invite/$token': typeof AuthenticatedInviteTokenRoute
@@ -136,6 +161,7 @@ export interface FileRoutesByTo {
   '/results/$sessionId': typeof AuthenticatedResultsSessionIdRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/play': typeof AuthenticatedPlayIndexRoute
+  '/admin/banks/$bankId': typeof AuthenticatedAdminBanksBankIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -145,7 +171,9 @@ export interface FileRoutesById {
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/app': typeof AuthenticatedAppRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
+  '/_authenticated/admin/banks': typeof AuthenticatedAdminBanksRouteWithChildren
   '/_authenticated/admin/departments': typeof AuthenticatedAdminDepartmentsRoute
+  '/_authenticated/admin/documents': typeof AuthenticatedAdminDocumentsRoute
   '/_authenticated/admin/members': typeof AuthenticatedAdminMembersRoute
   '/_authenticated/host/$sessionId': typeof AuthenticatedHostSessionIdRoute
   '/_authenticated/invite/$token': typeof AuthenticatedInviteTokenRoute
@@ -154,6 +182,7 @@ export interface FileRoutesById {
   '/_authenticated/results/$sessionId': typeof AuthenticatedResultsSessionIdRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/play/': typeof AuthenticatedPlayIndexRoute
+  '/_authenticated/admin/banks/$bankId': typeof AuthenticatedAdminBanksBankIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -163,7 +192,9 @@ export interface FileRouteTypes {
     | '/admin'
     | '/app'
     | '/onboarding'
+    | '/admin/banks'
     | '/admin/departments'
+    | '/admin/documents'
     | '/admin/members'
     | '/host/$sessionId'
     | '/invite/$token'
@@ -172,13 +203,16 @@ export interface FileRouteTypes {
     | '/results/$sessionId'
     | '/admin/'
     | '/play/'
+    | '/admin/banks/$bankId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
     | '/app'
     | '/onboarding'
+    | '/admin/banks'
     | '/admin/departments'
+    | '/admin/documents'
     | '/admin/members'
     | '/host/$sessionId'
     | '/invite/$token'
@@ -187,6 +221,7 @@ export interface FileRouteTypes {
     | '/results/$sessionId'
     | '/admin'
     | '/play'
+    | '/admin/banks/$bankId'
   id:
     | '__root__'
     | '/'
@@ -195,7 +230,9 @@ export interface FileRouteTypes {
     | '/_authenticated/admin'
     | '/_authenticated/app'
     | '/_authenticated/onboarding'
+    | '/_authenticated/admin/banks'
     | '/_authenticated/admin/departments'
+    | '/_authenticated/admin/documents'
     | '/_authenticated/admin/members'
     | '/_authenticated/host/$sessionId'
     | '/_authenticated/invite/$token'
@@ -204,6 +241,7 @@ export interface FileRouteTypes {
     | '/_authenticated/results/$sessionId'
     | '/_authenticated/admin/'
     | '/_authenticated/play/'
+    | '/_authenticated/admin/banks/$bankId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -312,6 +350,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminMembersRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/documents': {
+      id: '/_authenticated/admin/documents'
+      path: '/documents'
+      fullPath: '/admin/documents'
+      preLoaderRoute: typeof AuthenticatedAdminDocumentsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/departments': {
       id: '/_authenticated/admin/departments'
       path: '/departments'
@@ -319,17 +364,49 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminDepartmentsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/banks': {
+      id: '/_authenticated/admin/banks'
+      path: '/banks'
+      fullPath: '/admin/banks'
+      preLoaderRoute: typeof AuthenticatedAdminBanksRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/banks/$bankId': {
+      id: '/_authenticated/admin/banks/$bankId'
+      path: '/$bankId'
+      fullPath: '/admin/banks/$bankId'
+      preLoaderRoute: typeof AuthenticatedAdminBanksBankIdRouteImport
+      parentRoute: typeof AuthenticatedAdminBanksRoute
+    }
   }
 }
 
+interface AuthenticatedAdminBanksRouteChildren {
+  AuthenticatedAdminBanksBankIdRoute: typeof AuthenticatedAdminBanksBankIdRoute
+}
+
+const AuthenticatedAdminBanksRouteChildren: AuthenticatedAdminBanksRouteChildren =
+  {
+    AuthenticatedAdminBanksBankIdRoute: AuthenticatedAdminBanksBankIdRoute,
+  }
+
+const AuthenticatedAdminBanksRouteWithChildren =
+  AuthenticatedAdminBanksRoute._addFileChildren(
+    AuthenticatedAdminBanksRouteChildren,
+  )
+
 interface AuthenticatedAdminRouteChildren {
+  AuthenticatedAdminBanksRoute: typeof AuthenticatedAdminBanksRouteWithChildren
   AuthenticatedAdminDepartmentsRoute: typeof AuthenticatedAdminDepartmentsRoute
+  AuthenticatedAdminDocumentsRoute: typeof AuthenticatedAdminDocumentsRoute
   AuthenticatedAdminMembersRoute: typeof AuthenticatedAdminMembersRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
+  AuthenticatedAdminBanksRoute: AuthenticatedAdminBanksRouteWithChildren,
   AuthenticatedAdminDepartmentsRoute: AuthenticatedAdminDepartmentsRoute,
+  AuthenticatedAdminDocumentsRoute: AuthenticatedAdminDocumentsRoute,
   AuthenticatedAdminMembersRoute: AuthenticatedAdminMembersRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
 }
