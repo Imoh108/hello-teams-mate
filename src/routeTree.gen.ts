@@ -9,38 +9,140 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
+import { Route as AuthenticatedResultsSessionIdRouteImport } from './routes/_authenticated/results.$sessionId'
+import { Route as AuthenticatedQuizzesIdRouteImport } from './routes/_authenticated/quizzes.$id'
+import { Route as AuthenticatedPlaySessionIdRouteImport } from './routes/_authenticated/play.$sessionId'
+import { Route as AuthenticatedHostSessionIdRouteImport } from './routes/_authenticated/host.$sessionId'
 
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAppRoute = AuthenticatedAppRouteImport.update({
+  id: '/app',
+  path: '/app',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedResultsSessionIdRoute =
+  AuthenticatedResultsSessionIdRouteImport.update({
+    id: '/results/$sessionId',
+    path: '/results/$sessionId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedQuizzesIdRoute = AuthenticatedQuizzesIdRouteImport.update({
+  id: '/quizzes/$id',
+  path: '/quizzes/$id',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedPlaySessionIdRoute =
+  AuthenticatedPlaySessionIdRouteImport.update({
+    id: '/play/$sessionId',
+    path: '/play/$sessionId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedHostSessionIdRoute =
+  AuthenticatedHostSessionIdRouteImport.update({
+    id: '/host/$sessionId',
+    path: '/host/$sessionId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/app': typeof AuthenticatedAppRoute
+  '/host/$sessionId': typeof AuthenticatedHostSessionIdRoute
+  '/play/$sessionId': typeof AuthenticatedPlaySessionIdRoute
+  '/quizzes/$id': typeof AuthenticatedQuizzesIdRoute
+  '/results/$sessionId': typeof AuthenticatedResultsSessionIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/app': typeof AuthenticatedAppRoute
+  '/host/$sessionId': typeof AuthenticatedHostSessionIdRoute
+  '/play/$sessionId': typeof AuthenticatedPlaySessionIdRoute
+  '/quizzes/$id': typeof AuthenticatedQuizzesIdRoute
+  '/results/$sessionId': typeof AuthenticatedResultsSessionIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/_authenticated/app': typeof AuthenticatedAppRoute
+  '/_authenticated/host/$sessionId': typeof AuthenticatedHostSessionIdRoute
+  '/_authenticated/play/$sessionId': typeof AuthenticatedPlaySessionIdRoute
+  '/_authenticated/quizzes/$id': typeof AuthenticatedQuizzesIdRoute
+  '/_authenticated/results/$sessionId': typeof AuthenticatedResultsSessionIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/app'
+    | '/host/$sessionId'
+    | '/play/$sessionId'
+    | '/quizzes/$id'
+    | '/results/$sessionId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/auth'
+    | '/app'
+    | '/host/$sessionId'
+    | '/play/$sessionId'
+    | '/quizzes/$id'
+    | '/results/$sessionId'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/auth'
+    | '/_authenticated/app'
+    | '/_authenticated/host/$sessionId'
+    | '/_authenticated/play/$sessionId'
+    | '/_authenticated/quizzes/$id'
+    | '/_authenticated/results/$sessionId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthRoute: typeof AuthRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +150,67 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/app': {
+      id: '/_authenticated/app'
+      path: '/app'
+      fullPath: '/app'
+      preLoaderRoute: typeof AuthenticatedAppRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/results/$sessionId': {
+      id: '/_authenticated/results/$sessionId'
+      path: '/results/$sessionId'
+      fullPath: '/results/$sessionId'
+      preLoaderRoute: typeof AuthenticatedResultsSessionIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/quizzes/$id': {
+      id: '/_authenticated/quizzes/$id'
+      path: '/quizzes/$id'
+      fullPath: '/quizzes/$id'
+      preLoaderRoute: typeof AuthenticatedQuizzesIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/play/$sessionId': {
+      id: '/_authenticated/play/$sessionId'
+      path: '/play/$sessionId'
+      fullPath: '/play/$sessionId'
+      preLoaderRoute: typeof AuthenticatedPlaySessionIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/host/$sessionId': {
+      id: '/_authenticated/host/$sessionId'
+      path: '/host/$sessionId'
+      fullPath: '/host/$sessionId'
+      preLoaderRoute: typeof AuthenticatedHostSessionIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAppRoute: typeof AuthenticatedAppRoute
+  AuthenticatedHostSessionIdRoute: typeof AuthenticatedHostSessionIdRoute
+  AuthenticatedPlaySessionIdRoute: typeof AuthenticatedPlaySessionIdRoute
+  AuthenticatedQuizzesIdRoute: typeof AuthenticatedQuizzesIdRoute
+  AuthenticatedResultsSessionIdRoute: typeof AuthenticatedResultsSessionIdRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAppRoute: AuthenticatedAppRoute,
+  AuthenticatedHostSessionIdRoute: AuthenticatedHostSessionIdRoute,
+  AuthenticatedPlaySessionIdRoute: AuthenticatedPlaySessionIdRoute,
+  AuthenticatedQuizzesIdRoute: AuthenticatedQuizzesIdRoute,
+  AuthenticatedResultsSessionIdRoute: AuthenticatedResultsSessionIdRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthRoute: AuthRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
