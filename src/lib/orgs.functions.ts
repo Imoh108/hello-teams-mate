@@ -138,3 +138,39 @@ export const acceptInvite = createServerFn({ method: "POST" })
       data.token
     );
   });
+
+// ---------- Tier management ----------
+
+const TierEnum = z.enum(["basic", "premium", "enterprise"]);
+
+export const getOrgTier = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ orgId: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { data: row, error } = await context.supabase
+      .from("organizations")
+      .select("subscription_tier")
+      .eq("id", data.orgId)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    return { tier: (row?.subscription_tier ?? "basic") as "basic" | "premium" | "enterprise" };
+  });
+
+export const setOrgTier = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({ orgId: z.string().uuid(), tier: TierEnum }).parse(d)
+  )
+  .handler(async ({ data, context }) => {
+    // Only owners can change tier
+    const { data: isOwner, error: roleErr } = await context.supabase
+      .rpc("has_org_role", { _org: data.orgId, _user: context.userId, _role: "owner" });
+    if (roleErr) throw new Error(roleErr.message);
+    if (!isOwner) throw new Error("Only the organization owner can change the subscription tier.");
+    const { error } = await context.supabase
+      .from("organizations")
+      .update({ subscription_tier: data.tier })
+      .eq("id", data.orgId);
+    if (error) throw new Error(error.message);
+    return { ok: true, tier: data.tier };
+  });

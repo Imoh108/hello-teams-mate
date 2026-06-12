@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { requireTier } from "@/lib/tier-guard.server";
 import { z } from "zod";
 
 // ---- Award points (internal-style helper, callable from client too) ----
@@ -102,6 +103,7 @@ export const saveItem = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => SaveItemSchema.parse(d))
   .handler(async ({ data, context }) => {
+    await requireTier(context.supabase, data.orgId, "enterprise");
     const { supabase, userId } = context;
     const payload = {
       org_id: data.orgId, name: data.name, category: data.category,
@@ -137,6 +139,7 @@ export const saveBadge = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => SaveBadgeSchema.parse(d))
   .handler(async ({ data, context }) => {
+    await requireTier(context.supabase, data.orgId, "enterprise");
     const { supabase, userId } = context;
     const payload = {
       org_id: data.orgId, name: data.name, description: data.description ?? null,
@@ -183,6 +186,7 @@ export const saveChallenge = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => SaveChallengeSchema.parse(d))
   .handler(async ({ data, context }) => {
+    await requireTier(context.supabase, data.orgId, "enterprise");
     const { supabase, userId } = context;
     const payload = {
       org_id: data.orgId, name: data.name, description: data.description ?? null,

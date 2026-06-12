@@ -25,6 +25,7 @@ import { Route as AuthenticatedQuizzesIdRouteImport } from './routes/_authentica
 import { Route as AuthenticatedPlaySessionIdRouteImport } from './routes/_authenticated/play.$sessionId'
 import { Route as AuthenticatedInviteTokenRouteImport } from './routes/_authenticated/invite.$token'
 import { Route as AuthenticatedHostSessionIdRouteImport } from './routes/_authenticated/host.$sessionId'
+import { Route as AuthenticatedAdminUpgradeRouteImport } from './routes/_authenticated/admin.upgrade'
 import { Route as AuthenticatedAdminMembersRouteImport } from './routes/_authenticated/admin.members'
 import { Route as AuthenticatedAdminItemsRouteImport } from './routes/_authenticated/admin.items'
 import { Route as AuthenticatedAdminDocumentsRouteImport } from './routes/_authenticated/admin.documents'
@@ -118,6 +119,12 @@ const AuthenticatedHostSessionIdRoute =
     path: '/host/$sessionId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminUpgradeRoute =
+  AuthenticatedAdminUpgradeRouteImport.update({
+    id: '/upgrade',
+    path: '/upgrade',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminMembersRoute =
   AuthenticatedAdminMembersRouteImport.update({
     id: '/members',
@@ -188,6 +195,7 @@ export interface FileRoutesByFullPath {
   '/admin/documents': typeof AuthenticatedAdminDocumentsRoute
   '/admin/items': typeof AuthenticatedAdminItemsRoute
   '/admin/members': typeof AuthenticatedAdminMembersRoute
+  '/admin/upgrade': typeof AuthenticatedAdminUpgradeRoute
   '/host/$sessionId': typeof AuthenticatedHostSessionIdRoute
   '/invite/$token': typeof AuthenticatedInviteTokenRoute
   '/play/$sessionId': typeof AuthenticatedPlaySessionIdRoute
@@ -213,6 +221,7 @@ export interface FileRoutesByTo {
   '/admin/documents': typeof AuthenticatedAdminDocumentsRoute
   '/admin/items': typeof AuthenticatedAdminItemsRoute
   '/admin/members': typeof AuthenticatedAdminMembersRoute
+  '/admin/upgrade': typeof AuthenticatedAdminUpgradeRoute
   '/host/$sessionId': typeof AuthenticatedHostSessionIdRoute
   '/invite/$token': typeof AuthenticatedInviteTokenRoute
   '/play/$sessionId': typeof AuthenticatedPlaySessionIdRoute
@@ -241,6 +250,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/documents': typeof AuthenticatedAdminDocumentsRoute
   '/_authenticated/admin/items': typeof AuthenticatedAdminItemsRoute
   '/_authenticated/admin/members': typeof AuthenticatedAdminMembersRoute
+  '/_authenticated/admin/upgrade': typeof AuthenticatedAdminUpgradeRoute
   '/_authenticated/host/$sessionId': typeof AuthenticatedHostSessionIdRoute
   '/_authenticated/invite/$token': typeof AuthenticatedInviteTokenRoute
   '/_authenticated/play/$sessionId': typeof AuthenticatedPlaySessionIdRoute
@@ -269,6 +279,7 @@ export interface FileRouteTypes {
     | '/admin/documents'
     | '/admin/items'
     | '/admin/members'
+    | '/admin/upgrade'
     | '/host/$sessionId'
     | '/invite/$token'
     | '/play/$sessionId'
@@ -294,6 +305,7 @@ export interface FileRouteTypes {
     | '/admin/documents'
     | '/admin/items'
     | '/admin/members'
+    | '/admin/upgrade'
     | '/host/$sessionId'
     | '/invite/$token'
     | '/play/$sessionId'
@@ -321,6 +333,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/documents'
     | '/_authenticated/admin/items'
     | '/_authenticated/admin/members'
+    | '/_authenticated/admin/upgrade'
     | '/_authenticated/host/$sessionId'
     | '/_authenticated/invite/$token'
     | '/_authenticated/play/$sessionId'
@@ -451,6 +464,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedHostSessionIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/upgrade': {
+      id: '/_authenticated/admin/upgrade'
+      path: '/upgrade'
+      fullPath: '/admin/upgrade'
+      preLoaderRoute: typeof AuthenticatedAdminUpgradeRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/members': {
       id: '/_authenticated/admin/members'
       path: '/members'
@@ -540,6 +560,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminDocumentsRoute: typeof AuthenticatedAdminDocumentsRoute
   AuthenticatedAdminItemsRoute: typeof AuthenticatedAdminItemsRoute
   AuthenticatedAdminMembersRoute: typeof AuthenticatedAdminMembersRoute
+  AuthenticatedAdminUpgradeRoute: typeof AuthenticatedAdminUpgradeRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
 }
 
@@ -552,6 +573,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminDocumentsRoute: AuthenticatedAdminDocumentsRoute,
   AuthenticatedAdminItemsRoute: AuthenticatedAdminItemsRoute,
   AuthenticatedAdminMembersRoute: AuthenticatedAdminMembersRoute,
+  AuthenticatedAdminUpgradeRoute: AuthenticatedAdminUpgradeRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
 }
 

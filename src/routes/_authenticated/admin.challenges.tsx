@@ -11,9 +11,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Plus, Trash2, Flame, Pencil } from "lucide-react";
+import { TierGate } from "@/components/tier-gate";
 
 export const Route = createFileRoute("/_authenticated/admin/challenges")({
-  component: ChallengesAdminPage,
+  component: () => <TierGate min="enterprise"><ChallengesAdminPage /></TierGate>,
 });
 
 type Form = { id?: string; name: string; description: string; start_at: string; end_at: string; target_points: number; reward_badge_id: string | null };

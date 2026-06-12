@@ -13,9 +13,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { toast } from "sonner";
 import { Library, Plus, Trash2, Sparkles, ChevronRight } from "lucide-react";
 import type { Department, QuestionBank } from "@/lib/data/types";
+import { TierGate } from "@/components/tier-gate";
 
 export const Route = createFileRoute("/_authenticated/admin/banks")({
-  component: BanksPage,
+  component: () => <TierGate min="premium"><BanksPage /></TierGate>,
 });
 
 function BanksPage() {

@@ -7,10 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { ArrowLeft, Coins, Lock } from "lucide-react";
+import { TierGate } from "@/components/tier-gate";
 
 export const Route = createFileRoute("/_authenticated/shop")({
   head: () => ({ meta: [{ title: "Shop — QuizPulse" }] }),
-  component: ShopPage,
+  component: () => <TierGate min="enterprise"><ShopPage /></TierGate>,
 });
 
 function ShopPage() {

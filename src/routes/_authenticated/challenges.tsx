@@ -7,10 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import { ArrowLeft, Flame, Trophy, Check } from "lucide-react";
+import { TierGate } from "@/components/tier-gate";
 
 export const Route = createFileRoute("/_authenticated/challenges")({
   head: () => ({ meta: [{ title: "Challenges — QuizPulse" }] }),
-  component: ChallengesPage,
+  component: () => <TierGate min="enterprise"><ChallengesPage /></TierGate>,
 });
 
 function ChallengesPage() {

@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { requireTier } from "@/lib/tier-guard.server";
 import { z } from "zod";
 
 // ---------- Question Banks ----------
@@ -40,6 +41,7 @@ export const createBank = createServerFn({ method: "POST" })
     departmentId: z.string().uuid().nullable().optional(),
   }).parse(d))
   .handler(async ({ data, context }) => {
+    await requireTier(context.supabase, data.orgId, "premium");
     const { data: row, error } = await context.supabase
       .from("question_banks")
       .insert({
@@ -160,6 +162,7 @@ export const registerDocument = createServerFn({ method: "POST" })
     size_bytes: z.number().int().min(0),
   }).parse(d))
   .handler(async ({ data, context }) => {
+    await requireTier(context.supabase, data.orgId, "premium");
     const { data: row, error } = await context.supabase
       .from("training_documents")
       .insert({

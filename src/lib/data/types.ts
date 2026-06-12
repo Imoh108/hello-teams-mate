@@ -3,6 +3,7 @@
 
 export type OrgRole = "owner" | "admin" | "hr" | "team_lead" | "member";
 export type DataBackend = "lovable_cloud" | "dataverse";
+export type SubscriptionTier = "basic" | "premium" | "enterprise";
 
 export interface Organization {
   id: string;
@@ -11,6 +12,7 @@ export interface Organization {
   logo_url: string | null;
   default_locale: string;
   data_backend: DataBackend;
+  subscription_tier: SubscriptionTier;
   created_by: string;
   created_at: string;
   updated_at: string;
