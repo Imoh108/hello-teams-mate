@@ -14,8 +14,9 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { FileText, Upload, Trash2, FileEdit } from "lucide-react";
+import { FileText, Upload, Trash2, FileEdit, Sparkles } from "lucide-react";
 import type { QuestionBank, TrainingDocument } from "@/lib/data/types";
+import { generateQuestionsFromDocument } from "@/lib/ai.functions";
 
 export const Route = createFileRoute("/_authenticated/admin/documents")({
   component: DocumentsPage,
@@ -40,6 +41,13 @@ function DocumentsPage() {
 
   const [editing, setEditing] = useState<TrainingDocument | null>(null);
   const [editText, setEditText] = useState("");
+
+  const genFn = useServerFn(generateQuestionsFromDocument);
+  const [genDoc, setGenDoc] = useState<TrainingDocument | null>(null);
+  const [genBankId, setGenBankId] = useState<string>("");
+  const [genCount, setGenCount] = useState(5);
+  const [genDifficulty, setGenDifficulty] = useState(2);
+  const [generating, setGenerating] = useState(false);
 
   const refresh = async () => {
     if (!orgId) return;
@@ -160,6 +168,15 @@ function DocumentsPage() {
                   </div>
                 </div>
                 <div className="flex gap-1">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={!d.extracted_text}
+                    onClick={() => { setGenDoc(d); setGenBankId(d.bank_id ?? banks[0]?.id ?? ""); }}
+                    title={d.extracted_text ? "Generate questions with AI" : "Add extracted text first"}
+                  >
+                    <Sparkles className="size-4 mr-1" /> AI
+                  </Button>
                   <Button size="icon" variant="ghost" onClick={() => openEdit(d)} title="Edit extracted text">
                     <FileEdit className="size-4" />
                   </Button>
