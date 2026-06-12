@@ -465,6 +465,7 @@ export type Database = {
           logo_url: string | null
           name: string
           slug: string
+          subscription_tier: Database["public"]["Enums"]["subscription_tier"]
           updated_at: string
         }
         Insert: {
@@ -476,6 +477,7 @@ export type Database = {
           logo_url?: string | null
           name: string
           slug: string
+          subscription_tier?: Database["public"]["Enums"]["subscription_tier"]
           updated_at?: string
         }
         Update: {
@@ -487,6 +489,7 @@ export type Database = {
           logo_url?: string | null
           name?: string
           slug?: string
+          subscription_tier?: Database["public"]["Enums"]["subscription_tier"]
           updated_at?: string
         }
         Relationships: []
@@ -1007,12 +1010,28 @@ export type Database = {
         Args: { _session_id: string; _user_id: string }
         Returns: boolean
       }
+      org_has_tier: {
+        Args: {
+          _min: Database["public"]["Enums"]["subscription_tier"]
+          _org: string
+        }
+        Returns: boolean
+      }
+      org_tier: {
+        Args: { _org: string }
+        Returns: Database["public"]["Enums"]["subscription_tier"]
+      }
+      tier_rank: {
+        Args: { _t: Database["public"]["Enums"]["subscription_tier"] }
+        Returns: number
+      }
     }
     Enums: {
       app_role: "manager" | "player"
       org_data_backend: "lovable_cloud" | "dataverse"
       org_role: "owner" | "admin" | "hr" | "team_lead" | "member"
       session_status: "lobby" | "active" | "reveal" | "ended"
+      subscription_tier: "basic" | "premium" | "enterprise"
       topic_pack:
         | "company_trivia"
         | "industry_knowledge"
@@ -1149,6 +1168,7 @@ export const Constants = {
       org_data_backend: ["lovable_cloud", "dataverse"],
       org_role: ["owner", "admin", "hr", "team_lead", "member"],
       session_status: ["lobby", "active", "reveal", "ended"],
+      subscription_tier: ["basic", "premium", "enterprise"],
       topic_pack: [
         "company_trivia",
         "industry_knowledge",
