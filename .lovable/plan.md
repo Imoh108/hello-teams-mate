@@ -1,30 +1,27 @@
-## Fix the 4 standalone quiz app blockers
+## End-to-end smoke test plan
 
-### 1. Missing `src/lib/error-page.tsx` import
-`src/start.ts` imports `./lib/error-page`, and the file exists as `error-page.ts` (not `.tsx`). The import resolves, so this is actually OK — but I'll verify by reading start.ts output. No change needed unless build fails. **Action: verify, no-op if green.**
+I'll drive the preview browser through the full happy path. Because this requires signing in (and the auth form rule says I need your explicit OK to fill credentials), I want to confirm the approach before running it.
 
-### 2. Add missing `/play` route (join-by-code entry)
-Landing page links to `/play` but no route exists. Create `src/routes/play.tsx` (public, unauthenticated):
-- Input for 6-char join code
-- On submit: look up session by code via a new `getSessionByCode` server fn
-- If user is signed in → redirect to `/play/$sessionId`
-- If not → redirect to `/auth?redirect=/play/$sessionId` (or prompt display name for guest play — will default to **require sign-in** for v1 to match existing schema)
+### Test flow
+1. **Landing** (`/`) — load, verify hero + "Host a quiz" / "Join with code" CTAs render.
+2. **Auth** (`/auth`) — sign up a fresh host account (e.g. `host+smoke@quizpulse.test` / random pwd). Verify redirect to `/app`.
+3. **Dashboard** (`/app`) — verify it loads, the 3 seeded public packs appear under public quizzes.
+4. **Create quiz** — open the dialog, create "Smoke Test Quiz", land on `/quizzes/$id`.
+5. **Add 2 questions** with 4 options each and a 15s timer; save.
+6. **Launch session** — back on dashboard, hit Play on the quiz, capture the 6-char join code from the host control room (`/host/$sessionId`).
+7. **Open a second browser context** as a player: sign up `player+smoke@quizpulse.test`, go to `/play`, enter the code, land on `/play/$sessionId` waiting screen.
+8. **Host starts Q1** → verify player sees the question + timer; player picks an answer.
+9. **Host reveals** → verify leaderboard updates with the player's score in real time on both host and player views.
+10. **Host advances to Q2**, repeat, then **End session** → verify redirect to `/results/$sessionId` with final standings.
 
-### 3. Seed starter quiz packs
-Dashboard's "public quizzes" section is empty. Add a migration that inserts 3 starter quizzes (General Knowledge, Tech Trivia, Geography) with ~5 questions each, owned by a system user / marked `is_public = true`. Uses `ON CONFLICT DO NOTHING` so it's idempotent.
+### What I'll report
+- ✅/❌ per step with screenshots at key checkpoints (dashboard, host control, player live question, leaderboard, results).
+- Any console errors, 401s, RLS failures, or broken realtime.
+- Any UX bugs noticed along the way (won't fix in this pass — I'll list them for a follow-up).
 
-### 4. Replace generic root metadata
-Update `src/routes/__root.tsx` `head()`:
-- title: "Quiz Zone — Live Multiplayer Quizzes"
-- description: "Host live quiz sessions with real-time leaderboards. Create quizzes, share a join code, and play together."
-- og:title / og:description matching
-- twitter:card = summary_large_image
+### Caveats / approvals needed
+- **Test accounts**: I'll create two throwaway accounts in your Cloud auth (`host+smoke@…` and `player+smoke@…`). They'll persist unless you ask me to delete them after.
+- **Test data**: One quiz + one ended session will remain in the DB. I can clean up afterward via a migration if you want.
+- **Two-context play**: The browser tool is single-session. I'll simulate host + player by signing out and back in between steps, OR I can skip the live-realtime cross-tab verification and only confirm the host's view of player joins/scores. **Cross-tab realtime is the riskier path** — let me know if you want me to attempt it (slower, more fragile) or stick to single-session verification.
 
-### Files touched
-- `src/routes/play.tsx` (new)
-- `src/lib/quiz.functions.ts` (add `getSessionByCode`)
-- `src/routes/__root.tsx` (metadata)
-- New migration: seed starter public quizzes
-
-### Out of scope
-Teams integration (next phase, separate plan).
+Approve and I'll run it.
