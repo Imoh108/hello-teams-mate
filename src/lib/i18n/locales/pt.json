@@ -1,0 +1,10 @@
+{
+  "common": { "appName": "QuizPulse", "loading": "Carregando…", "cancel": "Cancelar", "save": "Salvar", "create": "Criar", "delete": "Excluir", "edit": "Editar", "back": "Voltar", "signOut": "Sair", "language": "Idioma" },
+  "auth": { "signIn": "Entrar", "signUp": "Cadastrar", "email": "E-mail", "password": "Senha", "displayName": "Nome", "continueWithGoogle": "Continuar com Google", "or": "ou", "needAccount": "Precisa de uma conta?", "haveAccount": "Já tem uma conta?" },
+  "nav": { "dashboard": "Painel", "profile": "Perfil", "shop": "Loja", "challenges": "Desafios", "admin": "Admin", "join": "Entrar", "joinCode": "CÓDIGO" },
+  "dashboard": { "yourQuizzes": "Seus quizzes", "yourQuizzesSubtitle": "Crie rodadas e inicie sessões ao vivo.", "newQuiz": "Novo quiz", "noQuizzes": "Nenhum quiz. Crie um ou clone um pacote.", "starterPacks": "Pacotes iniciais", "recentSessions": "Sessões recentes", "edit": "Editar", "launch": "Iniciar", "clone": "Clonar" },
+  "admin": { "title": "Admin", "exit": "Sair do admin", "overview": "Visão geral", "questionBanks": "Bancos de perguntas", "trainingDocs": "Documentos", "shopItems": "Itens", "badges": "Medalhas", "challenges": "Desafios", "members": "Membros", "departments": "Departamentos" },
+  "profile": { "title": "Perfil", "points": "pts", "inventory": "Inventário", "badges": "Medalhas", "recentActivity": "Atividade recente", "noItems": "Nenhum item.", "noBadges": "Nenhuma medalha.", "noActivity": "Sem atividade.", "equip": "Equipar", "unequip": "Remover" },
+  "shop": { "title": "Loja de avatares", "buy": "Comprar", "owned": "Possuído", "need": "Faltam {{count}}", "empty": "Loja vazia." },
+  "challenges": { "title": "Desafios", "join": "Participar", "none": "Sem desafios ativos.", "ends": "Termina {{date}}", "selectOrg": "Selecione uma organização para ver os desafios." }
+}
