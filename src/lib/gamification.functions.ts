@@ -16,10 +16,10 @@ export const awardPoints = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     const { data: total, error } = await supabase.rpc("award_points", {
       _user: userId,
-      _org: data.orgId ?? undefined,
+      _org: (data.orgId ?? null) as string,
       _source: data.source,
       _delta: data.delta,
-      _ref: data.refId ?? undefined,
+      _ref: (data.refId ?? null) as string,
     });
     if (error) throw new Error(error.message);
     return { total };
