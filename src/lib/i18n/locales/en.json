@@ -1,0 +1,83 @@
+{
+  "common": {
+    "appName": "QuizPulse",
+    "loading": "Loading…",
+    "cancel": "Cancel",
+    "save": "Save",
+    "create": "Create",
+    "delete": "Delete",
+    "edit": "Edit",
+    "back": "Back",
+    "signOut": "Sign out",
+    "language": "Language"
+  },
+  "auth": {
+    "signIn": "Sign in",
+    "signUp": "Sign up",
+    "email": "Email",
+    "password": "Password",
+    "displayName": "Display name",
+    "continueWithGoogle": "Continue with Google",
+    "or": "or",
+    "needAccount": "Need an account?",
+    "haveAccount": "Already have an account?"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "profile": "Profile",
+    "shop": "Shop",
+    "challenges": "Challenges",
+    "admin": "Admin",
+    "join": "Join",
+    "joinCode": "JOIN CODE"
+  },
+  "dashboard": {
+    "yourQuizzes": "Your quizzes",
+    "yourQuizzesSubtitle": "Author rounds and launch live sessions.",
+    "newQuiz": "New quiz",
+    "noQuizzes": "No quizzes yet. Create one above or clone a starter pack below.",
+    "starterPacks": "Starter packs",
+    "recentSessions": "Recent sessions",
+    "edit": "Edit",
+    "launch": "Launch",
+    "clone": "Clone"
+  },
+  "admin": {
+    "title": "Admin",
+    "exit": "Exit admin",
+    "overview": "Overview",
+    "questionBanks": "Question banks",
+    "trainingDocs": "Training docs",
+    "shopItems": "Shop items",
+    "badges": "Badges",
+    "challenges": "Challenges",
+    "members": "Members",
+    "departments": "Departments"
+  },
+  "profile": {
+    "title": "Profile",
+    "points": "pts",
+    "inventory": "Inventory",
+    "badges": "Badges",
+    "recentActivity": "Recent activity",
+    "noItems": "No items yet.",
+    "noBadges": "No badges earned yet.",
+    "noActivity": "No activity.",
+    "equip": "Equip",
+    "unequip": "Unequip"
+  },
+  "shop": {
+    "title": "Avatar shop",
+    "buy": "Buy",
+    "owned": "Owned",
+    "need": "Need {{count}}",
+    "empty": "Nothing in the shop yet."
+  },
+  "challenges": {
+    "title": "Challenges",
+    "join": "Join",
+    "none": "No active challenges.",
+    "ends": "Ends {{date}}",
+    "selectOrg": "Select an organization to see challenges."
+  }
+}
