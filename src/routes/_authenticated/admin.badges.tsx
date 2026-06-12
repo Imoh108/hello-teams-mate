@@ -43,7 +43,7 @@ function BadgesAdminPage() {
       toast.success(form.id ? "Updated" : "Created"); setOpen(false); setForm(empty()); refresh();
     } catch (e: any) { toast.error(e.message); }
   };
-  const onEdit = (b: any) => setForm({ id: b.id, name: b.name, description: b.description ?? "", icon: b.icon, criteria_type: b.criteria_type, criteria_value: b.criteria_value }) || setOpen(true);
+  const onEdit = (b: any) => { setForm({ id: b.id, name: b.name, description: b.description ?? "", icon: b.icon, criteria_type: b.criteria_type, criteria_value: b.criteria_value }); setOpen(true); };
   const onDelete = async (id: string) => { if (!confirm("Delete?")) return; await delFn({ data: { id } }); refresh(); };
 
   return (
