@@ -22,6 +22,7 @@ type Quiz = { id: string; title: string; description: string | null; topic_pack:
 type Session = { id: string; join_code: string; status: string; created_at: string; quiz_id: string };
 
 function Dashboard() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const createFn = useServerFn(createQuiz);
   const cloneFn = useServerFn(cloneQuiz);
