@@ -1,0 +1,10 @@
+{
+  "common": { "appName": "QuizPulse", "loading": "Lädt…", "cancel": "Abbrechen", "save": "Speichern", "create": "Erstellen", "delete": "Löschen", "edit": "Bearbeiten", "back": "Zurück", "signOut": "Abmelden", "language": "Sprache" },
+  "auth": { "signIn": "Anmelden", "signUp": "Registrieren", "email": "E-Mail", "password": "Passwort", "displayName": "Anzeigename", "continueWithGoogle": "Mit Google fortfahren", "or": "oder", "needAccount": "Noch kein Konto?", "haveAccount": "Schon ein Konto?" },
+  "nav": { "dashboard": "Dashboard", "profile": "Profil", "shop": "Shop", "challenges": "Herausforderungen", "admin": "Admin", "join": "Beitreten", "joinCode": "CODE" },
+  "dashboard": { "yourQuizzes": "Deine Quiz", "yourQuizzesSubtitle": "Runden erstellen und Live-Sessions starten.", "newQuiz": "Neues Quiz", "noQuizzes": "Noch keine Quiz. Erstelle eines oder klone ein Paket.", "starterPacks": "Starter-Pakete", "recentSessions": "Letzte Sessions", "edit": "Bearbeiten", "launch": "Starten", "clone": "Klonen" },
+  "admin": { "title": "Admin", "exit": "Admin verlassen", "overview": "Übersicht", "questionBanks": "Fragenbänke", "trainingDocs": "Dokumente", "shopItems": "Artikel", "badges": "Abzeichen", "challenges": "Herausforderungen", "members": "Mitglieder", "departments": "Abteilungen" },
+  "profile": { "title": "Profil", "points": "Pkt.", "inventory": "Inventar", "badges": "Abzeichen", "recentActivity": "Letzte Aktivität", "noItems": "Noch keine Artikel.", "noBadges": "Noch keine Abzeichen.", "noActivity": "Keine Aktivität.", "equip": "Anlegen", "unequip": "Ablegen" },
+  "shop": { "title": "Avatar-Shop", "buy": "Kaufen", "owned": "Besessen", "need": "Brauche {{count}}", "empty": "Shop ist leer." },
+  "challenges": { "title": "Herausforderungen", "join": "Beitreten", "none": "Keine aktiven Herausforderungen.", "ends": "Endet {{date}}", "selectOrg": "Wähle eine Organisation, um Herausforderungen zu sehen." }
+}

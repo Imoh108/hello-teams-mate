@@ -1,0 +1,10 @@
+{
+  "common": { "appName": "QuizPulse", "loading": "Chargement…", "cancel": "Annuler", "save": "Enregistrer", "create": "Créer", "delete": "Supprimer", "edit": "Modifier", "back": "Retour", "signOut": "Déconnexion", "language": "Langue" },
+  "auth": { "signIn": "Se connecter", "signUp": "S'inscrire", "email": "E-mail", "password": "Mot de passe", "displayName": "Nom affiché", "continueWithGoogle": "Continuer avec Google", "or": "ou", "needAccount": "Pas de compte ?", "haveAccount": "Déjà un compte ?" },
+  "nav": { "dashboard": "Tableau", "profile": "Profil", "shop": "Boutique", "challenges": "Défis", "admin": "Admin", "join": "Rejoindre", "joinCode": "CODE" },
+  "dashboard": { "yourQuizzes": "Vos quiz", "yourQuizzesSubtitle": "Créez des manches et lancez des parties en direct.", "newQuiz": "Nouveau quiz", "noQuizzes": "Aucun quiz. Créez-en un ou clonez un pack ci-dessous.", "starterPacks": "Packs de départ", "recentSessions": "Sessions récentes", "edit": "Modifier", "launch": "Lancer", "clone": "Cloner" },
+  "admin": { "title": "Admin", "exit": "Quitter", "overview": "Vue d'ensemble", "questionBanks": "Banques de questions", "trainingDocs": "Documents", "shopItems": "Articles", "badges": "Badges", "challenges": "Défis", "members": "Membres", "departments": "Départements" },
+  "profile": { "title": "Profil", "points": "pts", "inventory": "Inventaire", "badges": "Badges", "recentActivity": "Activité récente", "noItems": "Aucun objet.", "noBadges": "Aucun badge.", "noActivity": "Aucune activité.", "equip": "Équiper", "unequip": "Retirer" },
+  "shop": { "title": "Boutique d'avatars", "buy": "Acheter", "owned": "Possédé", "need": "Manque {{count}}", "empty": "Boutique vide." },
+  "challenges": { "title": "Défis", "join": "Rejoindre", "none": "Aucun défi actif.", "ends": "Fin {{date}}", "selectOrg": "Sélectionnez une organisation pour voir les défis." }
+}

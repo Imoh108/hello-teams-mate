@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { useServerFn } from "@tanstack/react-start";
 import { createQuiz, cloneQuiz, createSession, joinSessionByCode } from "@/lib/quiz.functions";
@@ -8,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { LanguageSwitcher } from "@/components/language-switcher";
 import { toast } from "sonner";
 import { Plus, Copy, Play, LogOut, Users, Building2, Trophy, Store, Flame } from "lucide-react";
 
@@ -20,6 +22,7 @@ type Quiz = { id: string; title: string; description: string | null; topic_pack:
 type Session = { id: string; join_code: string; status: string; created_at: string; quiz_id: string };
 
 function Dashboard() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const createFn = useServerFn(createQuiz);
   const cloneFn = useServerFn(cloneQuiz);
@@ -92,12 +95,13 @@ function Dashboard() {
             <span className="font-display font-semibold">QuizPulse</span>
           </Link>
           <div className="flex items-center gap-2">
-            <Input value={joinCode} onChange={(e) => setJoinCode(e.target.value.toUpperCase())} placeholder="JOIN CODE" className="w-32 font-mono-tab uppercase" maxLength={8} />
-            <Button onClick={onJoin} variant="outline" size="sm">Join</Button>
-            <Button asChild variant="ghost" size="sm"><Link to="/profile"><Trophy className="size-4 mr-1" /> Profile</Link></Button>
-            <Button asChild variant="ghost" size="sm"><Link to="/shop"><Store className="size-4 mr-1" /> Shop</Link></Button>
-            <Button asChild variant="ghost" size="sm"><Link to="/challenges"><Flame className="size-4 mr-1" /> Challenges</Link></Button>
-            <Button asChild variant="ghost" size="sm"><Link to="/admin"><Building2 className="size-4 mr-1" /> Admin</Link></Button>
+            <Input value={joinCode} onChange={(e) => setJoinCode(e.target.value.toUpperCase())} placeholder={t("nav.joinCode")} className="w-32 font-mono-tab uppercase" maxLength={8} />
+            <Button onClick={onJoin} variant="outline" size="sm">{t("nav.join")}</Button>
+            <Button asChild variant="ghost" size="sm"><Link to="/profile"><Trophy className="size-4 mr-1" /> {t("nav.profile")}</Link></Button>
+            <Button asChild variant="ghost" size="sm"><Link to="/shop"><Store className="size-4 mr-1" /> {t("nav.shop")}</Link></Button>
+            <Button asChild variant="ghost" size="sm"><Link to="/challenges"><Flame className="size-4 mr-1" /> {t("nav.challenges")}</Link></Button>
+            <Button asChild variant="ghost" size="sm"><Link to="/admin"><Building2 className="size-4 mr-1" /> {t("nav.admin")}</Link></Button>
+            <LanguageSwitcher compact />
             <Button onClick={onSignOut} variant="ghost" size="sm"><LogOut className="size-4" /></Button>
           </div>
         </div>
@@ -107,11 +111,11 @@ function Dashboard() {
         <section>
           <div className="flex items-end justify-between mb-4">
             <div>
-              <h1 className="font-display text-3xl font-bold tracking-tight">Your quizzes</h1>
-              <p className="text-sm text-muted-foreground">Author rounds and launch live sessions.</p>
+              <h1 className="font-display text-3xl font-bold tracking-tight">{t("dashboard.yourQuizzes")}</h1>
+              <p className="text-sm text-muted-foreground">{t("dashboard.yourQuizzesSubtitle")}</p>
             </div>
             <Dialog open={openCreate} onOpenChange={setOpenCreate}>
-              <DialogTrigger asChild><Button><Plus className="size-4 mr-1" /> New quiz</Button></DialogTrigger>
+              <DialogTrigger asChild><Button><Plus className="size-4 mr-1" /> {t("dashboard.newQuiz")}</Button></DialogTrigger>
               <DialogContent>
                 <DialogHeader><DialogTitle>Create a quiz</DialogTitle></DialogHeader>
                 <div className="space-y-3">

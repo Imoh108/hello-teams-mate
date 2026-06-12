@@ -1,11 +1,13 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { LanguageSwitcher } from "@/components/language-switcher";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/auth")({
@@ -14,6 +16,7 @@ export const Route = createFileRoute("/auth")({
 });
 
 function AuthPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
@@ -55,35 +58,38 @@ function AuthPage() {
   return (
     <div className="min-h-screen grid place-items-center px-4">
       <div className="w-full max-w-md">
-        <Link to="/" className="flex items-center gap-2 justify-center mb-8">
-          <div className="size-8 rounded-md bg-primary grid place-items-center text-primary-foreground font-display font-bold">Q</div>
-          <span className="font-display text-lg font-semibold">QuizPulse</span>
-        </Link>
+        <div className="flex items-center justify-between mb-6">
+          <Link to="/" className="flex items-center gap-2">
+            <div className="size-8 rounded-md bg-primary grid place-items-center text-primary-foreground font-display font-bold">Q</div>
+            <span className="font-display text-lg font-semibold">QuizPulse</span>
+          </Link>
+          <LanguageSwitcher compact />
+        </div>
         <div className="glass-panel rounded-2xl p-6">
           <Tabs defaultValue="signin">
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="signin">Sign in</TabsTrigger>
-              <TabsTrigger value="signup">Create account</TabsTrigger>
+              <TabsTrigger value="signin">{t("auth.signIn")}</TabsTrigger>
+              <TabsTrigger value="signup">{t("auth.signUp")}</TabsTrigger>
             </TabsList>
 
             <TabsContent value="signin" className="mt-5 space-y-4">
-              <Button onClick={onGoogle} disabled={loading} variant="outline" className="w-full">Continue with Google</Button>
-              <Separator />
+              <Button onClick={onGoogle} disabled={loading} variant="outline" className="w-full">{t("auth.continueWithGoogle")}</Button>
+              <Separator label={t("auth.or")} />
               <form onSubmit={onSignIn} className="space-y-3">
-                <div><Label>Email</Label><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required /></div>
-                <div><Label>Password</Label><Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required /></div>
-                <Button type="submit" disabled={loading} className="w-full">Sign in</Button>
+                <div><Label>{t("auth.email")}</Label><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required /></div>
+                <div><Label>{t("auth.password")}</Label><Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required /></div>
+                <Button type="submit" disabled={loading} className="w-full">{t("auth.signIn")}</Button>
               </form>
             </TabsContent>
 
             <TabsContent value="signup" className="mt-5 space-y-4">
-              <Button onClick={onGoogle} disabled={loading} variant="outline" className="w-full">Continue with Google</Button>
-              <Separator />
+              <Button onClick={onGoogle} disabled={loading} variant="outline" className="w-full">{t("auth.continueWithGoogle")}</Button>
+              <Separator label={t("auth.or")} />
               <form onSubmit={onSignUp} className="space-y-3">
-                <div><Label>Display name</Label><Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Sarah K." /></div>
-                <div><Label>Email</Label><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required /></div>
-                <div><Label>Password</Label><Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} /></div>
-                <Button type="submit" disabled={loading} className="w-full">Create account</Button>
+                <div><Label>{t("auth.displayName")}</Label><Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Sarah K." /></div>
+                <div><Label>{t("auth.email")}</Label><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required /></div>
+                <div><Label>{t("auth.password")}</Label><Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} /></div>
+                <Button type="submit" disabled={loading} className="w-full">{t("auth.signUp")}</Button>
               </form>
             </TabsContent>
           </Tabs>
@@ -93,10 +99,10 @@ function AuthPage() {
   );
 }
 
-function Separator() {
+function Separator({ label = "or" }: { label?: string }) {
   return (
     <div className="flex items-center gap-3 text-xs text-muted-foreground">
-      <div className="h-px flex-1 bg-border" /> or <div className="h-px flex-1 bg-border" />
+      <div className="h-px flex-1 bg-border" /> {label} <div className="h-px flex-1 bg-border" />
     </div>
   );
 }

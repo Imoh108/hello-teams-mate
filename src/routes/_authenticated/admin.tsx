@@ -1,10 +1,12 @@
 import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useServerFn } from "@tanstack/react-start";
 import { listMyOrganizations } from "@/lib/orgs.functions";
 import { useCurrentOrgId } from "@/hooks/use-current-org";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { LanguageSwitcher } from "@/components/language-switcher";
 import { Building2, Users, FolderTree, LayoutDashboard, Library, FileText, ShoppingBag, Trophy, Flame } from "lucide-react";
 import type { Organization } from "@/lib/data/types";
 
@@ -14,6 +16,7 @@ export const Route = createFileRoute("/_authenticated/admin")({
 });
 
 function AdminLayout() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const listFn = useServerFn(listMyOrganizations);
   const [orgId, setOrgId] = useCurrentOrgId();
@@ -42,18 +45,18 @@ function AdminLayout() {
   const current = orgs?.find((o) => o.id === orgId) ?? null;
 
   const nav = [
-    { to: "/admin", label: "Overview", icon: LayoutDashboard },
-    { to: "/admin/banks", label: "Question banks", icon: Library },
-    { to: "/admin/documents", label: "Training docs", icon: FileText },
-    { to: "/admin/items", label: "Shop items", icon: ShoppingBag },
-    { to: "/admin/badges", label: "Badges", icon: Trophy },
-    { to: "/admin/challenges", label: "Challenges", icon: Flame },
-    { to: "/admin/members", label: "Members", icon: Users },
-    { to: "/admin/departments", label: "Departments", icon: FolderTree },
+    { to: "/admin", label: t("admin.overview"), icon: LayoutDashboard },
+    { to: "/admin/banks", label: t("admin.questionBanks"), icon: Library },
+    { to: "/admin/documents", label: t("admin.trainingDocs"), icon: FileText },
+    { to: "/admin/items", label: t("admin.shopItems"), icon: ShoppingBag },
+    { to: "/admin/badges", label: t("admin.badges"), icon: Trophy },
+    { to: "/admin/challenges", label: t("admin.challenges"), icon: Flame },
+    { to: "/admin/members", label: t("admin.members"), icon: Users },
+    { to: "/admin/departments", label: t("admin.departments"), icon: FolderTree },
   ];
 
   if (orgs === null) {
-    return <div className="min-h-screen grid place-items-center text-muted-foreground">Loading…</div>;
+    return <div className="min-h-screen grid place-items-center text-muted-foreground">{t("common.loading")}</div>;
   }
 
   return (
@@ -78,7 +81,8 @@ function AdminLayout() {
                 </SelectContent>
               </Select>
             )}
-            <Button variant="ghost" size="sm" asChild><Link to="/app">Exit admin</Link></Button>
+            <LanguageSwitcher compact />
+            <Button variant="ghost" size="sm" asChild><Link to="/app">{t("admin.exit")}</Link></Button>
           </div>
         </div>
       </header>
