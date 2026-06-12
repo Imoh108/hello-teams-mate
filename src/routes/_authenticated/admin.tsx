@@ -43,6 +43,8 @@ function AdminLayout() {
 
   const nav = [
     { to: "/admin", label: "Overview", icon: LayoutDashboard },
+    { to: "/admin/banks", label: "Question banks", icon: Library },
+    { to: "/admin/documents", label: "Training docs", icon: FileText },
     { to: "/admin/members", label: "Members", icon: Users },
     { to: "/admin/departments", label: "Departments", icon: FolderTree },
   ];
