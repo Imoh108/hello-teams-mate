@@ -14,16 +14,280 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      answers: {
+        Row: {
+          answered_at: string
+          flagged: boolean
+          id: string
+          is_correct: boolean
+          points: number
+          question_id: string
+          selected_index: number | null
+          session_id: string
+          time_taken_ms: number
+          user_id: string
+        }
+        Insert: {
+          answered_at?: string
+          flagged?: boolean
+          id?: string
+          is_correct?: boolean
+          points?: number
+          question_id: string
+          selected_index?: number | null
+          session_id: string
+          time_taken_ms: number
+          user_id: string
+        }
+        Update: {
+          answered_at?: string
+          flagged?: boolean
+          id?: string
+          is_correct?: boolean
+          points?: number
+          question_id?: string
+          selected_index?: number | null
+          session_id?: string
+          time_taken_ms?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "answers_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "answers_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string
+          id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name: string
+          id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string
+          id?: string
+        }
+        Relationships: []
+      }
+      questions: {
+        Row: {
+          correct_index: number
+          created_at: string
+          id: string
+          options: Json
+          position: number
+          prompt: string
+          quiz_id: string
+          time_limit_s: number
+        }
+        Insert: {
+          correct_index: number
+          created_at?: string
+          id?: string
+          options: Json
+          position: number
+          prompt: string
+          quiz_id: string
+          time_limit_s?: number
+        }
+        Update: {
+          correct_index?: number
+          created_at?: string
+          id?: string
+          options?: Json
+          position?: number
+          prompt?: string
+          quiz_id?: string
+          time_limit_s?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "questions_quiz_id_fkey"
+            columns: ["quiz_id"]
+            isOneToOne: false
+            referencedRelation: "quizzes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quizzes: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_public: boolean
+          owner_id: string | null
+          title: string
+          topic_pack: Database["public"]["Enums"]["topic_pack"]
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_public?: boolean
+          owner_id?: string | null
+          title: string
+          topic_pack?: Database["public"]["Enums"]["topic_pack"]
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_public?: boolean
+          owner_id?: string | null
+          title?: string
+          topic_pack?: Database["public"]["Enums"]["topic_pack"]
+        }
+        Relationships: []
+      }
+      session_players: {
+        Row: {
+          display_name: string
+          flagged_count: number
+          id: string
+          joined_at: string
+          session_id: string
+          user_id: string
+        }
+        Insert: {
+          display_name: string
+          flagged_count?: number
+          id?: string
+          joined_at?: string
+          session_id: string
+          user_id: string
+        }
+        Update: {
+          display_name?: string
+          flagged_count?: number
+          id?: string
+          joined_at?: string
+          session_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "session_players_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sessions: {
+        Row: {
+          created_at: string
+          current_question_id: string | null
+          ended_at: string | null
+          host_id: string
+          id: string
+          join_code: string
+          question_started_at: string | null
+          quiz_id: string
+          status: Database["public"]["Enums"]["session_status"]
+          time_limit_override_s: number | null
+        }
+        Insert: {
+          created_at?: string
+          current_question_id?: string | null
+          ended_at?: string | null
+          host_id: string
+          id?: string
+          join_code: string
+          question_started_at?: string | null
+          quiz_id: string
+          status?: Database["public"]["Enums"]["session_status"]
+          time_limit_override_s?: number | null
+        }
+        Update: {
+          created_at?: string
+          current_question_id?: string | null
+          ended_at?: string | null
+          host_id?: string
+          id?: string
+          join_code?: string
+          question_started_at?: string | null
+          quiz_id?: string
+          status?: Database["public"]["Enums"]["session_status"]
+          time_limit_override_s?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sessions_current_question_id_fkey"
+            columns: ["current_question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sessions_quiz_id_fkey"
+            columns: ["quiz_id"]
+            isOneToOne: false
+            referencedRelation: "quizzes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "manager" | "player"
+      session_status: "lobby" | "active" | "reveal" | "ended"
+      topic_pack:
+        | "company_trivia"
+        | "industry_knowledge"
+        | "general_culture"
+        | "custom"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +414,15 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["manager", "player"],
+      session_status: ["lobby", "active", "reveal", "ended"],
+      topic_pack: [
+        "company_trivia",
+        "industry_knowledge",
+        "general_culture",
+        "custom",
+      ],
+    },
   },
 } as const
