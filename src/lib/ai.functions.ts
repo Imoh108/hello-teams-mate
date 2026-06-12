@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { requireTier } from "@/lib/tier-guard.server";
 import { z } from "zod";
 import { generateText, Output } from "ai";
 
@@ -41,6 +42,7 @@ export const generateQuestionsFromDocument = createServerFn({ method: "POST" })
     if (!doc?.extracted_text || doc.extracted_text.trim().length < 50) {
       throw new Error("Document has no extracted text. Add or paste text first.");
     }
+    await requireTier(context.supabase, doc.org_id as string, "premium");
 
     // 2. Verify bank belongs to the same org and user is admin (RLS will also enforce on insert)
     const { data: bank, error: bankErr } = await context.supabase
