@@ -95,12 +95,13 @@ function Dashboard() {
             <span className="font-display font-semibold">QuizPulse</span>
           </Link>
           <div className="flex items-center gap-2">
-            <Input value={joinCode} onChange={(e) => setJoinCode(e.target.value.toUpperCase())} placeholder="JOIN CODE" className="w-32 font-mono-tab uppercase" maxLength={8} />
-            <Button onClick={onJoin} variant="outline" size="sm">Join</Button>
-            <Button asChild variant="ghost" size="sm"><Link to="/profile"><Trophy className="size-4 mr-1" /> Profile</Link></Button>
-            <Button asChild variant="ghost" size="sm"><Link to="/shop"><Store className="size-4 mr-1" /> Shop</Link></Button>
-            <Button asChild variant="ghost" size="sm"><Link to="/challenges"><Flame className="size-4 mr-1" /> Challenges</Link></Button>
-            <Button asChild variant="ghost" size="sm"><Link to="/admin"><Building2 className="size-4 mr-1" /> Admin</Link></Button>
+            <Input value={joinCode} onChange={(e) => setJoinCode(e.target.value.toUpperCase())} placeholder={t("nav.joinCode")} className="w-32 font-mono-tab uppercase" maxLength={8} />
+            <Button onClick={onJoin} variant="outline" size="sm">{t("nav.join")}</Button>
+            <Button asChild variant="ghost" size="sm"><Link to="/profile"><Trophy className="size-4 mr-1" /> {t("nav.profile")}</Link></Button>
+            <Button asChild variant="ghost" size="sm"><Link to="/shop"><Store className="size-4 mr-1" /> {t("nav.shop")}</Link></Button>
+            <Button asChild variant="ghost" size="sm"><Link to="/challenges"><Flame className="size-4 mr-1" /> {t("nav.challenges")}</Link></Button>
+            <Button asChild variant="ghost" size="sm"><Link to="/admin"><Building2 className="size-4 mr-1" /> {t("nav.admin")}</Link></Button>
+            <LanguageSwitcher compact />
             <Button onClick={onSignOut} variant="ghost" size="sm"><LogOut className="size-4" /></Button>
           </div>
         </div>
