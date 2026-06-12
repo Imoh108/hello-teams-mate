@@ -68,6 +68,94 @@ export type Database = {
           },
         ]
       }
+      avatar_items: {
+        Row: {
+          category: string
+          cost_points: number
+          created_at: string
+          created_by: string
+          id: string
+          image_url: string
+          name: string
+          org_id: string | null
+          rarity: string
+        }
+        Insert: {
+          category?: string
+          cost_points?: number
+          created_at?: string
+          created_by: string
+          id?: string
+          image_url: string
+          name: string
+          org_id?: string | null
+          rarity?: string
+        }
+        Update: {
+          category?: string
+          cost_points?: number
+          created_at?: string
+          created_by?: string
+          id?: string
+          image_url?: string
+          name?: string
+          org_id?: string | null
+          rarity?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "avatar_items_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      badges: {
+        Row: {
+          created_at: string
+          created_by: string
+          criteria_type: string
+          criteria_value: number | null
+          description: string | null
+          icon: string
+          id: string
+          name: string
+          org_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          criteria_type?: string
+          criteria_value?: number | null
+          description?: string | null
+          icon?: string
+          id?: string
+          name: string
+          org_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          criteria_type?: string
+          criteria_value?: number | null
+          description?: string | null
+          icon?: string
+          id?: string
+          name?: string
+          org_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "badges_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bank_questions: {
         Row: {
           bank_id: string
@@ -140,6 +228,95 @@ export type Database = {
             columns: ["bank_id"]
             isOneToOne: false
             referencedRelation: "question_banks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      challenge_participants: {
+        Row: {
+          challenge_id: string
+          completed_at: string | null
+          current_progress: number
+          id: string
+          joined_at: string
+          user_id: string
+        }
+        Insert: {
+          challenge_id: string
+          completed_at?: string | null
+          current_progress?: number
+          id?: string
+          joined_at?: string
+          user_id: string
+        }
+        Update: {
+          challenge_id?: string
+          completed_at?: string | null
+          current_progress?: number
+          id?: string
+          joined_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "challenge_participants_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      challenges: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          end_at: string
+          id: string
+          name: string
+          org_id: string
+          reward_badge_id: string | null
+          start_at: string
+          target_points: number
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string | null
+          end_at: string
+          id?: string
+          name: string
+          org_id: string
+          reward_badge_id?: string | null
+          start_at?: string
+          target_points?: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          end_at?: string
+          id?: string
+          name?: string
+          org_id?: string
+          reward_badge_id?: string | null
+          start_at?: string
+          target_points?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "challenges_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "challenges_reward_badge_id_fkey"
+            columns: ["reward_badge_id"]
+            isOneToOne: false
+            referencedRelation: "badges"
             referencedColumns: ["id"]
           },
         ]
@@ -314,26 +491,70 @@ export type Database = {
         }
         Relationships: []
       }
+      point_events: {
+        Row: {
+          created_at: string
+          delta: number
+          id: string
+          org_id: string | null
+          ref_id: string | null
+          source: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          delta: number
+          id?: string
+          org_id?: string | null
+          ref_id?: string | null
+          source: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          delta?: number
+          id?: string
+          org_id?: string | null
+          ref_id?: string | null
+          source?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "point_events_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
           created_at: string
           display_name: string
+          equipped_avatar_id: string | null
           id: string
+          points: number
           preferred_locale: string
         }
         Insert: {
           avatar_url?: string | null
           created_at?: string
           display_name: string
+          equipped_avatar_id?: string | null
           id: string
+          points?: number
           preferred_locale?: string
         }
         Update: {
           avatar_url?: string | null
           created_at?: string
           display_name?: string
+          equipped_avatar_id?: string | null
           id?: string
+          points?: number
           preferred_locale?: string
         }
         Relationships: []
@@ -660,6 +881,74 @@ export type Database = {
           },
         ]
       }
+      user_avatar_items: {
+        Row: {
+          acquired_at: string
+          id: string
+          item_id: string
+          user_id: string
+        }
+        Insert: {
+          acquired_at?: string
+          id?: string
+          item_id: string
+          user_id: string
+        }
+        Update: {
+          acquired_at?: string
+          id?: string
+          item_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_avatar_items_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "avatar_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_badges: {
+        Row: {
+          awarded_at: string
+          badge_id: string
+          id: string
+          org_id: string | null
+          user_id: string
+        }
+        Insert: {
+          awarded_at?: string
+          badge_id: string
+          id?: string
+          org_id?: string | null
+          user_id: string
+        }
+        Update: {
+          awarded_at?: string
+          badge_id?: string
+          id?: string
+          org_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_badges_badge_id_fkey"
+            columns: ["badge_id"]
+            isOneToOne: false
+            referencedRelation: "badges"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_badges_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           id: string
@@ -683,6 +972,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      award_points: {
+        Args: {
+          _delta: number
+          _org: string
+          _ref?: string
+          _source: string
+          _user: string
+        }
+        Returns: number
+      }
       has_org_role: {
         Args: {
           _org: string

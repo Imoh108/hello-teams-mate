@@ -5,7 +5,7 @@ import { listMyOrganizations } from "@/lib/orgs.functions";
 import { useCurrentOrgId } from "@/hooks/use-current-org";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Building2, Users, FolderTree, LayoutDashboard, Library, FileText } from "lucide-react";
+import { Building2, Users, FolderTree, LayoutDashboard, Library, FileText, ShoppingBag, Trophy, Flame } from "lucide-react";
 import type { Organization } from "@/lib/data/types";
 
 export const Route = createFileRoute("/_authenticated/admin")({
@@ -45,6 +45,9 @@ function AdminLayout() {
     { to: "/admin", label: "Overview", icon: LayoutDashboard },
     { to: "/admin/banks", label: "Question banks", icon: Library },
     { to: "/admin/documents", label: "Training docs", icon: FileText },
+    { to: "/admin/items", label: "Shop items", icon: ShoppingBag },
+    { to: "/admin/badges", label: "Badges", icon: Trophy },
+    { to: "/admin/challenges", label: "Challenges", icon: Flame },
     { to: "/admin/members", label: "Members", icon: Users },
     { to: "/admin/departments", label: "Departments", icon: FolderTree },
   ];

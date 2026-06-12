@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Plus, Copy, Play, LogOut, Users, Building2 } from "lucide-react";
+import { Plus, Copy, Play, LogOut, Users, Building2, Trophy, Store, Flame } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/app")({
   head: () => ({ meta: [{ title: "Dashboard — QuizPulse" }] }),
@@ -94,6 +94,9 @@ function Dashboard() {
           <div className="flex items-center gap-2">
             <Input value={joinCode} onChange={(e) => setJoinCode(e.target.value.toUpperCase())} placeholder="JOIN CODE" className="w-32 font-mono-tab uppercase" maxLength={8} />
             <Button onClick={onJoin} variant="outline" size="sm">Join</Button>
+            <Button asChild variant="ghost" size="sm"><Link to="/profile"><Trophy className="size-4 mr-1" /> Profile</Link></Button>
+            <Button asChild variant="ghost" size="sm"><Link to="/shop"><Store className="size-4 mr-1" /> Shop</Link></Button>
+            <Button asChild variant="ghost" size="sm"><Link to="/challenges"><Flame className="size-4 mr-1" /> Challenges</Link></Button>
             <Button asChild variant="ghost" size="sm"><Link to="/admin"><Building2 className="size-4 mr-1" /> Admin</Link></Button>
             <Button onClick={onSignOut} variant="ghost" size="sm"><LogOut className="size-4" /></Button>
           </div>
