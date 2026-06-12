@@ -38,13 +38,18 @@ function AuthPage() {
 
   const onSignUp = async (e: React.FormEvent) => {
     e.preventDefault(); setLoading(true);
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email, password,
       options: { emailRedirectTo: `${window.location.origin}/app`, data: { display_name: displayName || email.split("@")[0] } },
     });
     setLoading(false);
     if (error) return toast.error(error.message);
-    toast.success("Check your email to confirm, or sign in if confirmation is disabled.");
+    if (data.session) {
+      toast.success("Account created");
+      navigate({ to: "/app" });
+    } else {
+      toast.success("Check your email to confirm your account.");
+    }
   };
 
   return (

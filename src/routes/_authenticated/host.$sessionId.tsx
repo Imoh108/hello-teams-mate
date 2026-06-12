@@ -34,6 +34,8 @@ function HostScreen() {
     return () => clearInterval(t);
   }, []);
 
+  const currentQuestionId = session?.current_question_id ?? null;
+
   useEffect(() => {
     (async () => {
       const { data: s } = await supabase.from("sessions").select("*").eq("id", sessionId).single();
@@ -54,16 +56,25 @@ function HostScreen() {
           const { data } = await supabase.from("session_players").select("user_id,display_name,flagged_count").eq("session_id", sessionId);
           setPlayers((data ?? []) as any);
         })
-      .on("postgres_changes", { event: "*", schema: "public", table: "answers", filter: `session_id=eq.${sessionId}` },
-        async () => {
-          if (!session?.current_question_id) return;
-          const { count } = await supabase.from("answers").select("id", { head: true, count: "exact" })
-            .eq("session_id", sessionId).eq("question_id", session.current_question_id);
-          setAnsweredCount(count ?? 0);
-        })
       .subscribe();
     return () => { supabase.removeChannel(ch); };
-  }, [sessionId, session?.current_question_id]);
+  }, [sessionId]);
+
+  // Track answered count per current question (counts any submitted row, including timeouts)
+  useEffect(() => {
+    if (!currentQuestionId) { setAnsweredCount(0); return; }
+    let cancelled = false;
+    const refresh = async () => {
+      const { count } = await supabase.from("answers").select("id", { head: true, count: "exact" })
+        .eq("session_id", sessionId).eq("question_id", currentQuestionId);
+      if (!cancelled) setAnsweredCount(count ?? 0);
+    };
+    refresh();
+    const ch = supabase.channel(`host-answers-${sessionId}-${currentQuestionId}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "answers", filter: `session_id=eq.${sessionId}` }, refresh)
+      .subscribe();
+    return () => { cancelled = true; supabase.removeChannel(ch); };
+  }, [sessionId, currentQuestionId]);
 
   const currentIdx = useMemo(() => {
     if (!session?.current_question_id) return -1;
