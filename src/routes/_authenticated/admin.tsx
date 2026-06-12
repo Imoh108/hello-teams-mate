@@ -81,7 +81,8 @@ function AdminLayout() {
                 </SelectContent>
               </Select>
             )}
-            <Button variant="ghost" size="sm" asChild><Link to="/app">Exit admin</Link></Button>
+            <LanguageSwitcher compact />
+            <Button variant="ghost" size="sm" asChild><Link to="/app">{t("admin.exit")}</Link></Button>
           </div>
         </div>
       </header>
