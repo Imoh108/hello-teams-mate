@@ -38,6 +38,7 @@ function Dashboard() {
   const load = async () => {
     const { data: u } = await supabase.auth.getUser();
     const uid = u.user?.id;
+    if (!uid) return;
     const { data: mine } = await supabase.from("quizzes").select("*").eq("owner_id", uid).order("created_at", { ascending: false });
     const { data: pub } = await supabase.from("quizzes").select("*").eq("is_public", true).order("created_at");
     const { data: sess } = await supabase.from("sessions").select("*").eq("host_id", uid).order("created_at", { ascending: false }).limit(10);
