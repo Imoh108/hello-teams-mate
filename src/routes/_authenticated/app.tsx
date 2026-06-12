@@ -111,11 +111,11 @@ function Dashboard() {
         <section>
           <div className="flex items-end justify-between mb-4">
             <div>
-              <h1 className="font-display text-3xl font-bold tracking-tight">Your quizzes</h1>
-              <p className="text-sm text-muted-foreground">Author rounds and launch live sessions.</p>
+              <h1 className="font-display text-3xl font-bold tracking-tight">{t("dashboard.yourQuizzes")}</h1>
+              <p className="text-sm text-muted-foreground">{t("dashboard.yourQuizzesSubtitle")}</p>
             </div>
             <Dialog open={openCreate} onOpenChange={setOpenCreate}>
-              <DialogTrigger asChild><Button><Plus className="size-4 mr-1" /> New quiz</Button></DialogTrigger>
+              <DialogTrigger asChild><Button><Plus className="size-4 mr-1" /> {t("dashboard.newQuiz")}</Button></DialogTrigger>
               <DialogContent>
                 <DialogHeader><DialogTitle>Create a quiz</DialogTitle></DialogHeader>
                 <div className="space-y-3">
