@@ -14,8 +14,10 @@ import {
   BarChart, Bar, CartesianGrid,
 } from "recharts";
 
+import { TierGate } from "@/components/tier-gate";
+
 export const Route = createFileRoute("/_authenticated/admin/analytics")({
-  component: AnalyticsPage,
+  component: () => <TierGate min="premium"><AnalyticsPage /></TierGate>,
 });
 
 type Overview = Awaited<ReturnType<typeof getOrgOverview>>;

@@ -17,9 +17,10 @@ import { toast } from "sonner";
 import { FileText, Upload, Trash2, FileEdit, Sparkles } from "lucide-react";
 import type { QuestionBank, TrainingDocument } from "@/lib/data/types";
 import { generateQuestionsFromDocument } from "@/lib/ai.functions";
+import { TierGate } from "@/components/tier-gate";
 
 export const Route = createFileRoute("/_authenticated/admin/documents")({
-  component: DocumentsPage,
+  component: () => <TierGate min="premium"><DocumentsPage /></TierGate>,
 });
 
 const ACCEPT = ".pdf,.docx,.txt,.md,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain,text/markdown";

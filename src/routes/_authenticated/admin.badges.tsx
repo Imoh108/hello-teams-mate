@@ -11,9 +11,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Plus, Trash2, Trophy, Pencil } from "lucide-react";
+import { TierGate } from "@/components/tier-gate";
 
 export const Route = createFileRoute("/_authenticated/admin/badges")({
-  component: BadgesAdminPage,
+  component: () => <TierGate min="enterprise"><BadgesAdminPage /></TierGate>,
 });
 
 type Form = { id?: string; name: string; description: string; icon: string; criteria_type: "manual"|"points_total"|"quizzes_completed"; criteria_value: number | null };
