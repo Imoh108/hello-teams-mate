@@ -202,6 +202,57 @@ function DocumentsPage() {
           <Button onClick={saveText}>Save text</Button>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={!!genDoc} onOpenChange={(o) => !o && setGenDoc(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2"><Sparkles className="size-4" /> Generate questions</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="text-sm text-muted-foreground">
+              Source: <span className="font-medium text-foreground">{genDoc?.file_name}</span>
+            </div>
+            <div>
+              <Label className="text-xs">Target bank</Label>
+              <Select value={genBankId} onValueChange={setGenBankId}>
+                <SelectTrigger><SelectValue placeholder="Choose a bank" /></SelectTrigger>
+                <SelectContent>
+                  {banks.map((b) => <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+              {banks.length === 0 && <p className="text-xs text-destructive mt-1">Create a question bank first.</p>}
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-xs">Number of questions</Label>
+                <Input type="number" min={1} max={20} value={genCount} onChange={(e) => setGenCount(Math.max(1, Math.min(20, Number(e.target.value) || 1)))} />
+              </div>
+              <div>
+                <Label className="text-xs">Difficulty (1–5)</Label>
+                <Input type="number" min={1} max={5} value={genDifficulty} onChange={(e) => setGenDifficulty(Math.max(1, Math.min(5, Number(e.target.value) || 1)))} />
+              </div>
+            </div>
+            <Button
+              disabled={!genBankId || generating}
+              onClick={async () => {
+                if (!genDoc) return;
+                setGenerating(true);
+                try {
+                  const res = await genFn({ data: { documentId: genDoc.id, bankId: genBankId, count: genCount, difficulty: genDifficulty } }) as { created: number };
+                  toast.success(`Generated ${res.created} questions`);
+                  setGenDoc(null);
+                } catch (e: any) {
+                  toast.error(e.message ?? "Generation failed");
+                } finally {
+                  setGenerating(false);
+                }
+              }}
+            >
+              {generating ? "Generating…" : "Generate"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
