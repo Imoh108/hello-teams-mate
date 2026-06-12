@@ -80,7 +80,7 @@ export const buyItem = createServerFn({ method: "POST" })
     if (existing) throw new Error("Already owned");
     // Deduct + log via award_points (negative delta)
     const { error: ae } = await supabase.rpc("award_points", {
-      _user: userId, _org: item.org_id ?? undefined, _source: "shop_purchase", _delta: -item.cost_points, _ref: item.id,
+      _user: userId, _org: (item.org_id ?? null) as string, _source: "shop_purchase", _delta: -item.cost_points, _ref: item.id,
     });
     if (ae) throw new Error(ae.message);
     const { error: ie } = await supabase.from("user_avatar_items").insert({ user_id: userId, item_id: data.itemId });
