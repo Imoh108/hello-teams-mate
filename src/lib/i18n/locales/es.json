@@ -1,0 +1,83 @@
+{
+  "common": {
+    "appName": "QuizPulse",
+    "loading": "Cargando…",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "create": "Crear",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "back": "Atrás",
+    "signOut": "Cerrar sesión",
+    "language": "Idioma"
+  },
+  "auth": {
+    "signIn": "Iniciar sesión",
+    "signUp": "Registrarse",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "displayName": "Nombre",
+    "continueWithGoogle": "Continuar con Google",
+    "or": "o",
+    "needAccount": "¿Necesitas una cuenta?",
+    "haveAccount": "¿Ya tienes una cuenta?"
+  },
+  "nav": {
+    "dashboard": "Panel",
+    "profile": "Perfil",
+    "shop": "Tienda",
+    "challenges": "Retos",
+    "admin": "Admin",
+    "join": "Unirse",
+    "joinCode": "CÓDIGO"
+  },
+  "dashboard": {
+    "yourQuizzes": "Tus cuestionarios",
+    "yourQuizzesSubtitle": "Crea rondas y lanza sesiones en vivo.",
+    "newQuiz": "Nuevo",
+    "noQuizzes": "Aún no hay cuestionarios. Crea uno o clona un pack abajo.",
+    "starterPacks": "Packs iniciales",
+    "recentSessions": "Sesiones recientes",
+    "edit": "Editar",
+    "launch": "Lanzar",
+    "clone": "Clonar"
+  },
+  "admin": {
+    "title": "Admin",
+    "exit": "Salir del admin",
+    "overview": "Resumen",
+    "questionBanks": "Bancos de preguntas",
+    "trainingDocs": "Documentos",
+    "shopItems": "Artículos",
+    "badges": "Insignias",
+    "challenges": "Retos",
+    "members": "Miembros",
+    "departments": "Departamentos"
+  },
+  "profile": {
+    "title": "Perfil",
+    "points": "pts",
+    "inventory": "Inventario",
+    "badges": "Insignias",
+    "recentActivity": "Actividad reciente",
+    "noItems": "Sin artículos aún.",
+    "noBadges": "Aún no hay insignias.",
+    "noActivity": "Sin actividad.",
+    "equip": "Equipar",
+    "unequip": "Quitar"
+  },
+  "shop": {
+    "title": "Tienda de avatares",
+    "buy": "Comprar",
+    "owned": "Adquirido",
+    "need": "Faltan {{count}}",
+    "empty": "Nada en la tienda todavía."
+  },
+  "challenges": {
+    "title": "Retos",
+    "join": "Unirse",
+    "none": "No hay retos activos.",
+    "ends": "Termina {{date}}",
+    "selectOrg": "Selecciona una organización para ver los retos."
+  }
+}
