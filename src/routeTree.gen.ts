@@ -25,6 +25,7 @@ import { Route as AuthenticatedHostSessionIdRouteImport } from './routes/_authen
 import { Route as AuthenticatedAdminMembersRouteImport } from './routes/_authenticated/admin.members'
 import { Route as AuthenticatedAdminDepartmentsRouteImport } from './routes/_authenticated/admin.departments'
 import { Route as AuthenticatedAdminBanksRouteImport } from './routes/_authenticated/admin.banks'
+import { Route as AuthenticatedAdminBanksBankIdRouteImport } from './routes/_authenticated/admin.banks.$bankId'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -111,6 +112,12 @@ const AuthenticatedAdminBanksRoute = AuthenticatedAdminBanksRouteImport.update({
   path: '/banks',
   getParentRoute: () => AuthenticatedAdminRoute,
 } as any)
+const AuthenticatedAdminBanksBankIdRoute =
+  AuthenticatedAdminBanksBankIdRouteImport.update({
+    id: '/$bankId',
+    path: '/$bankId',
+    getParentRoute: () => AuthenticatedAdminBanksRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -118,7 +125,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/app': typeof AuthenticatedAppRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
-  '/admin/banks': typeof AuthenticatedAdminBanksRoute
+  '/admin/banks': typeof AuthenticatedAdminBanksRouteWithChildren
   '/admin/departments': typeof AuthenticatedAdminDepartmentsRoute
   '/admin/members': typeof AuthenticatedAdminMembersRoute
   '/host/$sessionId': typeof AuthenticatedHostSessionIdRoute
@@ -128,13 +135,14 @@ export interface FileRoutesByFullPath {
   '/results/$sessionId': typeof AuthenticatedResultsSessionIdRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/play/': typeof AuthenticatedPlayIndexRoute
+  '/admin/banks/$bankId': typeof AuthenticatedAdminBanksBankIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/app': typeof AuthenticatedAppRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
-  '/admin/banks': typeof AuthenticatedAdminBanksRoute
+  '/admin/banks': typeof AuthenticatedAdminBanksRouteWithChildren
   '/admin/departments': typeof AuthenticatedAdminDepartmentsRoute
   '/admin/members': typeof AuthenticatedAdminMembersRoute
   '/host/$sessionId': typeof AuthenticatedHostSessionIdRoute
@@ -144,6 +152,7 @@ export interface FileRoutesByTo {
   '/results/$sessionId': typeof AuthenticatedResultsSessionIdRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/play': typeof AuthenticatedPlayIndexRoute
+  '/admin/banks/$bankId': typeof AuthenticatedAdminBanksBankIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -153,7 +162,7 @@ export interface FileRoutesById {
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/app': typeof AuthenticatedAppRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
-  '/_authenticated/admin/banks': typeof AuthenticatedAdminBanksRoute
+  '/_authenticated/admin/banks': typeof AuthenticatedAdminBanksRouteWithChildren
   '/_authenticated/admin/departments': typeof AuthenticatedAdminDepartmentsRoute
   '/_authenticated/admin/members': typeof AuthenticatedAdminMembersRoute
   '/_authenticated/host/$sessionId': typeof AuthenticatedHostSessionIdRoute
@@ -163,6 +172,7 @@ export interface FileRoutesById {
   '/_authenticated/results/$sessionId': typeof AuthenticatedResultsSessionIdRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/play/': typeof AuthenticatedPlayIndexRoute
+  '/_authenticated/admin/banks/$bankId': typeof AuthenticatedAdminBanksBankIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -182,6 +192,7 @@ export interface FileRouteTypes {
     | '/results/$sessionId'
     | '/admin/'
     | '/play/'
+    | '/admin/banks/$bankId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -198,6 +209,7 @@ export interface FileRouteTypes {
     | '/results/$sessionId'
     | '/admin'
     | '/play'
+    | '/admin/banks/$bankId'
   id:
     | '__root__'
     | '/'
@@ -216,6 +228,7 @@ export interface FileRouteTypes {
     | '/_authenticated/results/$sessionId'
     | '/_authenticated/admin/'
     | '/_authenticated/play/'
+    | '/_authenticated/admin/banks/$bankId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -338,18 +351,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminBanksRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/banks/$bankId': {
+      id: '/_authenticated/admin/banks/$bankId'
+      path: '/$bankId'
+      fullPath: '/admin/banks/$bankId'
+      preLoaderRoute: typeof AuthenticatedAdminBanksBankIdRouteImport
+      parentRoute: typeof AuthenticatedAdminBanksRoute
+    }
   }
 }
 
+interface AuthenticatedAdminBanksRouteChildren {
+  AuthenticatedAdminBanksBankIdRoute: typeof AuthenticatedAdminBanksBankIdRoute
+}
+
+const AuthenticatedAdminBanksRouteChildren: AuthenticatedAdminBanksRouteChildren =
+  {
+    AuthenticatedAdminBanksBankIdRoute: AuthenticatedAdminBanksBankIdRoute,
+  }
+
+const AuthenticatedAdminBanksRouteWithChildren =
+  AuthenticatedAdminBanksRoute._addFileChildren(
+    AuthenticatedAdminBanksRouteChildren,
+  )
+
 interface AuthenticatedAdminRouteChildren {
-  AuthenticatedAdminBanksRoute: typeof AuthenticatedAdminBanksRoute
+  AuthenticatedAdminBanksRoute: typeof AuthenticatedAdminBanksRouteWithChildren
   AuthenticatedAdminDepartmentsRoute: typeof AuthenticatedAdminDepartmentsRoute
   AuthenticatedAdminMembersRoute: typeof AuthenticatedAdminMembersRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
-  AuthenticatedAdminBanksRoute: AuthenticatedAdminBanksRoute,
+  AuthenticatedAdminBanksRoute: AuthenticatedAdminBanksRouteWithChildren,
   AuthenticatedAdminDepartmentsRoute: AuthenticatedAdminDepartmentsRoute,
   AuthenticatedAdminMembersRoute: AuthenticatedAdminMembersRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
