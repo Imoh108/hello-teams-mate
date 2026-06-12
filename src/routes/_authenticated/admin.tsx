@@ -16,6 +16,7 @@ export const Route = createFileRoute("/_authenticated/admin")({
 });
 
 function AdminLayout() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const listFn = useServerFn(listMyOrganizations);
   const [orgId, setOrgId] = useCurrentOrgId();
