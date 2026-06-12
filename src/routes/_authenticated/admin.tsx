@@ -1,10 +1,12 @@
 import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useServerFn } from "@tanstack/react-start";
 import { listMyOrganizations } from "@/lib/orgs.functions";
 import { useCurrentOrgId } from "@/hooks/use-current-org";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { LanguageSwitcher } from "@/components/language-switcher";
 import { Building2, Users, FolderTree, LayoutDashboard, Library, FileText, ShoppingBag, Trophy, Flame } from "lucide-react";
 import type { Organization } from "@/lib/data/types";
 
