@@ -11,9 +11,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { toast } from "sonner";
-import { Plus, Copy, Play, LogOut, Users, Building2, Trophy, Store, Flame } from "lucide-react";
+import { Plus, Copy, Play, LogOut, Users, Building2, Trophy, Store, Flame, Shield } from "lucide-react";
 import { useEnsureCurrentOrg } from "@/hooks/use-ensure-current-org";
 import { track } from "@/lib/track";
+import { isPlatformAdmin } from "@/lib/platform.functions";
 
 export const Route = createFileRoute("/_authenticated/app")({
   head: () => ({ meta: [{ title: "Dashboard — QuizPulse" }] }),
