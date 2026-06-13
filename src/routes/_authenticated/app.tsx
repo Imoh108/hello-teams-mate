@@ -13,6 +13,7 @@ import { LanguageSwitcher } from "@/components/language-switcher";
 import { toast } from "sonner";
 import { Plus, Copy, Play, LogOut, Users, Building2, Trophy, Store, Flame } from "lucide-react";
 import { useEnsureCurrentOrg } from "@/hooks/use-ensure-current-org";
+import { track } from "@/lib/track";
 
 export const Route = createFileRoute("/_authenticated/app")({
   head: () => ({ meta: [{ title: "Dashboard — QuizPulse" }] }),
