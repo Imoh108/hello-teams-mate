@@ -11,9 +11,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { toast } from "sonner";
-import { Plus, Copy, Play, LogOut, Users, Building2, Trophy, Store, Flame } from "lucide-react";
+import { Plus, Copy, Play, LogOut, Users, Building2, Trophy, Store, Flame, Shield } from "lucide-react";
 import { useEnsureCurrentOrg } from "@/hooks/use-ensure-current-org";
 import { track } from "@/lib/track";
+import { isPlatformAdmin } from "@/lib/platform.functions";
 
 export const Route = createFileRoute("/_authenticated/app")({
   head: () => ({ meta: [{ title: "Dashboard — QuizPulse" }] }),
@@ -40,6 +41,7 @@ function Dashboard() {
   const [desc, setDesc] = useState("");
   const [pack, setPack] = useState<"company_trivia" | "industry_knowledge" | "general_culture" | "custom">("custom");
   const [joinCode, setJoinCode] = useState("");
+  const [isSuper, setIsSuper] = useState(false);
 
   const load = async () => {
     const { data: u } = await supabase.auth.getUser();
@@ -53,7 +55,11 @@ function Dashboard() {
     setSessions(sess ?? []);
   };
 
-  useEffect(() => { load(); track("app_open"); }, []);
+  useEffect(() => {
+    load();
+    track("app_open");
+    isPlatformAdmin().then((r: any) => setIsSuper(!!r?.isAdmin)).catch(() => {});
+  }, []);
 
   const onCreate = async () => {
     if (!title.trim()) return toast.error("Title required");
@@ -108,6 +114,9 @@ function Dashboard() {
             <Button asChild variant="ghost" size="sm"><Link to="/shop"><Store className="size-4 mr-1" /> {t("nav.shop")}</Link></Button>
             <Button asChild variant="ghost" size="sm"><Link to="/challenges"><Flame className="size-4 mr-1" /> {t("nav.challenges")}</Link></Button>
             <Button asChild variant="ghost" size="sm"><Link to="/admin"><Building2 className="size-4 mr-1" /> {t("nav.admin")}</Link></Button>
+            {isSuper && (
+              <Button asChild variant="ghost" size="sm"><Link to="/platform"><Shield className="size-4 mr-1" /> Platform</Link></Button>
+            )}
             <LanguageSwitcher compact />
             <Button onClick={onSignOut} variant="ghost" size="sm"><LogOut className="size-4" /></Button>
           </div>
