@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { toast } from "sonner";
 import { Plus, Copy, Play, LogOut, Users, Building2, Trophy, Store, Flame } from "lucide-react";
+import { useEnsureCurrentOrg } from "@/hooks/use-ensure-current-org";
 
 export const Route = createFileRoute("/_authenticated/app")({
   head: () => ({ meta: [{ title: "Dashboard — QuizPulse" }] }),
@@ -24,6 +25,7 @@ type Session = { id: string; join_code: string; status: string; created_at: stri
 function Dashboard() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  useEnsureCurrentOrg();
   const createFn = useServerFn(createQuiz);
   const cloneFn = useServerFn(cloneQuiz);
   const sessionFn = useServerFn(createSession);

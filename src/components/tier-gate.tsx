@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useOrgTier } from "@/hooks/use-org-tier";
-import { hasTier, TIER_LABEL, type SubscriptionTier } from "@/lib/tiers";
+import { hasTier, PRELAUNCH_UNLOCK_ALL, TIER_LABEL, type SubscriptionTier } from "@/lib/tiers";
 
 interface Props {
   min: SubscriptionTier;
@@ -11,6 +11,7 @@ interface Props {
 
 export function TierGate({ min, children }: Props) {
   const { tier, loading, orgId } = useOrgTier();
+  if (PRELAUNCH_UNLOCK_ALL) return <>{children}</>;
   if (loading || (orgId && tier === null)) {
     return <div className="p-8 text-muted-foreground text-sm">Checking subscription…</div>;
   }
