@@ -63,8 +63,7 @@ function PlatformLayout() {
             })}
           </nav>
           <p className="mt-6 text-xs text-muted-foreground px-3">
-            More modules (system health, billing, AI pipeline, content) ship in
-            later phases.
+            Platform super-admin only. All actions are logged.
           </p>
         </aside>
         <main className="col-span-12 md:col-span-9 lg:col-span-10">

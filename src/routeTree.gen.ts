@@ -25,6 +25,8 @@ import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authentic
 import { Route as AuthenticatedResultsSessionIdRouteImport } from './routes/_authenticated/results.$sessionId'
 import { Route as AuthenticatedQuizzesIdRouteImport } from './routes/_authenticated/quizzes.$id'
 import { Route as AuthenticatedPlaySessionIdRouteImport } from './routes/_authenticated/play.$sessionId'
+import { Route as AuthenticatedPlatformTeamRouteImport } from './routes/_authenticated/platform.team'
+import { Route as AuthenticatedPlatformSettingsRouteImport } from './routes/_authenticated/platform.settings'
 import { Route as AuthenticatedPlatformPipelineRouteImport } from './routes/_authenticated/platform.pipeline'
 import { Route as AuthenticatedPlatformHealthRouteImport } from './routes/_authenticated/platform.health'
 import { Route as AuthenticatedPlatformBillingRouteImport } from './routes/_authenticated/platform.billing'
@@ -122,6 +124,18 @@ const AuthenticatedPlaySessionIdRoute =
     id: '/play/$sessionId',
     path: '/play/$sessionId',
     getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedPlatformTeamRoute =
+  AuthenticatedPlatformTeamRouteImport.update({
+    id: '/team',
+    path: '/team',
+    getParentRoute: () => AuthenticatedPlatformRoute,
+  } as any)
+const AuthenticatedPlatformSettingsRoute =
+  AuthenticatedPlatformSettingsRouteImport.update({
+    id: '/settings',
+    path: '/settings',
+    getParentRoute: () => AuthenticatedPlatformRoute,
   } as any)
 const AuthenticatedPlatformPipelineRoute =
   AuthenticatedPlatformPipelineRouteImport.update({
@@ -236,6 +250,8 @@ export interface FileRoutesByFullPath {
   '/platform/billing': typeof AuthenticatedPlatformBillingRoute
   '/platform/health': typeof AuthenticatedPlatformHealthRoute
   '/platform/pipeline': typeof AuthenticatedPlatformPipelineRoute
+  '/platform/settings': typeof AuthenticatedPlatformSettingsRoute
+  '/platform/team': typeof AuthenticatedPlatformTeamRoute
   '/play/$sessionId': typeof AuthenticatedPlaySessionIdRoute
   '/quizzes/$id': typeof AuthenticatedQuizzesIdRoute
   '/results/$sessionId': typeof AuthenticatedResultsSessionIdRoute
@@ -266,6 +282,8 @@ export interface FileRoutesByTo {
   '/platform/billing': typeof AuthenticatedPlatformBillingRoute
   '/platform/health': typeof AuthenticatedPlatformHealthRoute
   '/platform/pipeline': typeof AuthenticatedPlatformPipelineRoute
+  '/platform/settings': typeof AuthenticatedPlatformSettingsRoute
+  '/platform/team': typeof AuthenticatedPlatformTeamRoute
   '/play/$sessionId': typeof AuthenticatedPlaySessionIdRoute
   '/quizzes/$id': typeof AuthenticatedQuizzesIdRoute
   '/results/$sessionId': typeof AuthenticatedResultsSessionIdRoute
@@ -300,6 +318,8 @@ export interface FileRoutesById {
   '/_authenticated/platform/billing': typeof AuthenticatedPlatformBillingRoute
   '/_authenticated/platform/health': typeof AuthenticatedPlatformHealthRoute
   '/_authenticated/platform/pipeline': typeof AuthenticatedPlatformPipelineRoute
+  '/_authenticated/platform/settings': typeof AuthenticatedPlatformSettingsRoute
+  '/_authenticated/platform/team': typeof AuthenticatedPlatformTeamRoute
   '/_authenticated/play/$sessionId': typeof AuthenticatedPlaySessionIdRoute
   '/_authenticated/quizzes/$id': typeof AuthenticatedQuizzesIdRoute
   '/_authenticated/results/$sessionId': typeof AuthenticatedResultsSessionIdRoute
@@ -334,6 +354,8 @@ export interface FileRouteTypes {
     | '/platform/billing'
     | '/platform/health'
     | '/platform/pipeline'
+    | '/platform/settings'
+    | '/platform/team'
     | '/play/$sessionId'
     | '/quizzes/$id'
     | '/results/$sessionId'
@@ -364,6 +386,8 @@ export interface FileRouteTypes {
     | '/platform/billing'
     | '/platform/health'
     | '/platform/pipeline'
+    | '/platform/settings'
+    | '/platform/team'
     | '/play/$sessionId'
     | '/quizzes/$id'
     | '/results/$sessionId'
@@ -397,6 +421,8 @@ export interface FileRouteTypes {
     | '/_authenticated/platform/billing'
     | '/_authenticated/platform/health'
     | '/_authenticated/platform/pipeline'
+    | '/_authenticated/platform/settings'
+    | '/_authenticated/platform/team'
     | '/_authenticated/play/$sessionId'
     | '/_authenticated/quizzes/$id'
     | '/_authenticated/results/$sessionId'
@@ -525,6 +551,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/play/$sessionId'
       preLoaderRoute: typeof AuthenticatedPlaySessionIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/platform/team': {
+      id: '/_authenticated/platform/team'
+      path: '/team'
+      fullPath: '/platform/team'
+      preLoaderRoute: typeof AuthenticatedPlatformTeamRouteImport
+      parentRoute: typeof AuthenticatedPlatformRoute
+    }
+    '/_authenticated/platform/settings': {
+      id: '/_authenticated/platform/settings'
+      path: '/settings'
+      fullPath: '/platform/settings'
+      preLoaderRoute: typeof AuthenticatedPlatformSettingsRouteImport
+      parentRoute: typeof AuthenticatedPlatformRoute
     }
     '/_authenticated/platform/pipeline': {
       id: '/_authenticated/platform/pipeline'
@@ -681,6 +721,8 @@ interface AuthenticatedPlatformRouteChildren {
   AuthenticatedPlatformBillingRoute: typeof AuthenticatedPlatformBillingRoute
   AuthenticatedPlatformHealthRoute: typeof AuthenticatedPlatformHealthRoute
   AuthenticatedPlatformPipelineRoute: typeof AuthenticatedPlatformPipelineRoute
+  AuthenticatedPlatformSettingsRoute: typeof AuthenticatedPlatformSettingsRoute
+  AuthenticatedPlatformTeamRoute: typeof AuthenticatedPlatformTeamRoute
   AuthenticatedPlatformIndexRoute: typeof AuthenticatedPlatformIndexRoute
 }
 
@@ -688,6 +730,8 @@ const AuthenticatedPlatformRouteChildren: AuthenticatedPlatformRouteChildren = {
   AuthenticatedPlatformBillingRoute: AuthenticatedPlatformBillingRoute,
   AuthenticatedPlatformHealthRoute: AuthenticatedPlatformHealthRoute,
   AuthenticatedPlatformPipelineRoute: AuthenticatedPlatformPipelineRoute,
+  AuthenticatedPlatformSettingsRoute: AuthenticatedPlatformSettingsRoute,
+  AuthenticatedPlatformTeamRoute: AuthenticatedPlatformTeamRoute,
   AuthenticatedPlatformIndexRoute: AuthenticatedPlatformIndexRoute,
 }
 
