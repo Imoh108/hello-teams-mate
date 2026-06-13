@@ -76,8 +76,8 @@ function AuthPage() {
               <Button onClick={onGoogle} disabled={loading} variant="outline" className="w-full">{t("auth.continueWithGoogle")}</Button>
               <Separator label={t("auth.or")} />
               <form onSubmit={onSignIn} className="space-y-3">
-                <div><Label>{t("auth.email")}</Label><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required /></div>
-                <div><Label>{t("auth.password")}</Label><Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required /></div>
+                <div><Label>{t("auth.email")}</Label><Input suppressHydrationWarning type="email" value={email} onChange={(e) => setEmail(e.target.value)} required /></div>
+                <div><Label>{t("auth.password")}</Label><Input suppressHydrationWarning type="password" value={password} onChange={(e) => setPassword(e.target.value)} required /></div>
                 <Button type="submit" disabled={loading} className="w-full">{t("auth.signIn")}</Button>
               </form>
             </TabsContent>
