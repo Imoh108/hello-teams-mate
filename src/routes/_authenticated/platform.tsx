@@ -22,6 +22,7 @@ function PlatformLayout() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const nav = [
     { to: "/platform", label: "Overview", icon: LayoutDashboard },
+    { to: "/platform/health", label: "System health", icon: Activity },
   ];
 
   return (
