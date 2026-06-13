@@ -118,6 +118,9 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  // Initialize the Teams SDK once at the root so child routes can read context.
+  // Outside Teams this resolves quickly with inTeams: false and is a no-op.
+  useTeamsContext();
 
   return (
     <QueryClientProvider client={queryClient}>
