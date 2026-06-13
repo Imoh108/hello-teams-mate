@@ -29,6 +29,7 @@ import { Route as AuthenticatedPlatformTeamRouteImport } from './routes/_authent
 import { Route as AuthenticatedPlatformSettingsRouteImport } from './routes/_authenticated/platform.settings'
 import { Route as AuthenticatedPlatformPipelineRouteImport } from './routes/_authenticated/platform.pipeline'
 import { Route as AuthenticatedPlatformHealthRouteImport } from './routes/_authenticated/platform.health'
+import { Route as AuthenticatedPlatformContentRouteImport } from './routes/_authenticated/platform.content'
 import { Route as AuthenticatedPlatformBillingRouteImport } from './routes/_authenticated/platform.billing'
 import { Route as AuthenticatedInviteTokenRouteImport } from './routes/_authenticated/invite.$token'
 import { Route as AuthenticatedHostSessionIdRouteImport } from './routes/_authenticated/host.$sessionId'
@@ -149,6 +150,12 @@ const AuthenticatedPlatformHealthRoute =
     path: '/health',
     getParentRoute: () => AuthenticatedPlatformRoute,
   } as any)
+const AuthenticatedPlatformContentRoute =
+  AuthenticatedPlatformContentRouteImport.update({
+    id: '/content',
+    path: '/content',
+    getParentRoute: () => AuthenticatedPlatformRoute,
+  } as any)
 const AuthenticatedPlatformBillingRoute =
   AuthenticatedPlatformBillingRouteImport.update({
     id: '/billing',
@@ -248,6 +255,7 @@ export interface FileRoutesByFullPath {
   '/host/$sessionId': typeof AuthenticatedHostSessionIdRoute
   '/invite/$token': typeof AuthenticatedInviteTokenRoute
   '/platform/billing': typeof AuthenticatedPlatformBillingRoute
+  '/platform/content': typeof AuthenticatedPlatformContentRoute
   '/platform/health': typeof AuthenticatedPlatformHealthRoute
   '/platform/pipeline': typeof AuthenticatedPlatformPipelineRoute
   '/platform/settings': typeof AuthenticatedPlatformSettingsRoute
@@ -280,6 +288,7 @@ export interface FileRoutesByTo {
   '/host/$sessionId': typeof AuthenticatedHostSessionIdRoute
   '/invite/$token': typeof AuthenticatedInviteTokenRoute
   '/platform/billing': typeof AuthenticatedPlatformBillingRoute
+  '/platform/content': typeof AuthenticatedPlatformContentRoute
   '/platform/health': typeof AuthenticatedPlatformHealthRoute
   '/platform/pipeline': typeof AuthenticatedPlatformPipelineRoute
   '/platform/settings': typeof AuthenticatedPlatformSettingsRoute
@@ -316,6 +325,7 @@ export interface FileRoutesById {
   '/_authenticated/host/$sessionId': typeof AuthenticatedHostSessionIdRoute
   '/_authenticated/invite/$token': typeof AuthenticatedInviteTokenRoute
   '/_authenticated/platform/billing': typeof AuthenticatedPlatformBillingRoute
+  '/_authenticated/platform/content': typeof AuthenticatedPlatformContentRoute
   '/_authenticated/platform/health': typeof AuthenticatedPlatformHealthRoute
   '/_authenticated/platform/pipeline': typeof AuthenticatedPlatformPipelineRoute
   '/_authenticated/platform/settings': typeof AuthenticatedPlatformSettingsRoute
@@ -352,6 +362,7 @@ export interface FileRouteTypes {
     | '/host/$sessionId'
     | '/invite/$token'
     | '/platform/billing'
+    | '/platform/content'
     | '/platform/health'
     | '/platform/pipeline'
     | '/platform/settings'
@@ -384,6 +395,7 @@ export interface FileRouteTypes {
     | '/host/$sessionId'
     | '/invite/$token'
     | '/platform/billing'
+    | '/platform/content'
     | '/platform/health'
     | '/platform/pipeline'
     | '/platform/settings'
@@ -419,6 +431,7 @@ export interface FileRouteTypes {
     | '/_authenticated/host/$sessionId'
     | '/_authenticated/invite/$token'
     | '/_authenticated/platform/billing'
+    | '/_authenticated/platform/content'
     | '/_authenticated/platform/health'
     | '/_authenticated/platform/pipeline'
     | '/_authenticated/platform/settings'
@@ -580,6 +593,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPlatformHealthRouteImport
       parentRoute: typeof AuthenticatedPlatformRoute
     }
+    '/_authenticated/platform/content': {
+      id: '/_authenticated/platform/content'
+      path: '/content'
+      fullPath: '/platform/content'
+      preLoaderRoute: typeof AuthenticatedPlatformContentRouteImport
+      parentRoute: typeof AuthenticatedPlatformRoute
+    }
     '/_authenticated/platform/billing': {
       id: '/_authenticated/platform/billing'
       path: '/billing'
@@ -719,6 +739,7 @@ const AuthenticatedAdminRouteWithChildren =
 
 interface AuthenticatedPlatformRouteChildren {
   AuthenticatedPlatformBillingRoute: typeof AuthenticatedPlatformBillingRoute
+  AuthenticatedPlatformContentRoute: typeof AuthenticatedPlatformContentRoute
   AuthenticatedPlatformHealthRoute: typeof AuthenticatedPlatformHealthRoute
   AuthenticatedPlatformPipelineRoute: typeof AuthenticatedPlatformPipelineRoute
   AuthenticatedPlatformSettingsRoute: typeof AuthenticatedPlatformSettingsRoute
@@ -728,6 +749,7 @@ interface AuthenticatedPlatformRouteChildren {
 
 const AuthenticatedPlatformRouteChildren: AuthenticatedPlatformRouteChildren = {
   AuthenticatedPlatformBillingRoute: AuthenticatedPlatformBillingRoute,
+  AuthenticatedPlatformContentRoute: AuthenticatedPlatformContentRoute,
   AuthenticatedPlatformHealthRoute: AuthenticatedPlatformHealthRoute,
   AuthenticatedPlatformPipelineRoute: AuthenticatedPlatformPipelineRoute,
   AuthenticatedPlatformSettingsRoute: AuthenticatedPlatformSettingsRoute,

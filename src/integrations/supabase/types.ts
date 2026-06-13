@@ -466,6 +466,45 @@ export type Database = {
           },
         ]
       }
+      content_sources: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          license: string | null
+          name: string
+          notes: string | null
+          topic: string | null
+          updated_at: string
+          url: string
+          verified: boolean
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          license?: string | null
+          name: string
+          notes?: string | null
+          topic?: string | null
+          updated_at?: string
+          url: string
+          verified?: boolean
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          license?: string | null
+          name?: string
+          notes?: string | null
+          topic?: string | null
+          updated_at?: string
+          url?: string
+          verified?: boolean
+        }
+        Relationships: []
+      }
       departments: {
         Row: {
           created_at: string
