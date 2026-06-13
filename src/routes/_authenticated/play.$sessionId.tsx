@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useServerFn } from "@tanstack/react-start";
 import { submitAnswer } from "@/lib/quiz.functions";
 import { permutationFor } from "@/lib/scoring";
+import { track } from "@/lib/track";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/play/$sessionId")({
@@ -108,6 +109,7 @@ function PlayScreen() {
       const r: any = await submitFn({ data: { session_id: sessionId, question_id: question.id, selected_index: originalIdx } });
       setSubmittedFor(question.id);
       setResult({ points: r.points, isCorrect: r.isCorrect });
+      track("question_answered", { is_correct: !!r.isCorrect, points: r.points });
     } catch (e: any) { toast.error(e.message); }
   };
 

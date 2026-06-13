@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { toast } from "sonner";
+import { track } from "@/lib/track";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({ meta: [{ title: "Sign in — QuizPulse" }, { name: "description", content: "Sign in to host or join QuizPulse rounds." }] }),
@@ -36,6 +37,7 @@ function AuthPage() {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) return toast.error(error.message);
+    track("sign_in", { method: "password" });
     navigate({ to: "/app" });
   };
 
@@ -48,6 +50,7 @@ function AuthPage() {
     setLoading(false);
     if (error) return toast.error(error.message);
     if (data.session) {
+      track("sign_up", { method: "password" });
       toast.success("Account created");
       navigate({ to: "/app" });
     } else {

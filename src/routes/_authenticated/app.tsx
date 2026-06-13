@@ -59,6 +59,7 @@ function Dashboard() {
     if (!title.trim()) return toast.error("Title required");
     try {
       const row = await createFn({ data: { title: title.trim(), description: desc.trim() || undefined, topic_pack: pack } });
+      track("quiz_created", { topic_pack: pack });
       setOpenCreate(false); setTitle(""); setDesc("");
       navigate({ to: "/quizzes/$id", params: { id: (row as any).id } });
     } catch (e: any) { toast.error(e.message); }
@@ -67,6 +68,7 @@ function Dashboard() {
   const onClone = async (id: string) => {
     try {
       const row = await cloneFn({ data: { source_quiz_id: id } });
+      track("quiz_cloned");
       toast.success("Cloned to your library");
       navigate({ to: "/quizzes/$id", params: { id: (row as any).id } });
     } catch (e: any) { toast.error(e.message); }
@@ -75,6 +77,7 @@ function Dashboard() {
   const onLaunch = async (quizId: string) => {
     try {
       const row = await sessionFn({ data: { quiz_id: quizId } });
+      track("session_started", { quiz_id: quizId });
       navigate({ to: "/host/$sessionId", params: { sessionId: (row as any).id } });
     } catch (e: any) { toast.error(e.message); }
   };
@@ -83,6 +86,7 @@ function Dashboard() {
     if (!joinCode.trim()) return;
     try {
       const r = await joinFn({ data: { code: joinCode.trim() } });
+      track("session_joined");
       navigate({ to: "/play/$sessionId", params: { sessionId: (r as any).session_id } });
     } catch (e: any) { toast.error(e.message); }
   };
