@@ -14,11 +14,13 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedShopRouteImport } from './routes/_authenticated/shop'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
+import { Route as AuthenticatedPlatformRouteImport } from './routes/_authenticated/platform'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedChallengesRouteImport } from './routes/_authenticated/challenges'
 import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedPlayIndexRouteImport } from './routes/_authenticated/play.index'
+import { Route as AuthenticatedPlatformIndexRouteImport } from './routes/_authenticated/platform.index'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as AuthenticatedResultsSessionIdRouteImport } from './routes/_authenticated/results.$sessionId'
 import { Route as AuthenticatedQuizzesIdRouteImport } from './routes/_authenticated/quizzes.$id'
@@ -60,6 +62,11 @@ const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedPlatformRoute = AuthenticatedPlatformRouteImport.update({
+  id: '/platform',
+  path: '/platform',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
@@ -85,6 +92,12 @@ const AuthenticatedPlayIndexRoute = AuthenticatedPlayIndexRouteImport.update({
   path: '/play/',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedPlatformIndexRoute =
+  AuthenticatedPlatformIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedPlatformRoute,
+  } as any)
 const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -185,6 +198,7 @@ export interface FileRoutesByFullPath {
   '/app': typeof AuthenticatedAppRoute
   '/challenges': typeof AuthenticatedChallengesRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/platform': typeof AuthenticatedPlatformRouteWithChildren
   '/profile': typeof AuthenticatedProfileRoute
   '/shop': typeof AuthenticatedShopRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
@@ -202,6 +216,7 @@ export interface FileRoutesByFullPath {
   '/quizzes/$id': typeof AuthenticatedQuizzesIdRoute
   '/results/$sessionId': typeof AuthenticatedResultsSessionIdRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
+  '/platform/': typeof AuthenticatedPlatformIndexRoute
   '/play/': typeof AuthenticatedPlayIndexRoute
   '/admin/banks/$bankId': typeof AuthenticatedAdminBanksBankIdRoute
 }
@@ -228,6 +243,7 @@ export interface FileRoutesByTo {
   '/quizzes/$id': typeof AuthenticatedQuizzesIdRoute
   '/results/$sessionId': typeof AuthenticatedResultsSessionIdRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
+  '/platform': typeof AuthenticatedPlatformIndexRoute
   '/play': typeof AuthenticatedPlayIndexRoute
   '/admin/banks/$bankId': typeof AuthenticatedAdminBanksBankIdRoute
 }
@@ -240,6 +256,7 @@ export interface FileRoutesById {
   '/_authenticated/app': typeof AuthenticatedAppRoute
   '/_authenticated/challenges': typeof AuthenticatedChallengesRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
+  '/_authenticated/platform': typeof AuthenticatedPlatformRouteWithChildren
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/shop': typeof AuthenticatedShopRoute
   '/_authenticated/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
@@ -257,6 +274,7 @@ export interface FileRoutesById {
   '/_authenticated/quizzes/$id': typeof AuthenticatedQuizzesIdRoute
   '/_authenticated/results/$sessionId': typeof AuthenticatedResultsSessionIdRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
+  '/_authenticated/platform/': typeof AuthenticatedPlatformIndexRoute
   '/_authenticated/play/': typeof AuthenticatedPlayIndexRoute
   '/_authenticated/admin/banks/$bankId': typeof AuthenticatedAdminBanksBankIdRoute
 }
@@ -269,6 +287,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/challenges'
     | '/onboarding'
+    | '/platform'
     | '/profile'
     | '/shop'
     | '/admin/analytics'
@@ -286,6 +305,7 @@ export interface FileRouteTypes {
     | '/quizzes/$id'
     | '/results/$sessionId'
     | '/admin/'
+    | '/platform/'
     | '/play/'
     | '/admin/banks/$bankId'
   fileRoutesByTo: FileRoutesByTo
@@ -312,6 +332,7 @@ export interface FileRouteTypes {
     | '/quizzes/$id'
     | '/results/$sessionId'
     | '/admin'
+    | '/platform'
     | '/play'
     | '/admin/banks/$bankId'
   id:
@@ -323,6 +344,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app'
     | '/_authenticated/challenges'
     | '/_authenticated/onboarding'
+    | '/_authenticated/platform'
     | '/_authenticated/profile'
     | '/_authenticated/shop'
     | '/_authenticated/admin/analytics'
@@ -340,6 +362,7 @@ export interface FileRouteTypes {
     | '/_authenticated/quizzes/$id'
     | '/_authenticated/results/$sessionId'
     | '/_authenticated/admin/'
+    | '/_authenticated/platform/'
     | '/_authenticated/play/'
     | '/_authenticated/admin/banks/$bankId'
   fileRoutesById: FileRoutesById
@@ -387,6 +410,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProfileRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/platform': {
+      id: '/_authenticated/platform'
+      path: '/platform'
+      fullPath: '/platform'
+      preLoaderRoute: typeof AuthenticatedPlatformRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/onboarding': {
       id: '/_authenticated/onboarding'
       path: '/onboarding'
@@ -421,6 +451,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/play/'
       preLoaderRoute: typeof AuthenticatedPlayIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/platform/': {
+      id: '/_authenticated/platform/'
+      path: '/'
+      fullPath: '/platform/'
+      preLoaderRoute: typeof AuthenticatedPlatformIndexRouteImport
+      parentRoute: typeof AuthenticatedPlatformRoute
     }
     '/_authenticated/admin/': {
       id: '/_authenticated/admin/'
@@ -580,11 +617,25 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
 const AuthenticatedAdminRouteWithChildren =
   AuthenticatedAdminRoute._addFileChildren(AuthenticatedAdminRouteChildren)
 
+interface AuthenticatedPlatformRouteChildren {
+  AuthenticatedPlatformIndexRoute: typeof AuthenticatedPlatformIndexRoute
+}
+
+const AuthenticatedPlatformRouteChildren: AuthenticatedPlatformRouteChildren = {
+  AuthenticatedPlatformIndexRoute: AuthenticatedPlatformIndexRoute,
+}
+
+const AuthenticatedPlatformRouteWithChildren =
+  AuthenticatedPlatformRoute._addFileChildren(
+    AuthenticatedPlatformRouteChildren,
+  )
+
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
   AuthenticatedAppRoute: typeof AuthenticatedAppRoute
   AuthenticatedChallengesRoute: typeof AuthenticatedChallengesRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
+  AuthenticatedPlatformRoute: typeof AuthenticatedPlatformRouteWithChildren
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedShopRoute: typeof AuthenticatedShopRoute
   AuthenticatedHostSessionIdRoute: typeof AuthenticatedHostSessionIdRoute
@@ -600,6 +651,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAppRoute: AuthenticatedAppRoute,
   AuthenticatedChallengesRoute: AuthenticatedChallengesRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
+  AuthenticatedPlatformRoute: AuthenticatedPlatformRouteWithChildren,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedShopRoute: AuthenticatedShopRoute,
   AuthenticatedHostSessionIdRoute: AuthenticatedHostSessionIdRoute,
