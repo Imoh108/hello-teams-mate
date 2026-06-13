@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useServerFn } from "@tanstack/react-start";
 import { submitAnswer } from "@/lib/quiz.functions";
 import { permutationFor } from "@/lib/scoring";
+import { track } from "@/lib/track";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/play/$sessionId")({
