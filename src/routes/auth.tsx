@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { toast } from "sonner";
+import { track } from "@/lib/track";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({ meta: [{ title: "Sign in — QuizPulse" }, { name: "description", content: "Sign in to host or join QuizPulse rounds." }] }),
