@@ -20,12 +20,21 @@ export const createOrganization = createServerFn({ method: "POST" })
     // creation works even when RLS/JWT verification is mid-rotation; we pin
     // created_by to the verified user id so the row is still owned correctly.
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: org, error } = await supabaseAdmin
-      .from("organizations")
-      .insert({ name: data.name, slug: data.slug, created_by: context.userId })
-      .select("*")
-      .single();
-    if (error) throw new Error(error.message);
+    let slug = data.slug;
+    let org: any = null;
+    let lastErr: any = null;
+    for (let i = 0; i < 5; i++) {
+      const candidate = i === 0 ? slug : `${slug}-${Math.random().toString(36).slice(2, 6)}`;
+      const { data: row, error } = await supabaseAdmin
+        .from("organizations")
+        .insert({ name: data.name, slug: candidate, created_by: context.userId })
+        .select("*")
+        .single();
+      if (!error) { org = row; break; }
+      lastErr = error;
+      if (!/duplicate key|organizations_slug_key/i.test(error.message)) break;
+    }
+    if (!org) throw new Error(lastErr?.message ?? "Failed to create organization");
     const { error: mErr } = await supabaseAdmin
       .from("organization_members")
       .insert({ org_id: org.id, user_id: context.userId, org_role: "owner" });
