@@ -14,6 +14,44 @@ export type Database = {
   }
   public: {
     Tables: {
+      analytics_events: {
+        Row: {
+          country: string | null
+          created_at: string
+          event_type: string
+          id: string
+          org_id: string | null
+          properties: Json
+          user_id: string | null
+        }
+        Insert: {
+          country?: string | null
+          created_at?: string
+          event_type: string
+          id?: string
+          org_id?: string | null
+          properties?: Json
+          user_id?: string | null
+        }
+        Update: {
+          country?: string | null
+          created_at?: string
+          event_type?: string
+          id?: string
+          org_id?: string | null
+          properties?: Json
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analytics_events_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       answers: {
         Row: {
           answered_at: string
