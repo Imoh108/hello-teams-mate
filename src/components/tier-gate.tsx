@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useOrgTier } from "@/hooks/use-org-tier";
 import { hasTier, PRELAUNCH_UNLOCK_ALL, TIER_LABEL, type SubscriptionTier } from "@/lib/tiers";
 
 interface Props {
