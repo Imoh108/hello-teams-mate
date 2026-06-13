@@ -14,6 +14,44 @@ export type Database = {
   }
   public: {
     Tables: {
+      analytics_events: {
+        Row: {
+          country: string | null
+          created_at: string
+          event_type: string
+          id: string
+          org_id: string | null
+          properties: Json
+          user_id: string | null
+        }
+        Insert: {
+          country?: string | null
+          created_at?: string
+          event_type: string
+          id?: string
+          org_id?: string | null
+          properties?: Json
+          user_id?: string | null
+        }
+        Update: {
+          country?: string | null
+          created_at?: string
+          event_type?: string
+          id?: string
+          org_id?: string | null
+          properties?: Json
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analytics_events_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       answers: {
         Row: {
           answered_at: string
@@ -1027,7 +1065,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "manager" | "player"
+      app_role: "manager" | "player" | "platform_admin"
       org_data_backend: "lovable_cloud" | "dataverse"
       org_role: "owner" | "admin" | "hr" | "team_lead" | "member"
       session_status: "lobby" | "active" | "reveal" | "ended"
@@ -1164,7 +1202,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["manager", "player"],
+      app_role: ["manager", "player", "platform_admin"],
       org_data_backend: ["lovable_cloud", "dataverse"],
       org_role: ["owner", "admin", "hr", "team_lead", "member"],
       session_status: ["lobby", "active", "reveal", "ended"],
