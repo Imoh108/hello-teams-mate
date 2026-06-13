@@ -37,6 +37,7 @@ function AuthPage() {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) return toast.error(error.message);
+    track("sign_in", { method: "password" });
     navigate({ to: "/app" });
   };
 
@@ -49,6 +50,7 @@ function AuthPage() {
     setLoading(false);
     if (error) return toast.error(error.message);
     if (data.session) {
+      track("sign_up", { method: "password" });
       toast.success("Account created");
       navigate({ to: "/app" });
     } else {
