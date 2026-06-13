@@ -1,39 +1,33 @@
-## Problem
-The `/platform` super-admin dashboard is complete (8 phases built), but there is no way to actually reach it or become the first admin on a fresh deployment:
+## Goal
 
-- The route requires the `platform_admin` role, but the `handle_new_user()` trigger only assigns `player`.
-- There is no link to `/platform` anywhere in the UI (not in `/app`, `/admin`, or the landing page).
-- Typing `/platform` manually redirects non-admins back to `/app`.
+Fully reset the database by removing the remaining real user (imohi2013@gmail.com) and all data tied to any user, leaving an empty app ready for fresh signups.
 
-## Solution
+## What gets deleted
 
-### 1. Auto-bootstrap the first user as platform admin
-Update the `handle_new_user()` database trigger: when a new user signs up, if the `profiles` table is empty (this is the very first user), also insert a `platform_admin` role into `user_roles`.
+All rows from:
+- auth.users (the last remaining account)
+- profiles, user_roles
+- organizations, organization_members, organization_invites, departments
+- quizzes, questions, question_banks, bank_questions, bank_tags
+- sessions, session_players, answers
+- point_events, challenges, challenge_participants
+- user_badges, user_avatar_items
+- training_documents, content_sources
+- ai_generated_items, ai_generation_jobs
+- analytics_events
+- platform_settings (optional — clears any saved super-admin config)
 
-This guarantees the first account on a fresh app is a super-admin with no manual database editing required.
+Reference tables left intact: badges, avatar_items (catalog data, not user-owned).
 
-### 2. Add a conditional "Platform" nav link in `/app`
-In the `Dashboard` header (`src/routes/_authenticated/app.tsx`):
-- On mount, call `isPlatformAdmin()`.
-- If the user is a platform admin, render a new nav link (e.g. a small badge button) that navigates to `/platform`.
+## Effect
 
-This makes the dashboard discoverable without memorizing the URL.
+- Next person to sign up becomes the first user and is auto-granted `platform_admin` via the `handle_new_user` trigger, regaining access to `/platform`.
+- All quizzes, sessions, and storage references are gone.
 
-### 3. Optional: add the same link in the org `/admin` sidebar
-If the user is already in the org admin area (`/admin`), show a "Platform admin" item in its sidebar or footer for users who also hold the platform role.
+## Note
 
-## Files to change
-- `supabase/migrations/...` — migration to update `handle_new_user()` trigger with first-user bootstrap logic
-- `src/routes/_authenticated/app.tsx` — add conditional platform-admin nav link
-- `src/routes/_authenticated/admin.tsx` — optional conditional platform-admin link in sidebar
+Files in the `training-documents` storage bucket are not auto-deleted by the SQL wipe. I'll list and delete them as a second step if you want a fully clean slate.
 
-## Technical details
-- The trigger is `SECURITY DEFINER` and already has `search_path = public`, so a simple `SELECT count(*) FROM public.profiles` check inside the trigger body is safe.
-- `isPlatformAdmin` is an existing `createServerFn` at `src/lib/platform.functions.ts`.
-- No new dependencies.
+## Confirmation needed
 
-## Acceptance criteria
-1. First user to sign up on a fresh database automatically has `platform_admin` role.
-2. That user sees a "Platform" link in the `/app` header.
-3. Clicking it navigates to `/platform` successfully.
-4. Non-admins do not see the link and are redirected away from `/platform` as before.
+This is destructive and irreversible. Confirm before I switch to build and run it.
