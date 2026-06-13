@@ -12,7 +12,13 @@ export const TIER_LABEL: Record<SubscriptionTier, string> = {
   enterprise: "Enterprise",
 };
 
+// Pre-launch: every feature is unlocked for every org. At launch, flip this
+// to false and the existing tier checks (client gates + server requireTier +
+// per-table RLS) enforce the paywall again.
+export const PRELAUNCH_UNLOCK_ALL = true;
+
 export function hasTier(current: SubscriptionTier | null | undefined, min: SubscriptionTier): boolean {
+  if (PRELAUNCH_UNLOCK_ALL) return true;
   if (!current) return false;
   return TIER_ORDER[current] >= TIER_ORDER[min];
 }
