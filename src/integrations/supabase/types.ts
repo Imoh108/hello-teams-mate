@@ -14,6 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_generation_jobs: {
+        Row: {
+          approved_count: number
+          created_at: string
+          created_by: string | null
+          error_message: string | null
+          generated_count: number
+          id: string
+          prompt: string | null
+          rejected_count: number
+          source: string
+          status: string
+          topic: string | null
+          updated_at: string
+        }
+        Insert: {
+          approved_count?: number
+          created_at?: string
+          created_by?: string | null
+          error_message?: string | null
+          generated_count?: number
+          id?: string
+          prompt?: string | null
+          rejected_count?: number
+          source: string
+          status?: string
+          topic?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approved_count?: number
+          created_at?: string
+          created_by?: string | null
+          error_message?: string | null
+          generated_count?: number
+          id?: string
+          prompt?: string | null
+          rejected_count?: number
+          source?: string
+          status?: string
+          topic?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       analytics_events: {
         Row: {
           country: string | null
