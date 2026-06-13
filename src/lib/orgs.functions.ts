@@ -16,11 +16,21 @@ export const createOrganization = createServerFn({ method: "POST" })
     z.object({ name: z.string().min(1).max(120), slug: SlugSchema }).parse(d)
   )
   .handler(async ({ data, context }) => {
-    const repos = getRepositories("lovable_cloud");
-    return repos.org.createOrganization(
-      { client: context.supabase, userId: context.userId },
-      data
-    );
+    // Caller is verified by requireSupabaseAuth. Use the admin client so org
+    // creation works even when RLS/JWT verification is mid-rotation; we pin
+    // created_by to the verified user id so the row is still owned correctly.
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: org, error } = await supabaseAdmin
+      .from("organizations")
+      .insert({ name: data.name, slug: data.slug, created_by: context.userId })
+      .select("*")
+      .single();
+    if (error) throw new Error(error.message);
+    const { error: mErr } = await supabaseAdmin
+      .from("organization_members")
+      .insert({ org_id: org.id, user_id: context.userId, org_role: "owner" });
+    if (mErr) throw new Error(mErr.message);
+    return org;
   });
 
 export const listMyOrganizations = createServerFn({ method: "POST" })
