@@ -1,21 +1,39 @@
-## Status check
+## Problem
+The `/platform` super-admin dashboard is complete (8 phases built), but there is no way to actually reach it or become the first admin on a fresh deployment:
 
-All four items from the original plan are implemented and the two errors you hit during the org-creation flow (RLS rejection, then duplicate slug) are fixed. Specifically:
+- The route requires the `platform_admin` role, but the `handle_new_user()` trigger only assigns `player`.
+- There is no link to `/platform` anywhere in the UI (not in `/app`, `/admin`, or the landing page).
+- Typing `/platform` manually redirects non-admins back to `/app`.
 
-1. **Pre-launch unlock** — `PRELAUNCH_UNLOCK_ALL` flag wired through `tiers.ts`, `tier-guard.server.ts`, and `TierGate`. All features visible.
-2. **Org auto-create + auto-select** — `handle_new_user()` trigger creates a personal `enterprise` workspace and owner membership; `useEnsureCurrentOrg` populates `currentOrgId` from the server on first load. Manual org creation now uses the admin client + retry-on-duplicate-slug.
-3. **Host/play flow** — verified end-to-end in the prior pass.
-4. **Quiet wins** — `suppressHydrationWarning` on `/auth` inputs.
+## Solution
 
-## Nothing pending from the plan
+### 1. Auto-bootstrap the first user as platform admin
+Update the `handle_new_user()` database trigger: when a new user signs up, if the `profiles` table is empty (this is the very first user), also insert a `platform_admin` role into `user_roles`.
 
-No outstanding TODOs and no new runtime errors in the latest console snapshot (only an unrelated transient `Failed to fetch` from Supabase token refresh after the dev server reconnected — not a code bug).
+This guarantees the first account on a fresh app is a super-admin with no manual database editing required.
 
-## Suggested next-step options (only if you want to keep going)
+### 2. Add a conditional "Platform" nav link in `/app`
+In the `Dashboard` header (`src/routes/_authenticated/app.tsx`):
+- On mount, call `isPlatformAdmin()`.
+- If the user is a platform admin, render a new nav link (e.g. a small badge button) that navigates to `/platform`.
 
-- **Smoke test as a brand-new user**: sign up a fresh email → confirm the personal workspace appears, `/shop`, `/challenges`, `/admin/*` all load without the "Select an organization" empty state.
-- **Org switcher in the main app header** (currently only in the admin sidebar) so non-admin pages can switch orgs too.
-- **Launch checklist prep**: wire Stripe/Paddle to `/admin/upgrade` and flip `PRELAUNCH_UNLOCK_ALL = false`. Tier RLS + server guards are already in place underneath.
-- **Multi-org invites UI polish** (listed as out-of-scope previously).
+This makes the dashboard discoverable without memorizing the URL.
 
-Tell me which (if any) you want me to pick up and I'll plan it out — otherwise we're good to ship the pre-launch build.
+### 3. Optional: add the same link in the org `/admin` sidebar
+If the user is already in the org admin area (`/admin`), show a "Platform admin" item in its sidebar or footer for users who also hold the platform role.
+
+## Files to change
+- `supabase/migrations/...` — migration to update `handle_new_user()` trigger with first-user bootstrap logic
+- `src/routes/_authenticated/app.tsx` — add conditional platform-admin nav link
+- `src/routes/_authenticated/admin.tsx` — optional conditional platform-admin link in sidebar
+
+## Technical details
+- The trigger is `SECURITY DEFINER` and already has `search_path = public`, so a simple `SELECT count(*) FROM public.profiles` check inside the trigger body is safe.
+- `isPlatformAdmin` is an existing `createServerFn` at `src/lib/platform.functions.ts`.
+- No new dependencies.
+
+## Acceptance criteria
+1. First user to sign up on a fresh database automatically has `platform_admin` role.
+2. That user sees a "Platform" link in the `/app` header.
+3. Clicking it navigates to `/platform` successfully.
+4. Non-admins do not see the link and are redirected away from `/platform` as before.
