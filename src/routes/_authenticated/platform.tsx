@@ -1,7 +1,7 @@
 import { createFileRoute, Link, Outlet, useRouterState, redirect } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { LayoutDashboard, Shield, ArrowLeft } from "lucide-react";
+import { LayoutDashboard, Shield, ArrowLeft, Activity } from "lucide-react";
 import { isPlatformAdmin } from "@/lib/platform.functions";
 
 export const Route = createFileRoute("/_authenticated/platform")({
@@ -22,6 +22,7 @@ function PlatformLayout() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const nav = [
     { to: "/platform", label: "Overview", icon: LayoutDashboard },
+    { to: "/platform/health", label: "System health", icon: Activity },
   ];
 
   return (

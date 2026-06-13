@@ -25,6 +25,7 @@ import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authentic
 import { Route as AuthenticatedResultsSessionIdRouteImport } from './routes/_authenticated/results.$sessionId'
 import { Route as AuthenticatedQuizzesIdRouteImport } from './routes/_authenticated/quizzes.$id'
 import { Route as AuthenticatedPlaySessionIdRouteImport } from './routes/_authenticated/play.$sessionId'
+import { Route as AuthenticatedPlatformHealthRouteImport } from './routes/_authenticated/platform.health'
 import { Route as AuthenticatedInviteTokenRouteImport } from './routes/_authenticated/invite.$token'
 import { Route as AuthenticatedHostSessionIdRouteImport } from './routes/_authenticated/host.$sessionId'
 import { Route as AuthenticatedAdminUpgradeRouteImport } from './routes/_authenticated/admin.upgrade'
@@ -120,6 +121,12 @@ const AuthenticatedPlaySessionIdRoute =
     path: '/play/$sessionId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedPlatformHealthRoute =
+  AuthenticatedPlatformHealthRouteImport.update({
+    id: '/health',
+    path: '/health',
+    getParentRoute: () => AuthenticatedPlatformRoute,
+  } as any)
 const AuthenticatedInviteTokenRoute =
   AuthenticatedInviteTokenRouteImport.update({
     id: '/invite/$token',
@@ -212,6 +219,7 @@ export interface FileRoutesByFullPath {
   '/admin/upgrade': typeof AuthenticatedAdminUpgradeRoute
   '/host/$sessionId': typeof AuthenticatedHostSessionIdRoute
   '/invite/$token': typeof AuthenticatedInviteTokenRoute
+  '/platform/health': typeof AuthenticatedPlatformHealthRoute
   '/play/$sessionId': typeof AuthenticatedPlaySessionIdRoute
   '/quizzes/$id': typeof AuthenticatedQuizzesIdRoute
   '/results/$sessionId': typeof AuthenticatedResultsSessionIdRoute
@@ -239,6 +247,7 @@ export interface FileRoutesByTo {
   '/admin/upgrade': typeof AuthenticatedAdminUpgradeRoute
   '/host/$sessionId': typeof AuthenticatedHostSessionIdRoute
   '/invite/$token': typeof AuthenticatedInviteTokenRoute
+  '/platform/health': typeof AuthenticatedPlatformHealthRoute
   '/play/$sessionId': typeof AuthenticatedPlaySessionIdRoute
   '/quizzes/$id': typeof AuthenticatedQuizzesIdRoute
   '/results/$sessionId': typeof AuthenticatedResultsSessionIdRoute
@@ -270,6 +279,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/upgrade': typeof AuthenticatedAdminUpgradeRoute
   '/_authenticated/host/$sessionId': typeof AuthenticatedHostSessionIdRoute
   '/_authenticated/invite/$token': typeof AuthenticatedInviteTokenRoute
+  '/_authenticated/platform/health': typeof AuthenticatedPlatformHealthRoute
   '/_authenticated/play/$sessionId': typeof AuthenticatedPlaySessionIdRoute
   '/_authenticated/quizzes/$id': typeof AuthenticatedQuizzesIdRoute
   '/_authenticated/results/$sessionId': typeof AuthenticatedResultsSessionIdRoute
@@ -301,6 +311,7 @@ export interface FileRouteTypes {
     | '/admin/upgrade'
     | '/host/$sessionId'
     | '/invite/$token'
+    | '/platform/health'
     | '/play/$sessionId'
     | '/quizzes/$id'
     | '/results/$sessionId'
@@ -328,6 +339,7 @@ export interface FileRouteTypes {
     | '/admin/upgrade'
     | '/host/$sessionId'
     | '/invite/$token'
+    | '/platform/health'
     | '/play/$sessionId'
     | '/quizzes/$id'
     | '/results/$sessionId'
@@ -358,6 +370,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/upgrade'
     | '/_authenticated/host/$sessionId'
     | '/_authenticated/invite/$token'
+    | '/_authenticated/platform/health'
     | '/_authenticated/play/$sessionId'
     | '/_authenticated/quizzes/$id'
     | '/_authenticated/results/$sessionId'
@@ -486,6 +499,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/play/$sessionId'
       preLoaderRoute: typeof AuthenticatedPlaySessionIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/platform/health': {
+      id: '/_authenticated/platform/health'
+      path: '/health'
+      fullPath: '/platform/health'
+      preLoaderRoute: typeof AuthenticatedPlatformHealthRouteImport
+      parentRoute: typeof AuthenticatedPlatformRoute
     }
     '/_authenticated/invite/$token': {
       id: '/_authenticated/invite/$token'
@@ -618,10 +638,12 @@ const AuthenticatedAdminRouteWithChildren =
   AuthenticatedAdminRoute._addFileChildren(AuthenticatedAdminRouteChildren)
 
 interface AuthenticatedPlatformRouteChildren {
+  AuthenticatedPlatformHealthRoute: typeof AuthenticatedPlatformHealthRoute
   AuthenticatedPlatformIndexRoute: typeof AuthenticatedPlatformIndexRoute
 }
 
 const AuthenticatedPlatformRouteChildren: AuthenticatedPlatformRouteChildren = {
+  AuthenticatedPlatformHealthRoute: AuthenticatedPlatformHealthRoute,
   AuthenticatedPlatformIndexRoute: AuthenticatedPlatformIndexRoute,
 }
 

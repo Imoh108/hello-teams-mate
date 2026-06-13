@@ -48,6 +48,8 @@ export const getPlatformOverview = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await assertPlatformAdmin(context);
+    const { instrument } = await import("@/lib/instrument.server");
+    return instrument("platform.overview", async () => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     const now = Date.now();
@@ -93,6 +95,7 @@ export const getPlatformOverview = createServerFn({ method: "POST" })
       wau: uniq(events7d.data),
       mau: uniq(events30d.data),
     };
+    });
   });
 
 export const getActivityTimeline = createServerFn({ method: "POST" })
