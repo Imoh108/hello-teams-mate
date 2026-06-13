@@ -155,7 +155,6 @@ export const reviewItem = createServerFn({ method: "POST" })
     // bump job counters
     if (item?.job_id) {
       const field = data.decision === "approved" ? "approved_count" : "rejected_count";
-      await supabaseAdmin.rpc("award_points", { _user: context.userId, _org: null, _source: "noop", _delta: 0 }).then(() => {});
       const { data: job } = await supabaseAdmin
         .from("ai_generation_jobs")
         .select("approved_count, rejected_count, generated_count")
