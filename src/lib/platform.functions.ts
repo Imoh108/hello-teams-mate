@@ -95,6 +95,7 @@ export const getPlatformOverview = createServerFn({ method: "POST" })
       wau: uniq(events7d.data),
       mau: uniq(events30d.data),
     };
+    });
   });
 
 export const getActivityTimeline = createServerFn({ method: "POST" })
