@@ -14,6 +14,68 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_generated_items: {
+        Row: {
+          choices: Json
+          correct_index: number
+          created_at: string
+          difficulty: number
+          explanation: string | null
+          id: string
+          job_id: string | null
+          prompt: string
+          reject_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          source: string | null
+          status: string
+          topic: string | null
+          updated_at: string
+        }
+        Insert: {
+          choices?: Json
+          correct_index?: number
+          created_at?: string
+          difficulty?: number
+          explanation?: string | null
+          id?: string
+          job_id?: string | null
+          prompt: string
+          reject_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          source?: string | null
+          status?: string
+          topic?: string | null
+          updated_at?: string
+        }
+        Update: {
+          choices?: Json
+          correct_index?: number
+          created_at?: string
+          difficulty?: number
+          explanation?: string | null
+          id?: string
+          job_id?: string | null
+          prompt?: string
+          reject_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          source?: string | null
+          status?: string
+          topic?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_generated_items_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "ai_generation_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_generation_jobs: {
         Row: {
           approved_count: number
