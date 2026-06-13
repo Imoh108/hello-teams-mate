@@ -25,6 +25,7 @@ import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authentic
 import { Route as AuthenticatedResultsSessionIdRouteImport } from './routes/_authenticated/results.$sessionId'
 import { Route as AuthenticatedQuizzesIdRouteImport } from './routes/_authenticated/quizzes.$id'
 import { Route as AuthenticatedPlaySessionIdRouteImport } from './routes/_authenticated/play.$sessionId'
+import { Route as AuthenticatedPlatformPipelineRouteImport } from './routes/_authenticated/platform.pipeline'
 import { Route as AuthenticatedPlatformHealthRouteImport } from './routes/_authenticated/platform.health'
 import { Route as AuthenticatedInviteTokenRouteImport } from './routes/_authenticated/invite.$token'
 import { Route as AuthenticatedHostSessionIdRouteImport } from './routes/_authenticated/host.$sessionId'
@@ -120,6 +121,12 @@ const AuthenticatedPlaySessionIdRoute =
     id: '/play/$sessionId',
     path: '/play/$sessionId',
     getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedPlatformPipelineRoute =
+  AuthenticatedPlatformPipelineRouteImport.update({
+    id: '/pipeline',
+    path: '/pipeline',
+    getParentRoute: () => AuthenticatedPlatformRoute,
   } as any)
 const AuthenticatedPlatformHealthRoute =
   AuthenticatedPlatformHealthRouteImport.update({
@@ -220,6 +227,7 @@ export interface FileRoutesByFullPath {
   '/host/$sessionId': typeof AuthenticatedHostSessionIdRoute
   '/invite/$token': typeof AuthenticatedInviteTokenRoute
   '/platform/health': typeof AuthenticatedPlatformHealthRoute
+  '/platform/pipeline': typeof AuthenticatedPlatformPipelineRoute
   '/play/$sessionId': typeof AuthenticatedPlaySessionIdRoute
   '/quizzes/$id': typeof AuthenticatedQuizzesIdRoute
   '/results/$sessionId': typeof AuthenticatedResultsSessionIdRoute
@@ -248,6 +256,7 @@ export interface FileRoutesByTo {
   '/host/$sessionId': typeof AuthenticatedHostSessionIdRoute
   '/invite/$token': typeof AuthenticatedInviteTokenRoute
   '/platform/health': typeof AuthenticatedPlatformHealthRoute
+  '/platform/pipeline': typeof AuthenticatedPlatformPipelineRoute
   '/play/$sessionId': typeof AuthenticatedPlaySessionIdRoute
   '/quizzes/$id': typeof AuthenticatedQuizzesIdRoute
   '/results/$sessionId': typeof AuthenticatedResultsSessionIdRoute
@@ -280,6 +289,7 @@ export interface FileRoutesById {
   '/_authenticated/host/$sessionId': typeof AuthenticatedHostSessionIdRoute
   '/_authenticated/invite/$token': typeof AuthenticatedInviteTokenRoute
   '/_authenticated/platform/health': typeof AuthenticatedPlatformHealthRoute
+  '/_authenticated/platform/pipeline': typeof AuthenticatedPlatformPipelineRoute
   '/_authenticated/play/$sessionId': typeof AuthenticatedPlaySessionIdRoute
   '/_authenticated/quizzes/$id': typeof AuthenticatedQuizzesIdRoute
   '/_authenticated/results/$sessionId': typeof AuthenticatedResultsSessionIdRoute
@@ -312,6 +322,7 @@ export interface FileRouteTypes {
     | '/host/$sessionId'
     | '/invite/$token'
     | '/platform/health'
+    | '/platform/pipeline'
     | '/play/$sessionId'
     | '/quizzes/$id'
     | '/results/$sessionId'
@@ -340,6 +351,7 @@ export interface FileRouteTypes {
     | '/host/$sessionId'
     | '/invite/$token'
     | '/platform/health'
+    | '/platform/pipeline'
     | '/play/$sessionId'
     | '/quizzes/$id'
     | '/results/$sessionId'
@@ -371,6 +383,7 @@ export interface FileRouteTypes {
     | '/_authenticated/host/$sessionId'
     | '/_authenticated/invite/$token'
     | '/_authenticated/platform/health'
+    | '/_authenticated/platform/pipeline'
     | '/_authenticated/play/$sessionId'
     | '/_authenticated/quizzes/$id'
     | '/_authenticated/results/$sessionId'
@@ -499,6 +512,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/play/$sessionId'
       preLoaderRoute: typeof AuthenticatedPlaySessionIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/platform/pipeline': {
+      id: '/_authenticated/platform/pipeline'
+      path: '/pipeline'
+      fullPath: '/platform/pipeline'
+      preLoaderRoute: typeof AuthenticatedPlatformPipelineRouteImport
+      parentRoute: typeof AuthenticatedPlatformRoute
     }
     '/_authenticated/platform/health': {
       id: '/_authenticated/platform/health'
@@ -639,11 +659,13 @@ const AuthenticatedAdminRouteWithChildren =
 
 interface AuthenticatedPlatformRouteChildren {
   AuthenticatedPlatformHealthRoute: typeof AuthenticatedPlatformHealthRoute
+  AuthenticatedPlatformPipelineRoute: typeof AuthenticatedPlatformPipelineRoute
   AuthenticatedPlatformIndexRoute: typeof AuthenticatedPlatformIndexRoute
 }
 
 const AuthenticatedPlatformRouteChildren: AuthenticatedPlatformRouteChildren = {
   AuthenticatedPlatformHealthRoute: AuthenticatedPlatformHealthRoute,
+  AuthenticatedPlatformPipelineRoute: AuthenticatedPlatformPipelineRoute,
   AuthenticatedPlatformIndexRoute: AuthenticatedPlatformIndexRoute,
 }
 
