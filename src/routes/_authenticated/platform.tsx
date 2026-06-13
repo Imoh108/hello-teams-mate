@@ -1,7 +1,7 @@
 import { createFileRoute, Link, Outlet, useRouterState, redirect } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { LayoutDashboard, Shield, ArrowLeft, Activity, Sparkles, DollarSign, Users, Settings as SettingsIcon, Library } from "lucide-react";
+import { LayoutDashboard, Shield, ArrowLeft, Activity, Sparkles, DollarSign, Users, Settings as SettingsIcon, Library, FileDown } from "lucide-react";
 import { isPlatformAdmin } from "@/lib/platform.functions";
 
 export const Route = createFileRoute("/_authenticated/platform")({
@@ -26,6 +26,7 @@ function PlatformLayout() {
     { to: "/platform/pipeline", label: "AI pipeline", icon: Sparkles },
     { to: "/platform/billing", label: "Billing & orgs", icon: DollarSign },
     { to: "/platform/content", label: "Content sources", icon: Library },
+    { to: "/platform/reports", label: "Usage reports", icon: FileDown },
     { to: "/platform/team", label: "Team access", icon: Users },
     { to: "/platform/settings", label: "Settings", icon: SettingsIcon },
   ];
