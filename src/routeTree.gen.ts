@@ -12,6 +12,8 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthTeamsStartRouteImport } from './routes/auth.teams-start'
+import { Route as AuthTeamsEndRouteImport } from './routes/auth.teams-end'
 import { Route as AuthenticatedShopRouteImport } from './routes/_authenticated/shop'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedPlatformRouteImport } from './routes/_authenticated/platform'
@@ -58,6 +60,16 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthTeamsStartRoute = AuthTeamsStartRouteImport.update({
+  id: '/teams-start',
+  path: '/teams-start',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthTeamsEndRoute = AuthTeamsEndRouteImport.update({
+  id: '/teams-end',
+  path: '/teams-end',
+  getParentRoute: () => AuthRoute,
 } as any)
 const AuthenticatedShopRoute = AuthenticatedShopRouteImport.update({
   id: '/shop',
@@ -242,7 +254,7 @@ const AuthenticatedAdminBanksBankIdRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/auth': typeof AuthRoute
+  '/auth': typeof AuthRouteWithChildren
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/app': typeof AuthenticatedAppRoute
   '/challenges': typeof AuthenticatedChallengesRoute
@@ -250,6 +262,8 @@ export interface FileRoutesByFullPath {
   '/platform': typeof AuthenticatedPlatformRouteWithChildren
   '/profile': typeof AuthenticatedProfileRoute
   '/shop': typeof AuthenticatedShopRoute
+  '/auth/teams-end': typeof AuthTeamsEndRoute
+  '/auth/teams-start': typeof AuthTeamsStartRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/admin/badges': typeof AuthenticatedAdminBadgesRoute
   '/admin/banks': typeof AuthenticatedAdminBanksRouteWithChildren
@@ -278,12 +292,14 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/auth': typeof AuthRoute
+  '/auth': typeof AuthRouteWithChildren
   '/app': typeof AuthenticatedAppRoute
   '/challenges': typeof AuthenticatedChallengesRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/shop': typeof AuthenticatedShopRoute
+  '/auth/teams-end': typeof AuthTeamsEndRoute
+  '/auth/teams-start': typeof AuthTeamsStartRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/admin/badges': typeof AuthenticatedAdminBadgesRoute
   '/admin/banks': typeof AuthenticatedAdminBanksRouteWithChildren
@@ -314,7 +330,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
-  '/auth': typeof AuthRoute
+  '/auth': typeof AuthRouteWithChildren
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/app': typeof AuthenticatedAppRoute
   '/_authenticated/challenges': typeof AuthenticatedChallengesRoute
@@ -322,6 +338,8 @@ export interface FileRoutesById {
   '/_authenticated/platform': typeof AuthenticatedPlatformRouteWithChildren
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/shop': typeof AuthenticatedShopRoute
+  '/auth/teams-end': typeof AuthTeamsEndRoute
+  '/auth/teams-start': typeof AuthTeamsStartRoute
   '/_authenticated/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/_authenticated/admin/badges': typeof AuthenticatedAdminBadgesRoute
   '/_authenticated/admin/banks': typeof AuthenticatedAdminBanksRouteWithChildren
@@ -360,6 +378,8 @@ export interface FileRouteTypes {
     | '/platform'
     | '/profile'
     | '/shop'
+    | '/auth/teams-end'
+    | '/auth/teams-start'
     | '/admin/analytics'
     | '/admin/badges'
     | '/admin/banks'
@@ -394,6 +414,8 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/profile'
     | '/shop'
+    | '/auth/teams-end'
+    | '/auth/teams-start'
     | '/admin/analytics'
     | '/admin/badges'
     | '/admin/banks'
@@ -431,6 +453,8 @@ export interface FileRouteTypes {
     | '/_authenticated/platform'
     | '/_authenticated/profile'
     | '/_authenticated/shop'
+    | '/auth/teams-end'
+    | '/auth/teams-start'
     | '/_authenticated/admin/analytics'
     | '/_authenticated/admin/badges'
     | '/_authenticated/admin/banks'
@@ -461,7 +485,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
-  AuthRoute: typeof AuthRoute
+  AuthRoute: typeof AuthRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -486,6 +510,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/auth/teams-start': {
+      id: '/auth/teams-start'
+      path: '/teams-start'
+      fullPath: '/auth/teams-start'
+      preLoaderRoute: typeof AuthTeamsStartRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/auth/teams-end': {
+      id: '/auth/teams-end'
+      path: '/teams-end'
+      fullPath: '/auth/teams-end'
+      preLoaderRoute: typeof AuthTeamsEndRouteImport
+      parentRoute: typeof AuthRoute
     }
     '/_authenticated/shop': {
       id: '/_authenticated/shop'
@@ -819,10 +857,22 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
+interface AuthRouteChildren {
+  AuthTeamsEndRoute: typeof AuthTeamsEndRoute
+  AuthTeamsStartRoute: typeof AuthTeamsStartRoute
+}
+
+const AuthRouteChildren: AuthRouteChildren = {
+  AuthTeamsEndRoute: AuthTeamsEndRoute,
+  AuthTeamsStartRoute: AuthTeamsStartRoute,
+}
+
+const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
-  AuthRoute: AuthRoute,
+  AuthRoute: AuthRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
