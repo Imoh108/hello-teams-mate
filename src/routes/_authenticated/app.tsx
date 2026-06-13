@@ -52,7 +52,7 @@ function Dashboard() {
     setSessions(sess ?? []);
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(); track("app_open"); }, []);
 
   const onCreate = async () => {
     if (!title.trim()) return toast.error("Title required");
