@@ -1027,7 +1027,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "manager" | "player"
+      app_role: "manager" | "player" | "platform_admin"
       org_data_backend: "lovable_cloud" | "dataverse"
       org_role: "owner" | "admin" | "hr" | "team_lead" | "member"
       session_status: "lobby" | "active" | "reveal" | "ended"
@@ -1164,7 +1164,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["manager", "player"],
+      app_role: ["manager", "player", "platform_admin"],
       org_data_backend: ["lovable_cloud", "dataverse"],
       org_role: ["owner", "admin", "hr", "team_lead", "member"],
       session_status: ["lobby", "active", "reveal", "ended"],
