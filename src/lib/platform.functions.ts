@@ -48,6 +48,8 @@ export const getPlatformOverview = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await assertPlatformAdmin(context);
+    const { instrument } = await import("@/lib/instrument.server");
+    return instrument("platform.overview", async () => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     const now = Date.now();
