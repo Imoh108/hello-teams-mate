@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { exchangeTeamsToken } from "@/lib/teams-auth.functions";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/auth/teams-start")({
   head: () => ({ meta: [{ title: "Signing in… — QuizPulse" }] }),
@@ -7,27 +9,49 @@ export const Route = createFileRoute("/auth/teams-start")({
 });
 
 /**
- * Popup page launched by `microsoftTeams.authentication.authenticate()`.
- * Phase 1 stub: this route exists so the Teams SDK can open a popup; the
- * actual Entra ID redirect is wired in Phase 1b once the Entra app
- * credentials are configured. For now it just notifies the parent so the
- * standalone app keeps working.
+ * Popup launched by `microsoftTeams.authentication.authenticate()`. Runs the
+ * full Teams SSO → Lovable Cloud session exchange:
+ *   1. Ask the Teams host for an SSO id_token (silent for the user).
+ *   2. Server-side: verify the token, find/create the Supabase user, mint
+ *      a one-time magiclink hash.
+ *   3. Redeem with supabase.auth.verifyOtp to establish a real session.
+ *   4. Notify the parent tab so it can resume.
  */
 function TeamsAuthStart() {
-  const [msg, setMsg] = useState("Preparing Microsoft sign-in…");
+  const [msg, setMsg] = useState("Signing you in with Microsoft Teams…");
 
   useEffect(() => {
     (async () => {
+      let teams: typeof import("@microsoft/teams-js");
       try {
-        const teams = await import("@microsoft/teams-js");
+        teams = await import("@microsoft/teams-js");
         await teams.app.initialize();
-        setMsg(
-          "Microsoft sign-in is not yet configured. The administrator must register an Entra ID app and add the client ID to project secrets.",
-        );
-        // Close cleanly so the calling tab gets a recognisable failure.
-        teams.authentication.notifyFailure("entra_not_configured");
       } catch {
         setMsg("This page must be opened from inside Microsoft Teams.");
+        return;
+      }
+
+      try {
+        const idToken = await teams.authentication.getAuthToken();
+        const { email, tokenHash } = await exchangeTeamsToken({
+          data: { idToken },
+        });
+        const { error } = await supabase.auth.verifyOtp({
+          type: "magiclink",
+          email,
+          token_hash: tokenHash,
+        });
+        if (error) throw error;
+        teams.authentication.notifySuccess(email);
+      } catch (err) {
+        const reason =
+          err instanceof Error ? err.message : "teams_sso_failed";
+        setMsg(`Sign-in failed: ${reason}`);
+        try {
+          teams.authentication.notifyFailure(reason);
+        } catch {
+          /* parent isn't listening */
+        }
       }
     })();
   }, []);
@@ -38,7 +62,9 @@ function TeamsAuthStart() {
         <div className="mx-auto size-10 rounded-md bg-primary grid place-items-center text-primary-foreground font-display font-bold">
           Q
         </div>
-        <h1 className="mt-4 font-display text-xl font-semibold">Microsoft sign-in</h1>
+        <h1 className="mt-4 font-display text-xl font-semibold">
+          Microsoft sign-in
+        </h1>
         <p className="mt-2 text-sm text-muted-foreground">{msg}</p>
       </div>
     </div>
