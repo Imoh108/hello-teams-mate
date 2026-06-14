@@ -1,0 +1,45 @@
+{
+  "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.17/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.17",
+  "version": "1.0.0",
+  "id": "e38c640c-037f-445b-b2cb-1f6a9c8dcb78",
+  "packageName": "com.quizpulse.teams",
+  "developer": {
+    "name": "QuizPulse",
+    "websiteUrl": "https://id-preview--b147aad7-3ae2-4d89-8d21-625495d54b86.lovable.app",
+    "privacyUrl": "https://id-preview--b147aad7-3ae2-4d89-8d21-625495d54b86.lovable.app/privacy",
+    "termsOfUseUrl": "https://id-preview--b147aad7-3ae2-4d89-8d21-625495d54b86.lovable.app/terms"
+  },
+  "name": {
+    "short": "QuizPulse",
+    "full": "QuizPulse — Interactive Team Quizzes"
+  },
+  "description": {
+    "short": "Run live interactive quizzes in Microsoft Teams.",
+    "full": "QuizPulse turns your Microsoft Teams workspace into a live trivia and training arena. Host quizzes, track scores, and engage your team — right inside Teams."
+  },
+  "icons": {
+    "color": "color.png",
+    "outline": "outline.png"
+  },
+  "accentColor": "#3B82F6",
+  "staticTabs": [
+    {
+      "entityId": "quizpulse-home",
+      "name": "QuizPulse",
+      "contentUrl": "https://id-preview--b147aad7-3ae2-4d89-8d21-625495d54b86.lovable.app/app",
+      "websiteUrl": "https://id-preview--b147aad7-3ae2-4d89-8d21-625495d54b86.lovable.app/app",
+      "scopes": ["personal"]
+    }
+  ],
+  "permissions": ["identity", "messageTeamMembers"],
+  "validDomains": [
+    "id-preview--b147aad7-3ae2-4d89-8d21-625495d54b86.lovable.app",
+    "project--b147aad7-3ae2-4d89-8d21-625495d54b86.lovable.app",
+    "*.lovable.app"
+  ],
+  "webApplicationInfo": {
+    "id": "e38c640c-037f-445b-b2cb-1f6a9c8dcb78",
+    "resource": "api://e38c640c-037f-445b-b2cb-1f6a9c8dcb78"
+  }
+}
