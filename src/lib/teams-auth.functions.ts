@@ -107,7 +107,7 @@ export const exchangeTeamsToken = createServerFn({ method: "POST" })
         {
           _user: userId,
           _tid: tenantClaim,
-          _tenant_name: tenantName,
+          _tenant_name: tenantName ?? "",
           _display: displayName,
         },
       );
