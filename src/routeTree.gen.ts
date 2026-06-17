@@ -45,6 +45,7 @@ import { Route as AuthenticatedAdminChallengesRouteImport } from './routes/_auth
 import { Route as AuthenticatedAdminBanksRouteImport } from './routes/_authenticated/admin.banks'
 import { Route as AuthenticatedAdminBadgesRouteImport } from './routes/_authenticated/admin.badges'
 import { Route as AuthenticatedAdminAnalyticsRouteImport } from './routes/_authenticated/admin.analytics'
+import { Route as AuthenticatedTeamsChannelConfigRouteImport } from './routes/_authenticated/teams.channel.config'
 import { Route as AuthenticatedAdminBanksBankIdRouteImport } from './routes/_authenticated/admin.banks.$bankId'
 
 const AuthRoute = AuthRouteImport.update({
@@ -245,6 +246,12 @@ const AuthenticatedAdminAnalyticsRoute =
     path: '/analytics',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedTeamsChannelConfigRoute =
+  AuthenticatedTeamsChannelConfigRouteImport.update({
+    id: '/teams/channel/config',
+    path: '/teams/channel/config',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminBanksBankIdRoute =
   AuthenticatedAdminBanksBankIdRouteImport.update({
     id: '/$bankId',
@@ -289,6 +296,7 @@ export interface FileRoutesByFullPath {
   '/platform/': typeof AuthenticatedPlatformIndexRoute
   '/play/': typeof AuthenticatedPlayIndexRoute
   '/admin/banks/$bankId': typeof AuthenticatedAdminBanksBankIdRoute
+  '/teams/channel/config': typeof AuthenticatedTeamsChannelConfigRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -325,6 +333,7 @@ export interface FileRoutesByTo {
   '/platform': typeof AuthenticatedPlatformIndexRoute
   '/play': typeof AuthenticatedPlayIndexRoute
   '/admin/banks/$bankId': typeof AuthenticatedAdminBanksBankIdRoute
+  '/teams/channel/config': typeof AuthenticatedTeamsChannelConfigRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -365,6 +374,7 @@ export interface FileRoutesById {
   '/_authenticated/platform/': typeof AuthenticatedPlatformIndexRoute
   '/_authenticated/play/': typeof AuthenticatedPlayIndexRoute
   '/_authenticated/admin/banks/$bankId': typeof AuthenticatedAdminBanksBankIdRoute
+  '/_authenticated/teams/channel/config': typeof AuthenticatedTeamsChannelConfigRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -405,6 +415,7 @@ export interface FileRouteTypes {
     | '/platform/'
     | '/play/'
     | '/admin/banks/$bankId'
+    | '/teams/channel/config'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -441,6 +452,7 @@ export interface FileRouteTypes {
     | '/platform'
     | '/play'
     | '/admin/banks/$bankId'
+    | '/teams/channel/config'
   id:
     | '__root__'
     | '/'
@@ -480,6 +492,7 @@ export interface FileRouteTypes {
     | '/_authenticated/platform/'
     | '/_authenticated/play/'
     | '/_authenticated/admin/banks/$bankId'
+    | '/_authenticated/teams/channel/config'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -742,6 +755,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAnalyticsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/teams/channel/config': {
+      id: '/_authenticated/teams/channel/config'
+      path: '/teams/channel/config'
+      fullPath: '/teams/channel/config'
+      preLoaderRoute: typeof AuthenticatedTeamsChannelConfigRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/banks/$bankId': {
       id: '/_authenticated/admin/banks/$bankId'
       path: '/$bankId'
@@ -836,6 +856,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedQuizzesIdRoute: typeof AuthenticatedQuizzesIdRoute
   AuthenticatedResultsSessionIdRoute: typeof AuthenticatedResultsSessionIdRoute
   AuthenticatedPlayIndexRoute: typeof AuthenticatedPlayIndexRoute
+  AuthenticatedTeamsChannelConfigRoute: typeof AuthenticatedTeamsChannelConfigRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -852,6 +873,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedQuizzesIdRoute: AuthenticatedQuizzesIdRoute,
   AuthenticatedResultsSessionIdRoute: AuthenticatedResultsSessionIdRoute,
   AuthenticatedPlayIndexRoute: AuthenticatedPlayIndexRoute,
+  AuthenticatedTeamsChannelConfigRoute: AuthenticatedTeamsChannelConfigRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

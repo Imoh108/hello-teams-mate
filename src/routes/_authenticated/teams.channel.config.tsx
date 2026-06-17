@@ -56,7 +56,7 @@ function ChannelTabConfig() {
     if (!orgId) return;
     (async () => {
       try {
-        const rows = (await listFn({ data: { orgId } })) as Dept[];
+        const rows = (await listFn({ data: { orgId } })) as unknown as Dept[];
         setDepts(rows ?? []);
         // Pre-select an existing mapping for this channel, if any.
         const existing = rows?.find((d) => d.teams_channel_id === ctx?.channelId);
