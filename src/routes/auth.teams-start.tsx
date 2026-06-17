@@ -33,7 +33,7 @@ function TeamsAuthStart() {
 
       try {
         const idToken = await teams.authentication.getAuthToken();
-        const { email, tokenHash } = await exchangeTeamsToken({
+        const { email, tokenHash, orgId } = await exchangeTeamsToken({
           data: { idToken },
         });
         const { error } = await supabase.auth.verifyOtp({
@@ -42,6 +42,13 @@ function TeamsAuthStart() {
           token_hash: tokenHash,
         });
         if (error) throw error;
+        if (orgId) {
+          try {
+            window.localStorage.setItem("qp.currentOrgId", orgId);
+          } catch {
+            /* storage may be blocked in the popup; non-fatal */
+          }
+        }
         teams.authentication.notifySuccess(email);
       } catch (err) {
         const reason =

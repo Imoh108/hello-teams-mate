@@ -512,6 +512,8 @@ export type Database = {
           name: string
           org_id: string
           slug: string
+          teams_channel_id: string | null
+          teams_team_id: string | null
           updated_at: string
         }
         Insert: {
@@ -520,6 +522,8 @@ export type Database = {
           name: string
           org_id: string
           slug: string
+          teams_channel_id?: string | null
+          teams_team_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -528,6 +532,8 @@ export type Database = {
           name?: string
           org_id?: string
           slug?: string
+          teams_channel_id?: string | null
+          teams_team_id?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -650,6 +656,8 @@ export type Database = {
           name: string
           slug: string
           subscription_tier: Database["public"]["Enums"]["subscription_tier"]
+          tenant_id: string | null
+          tenant_name: string | null
           updated_at: string
         }
         Insert: {
@@ -662,6 +670,8 @@ export type Database = {
           name: string
           slug: string
           subscription_tier?: Database["public"]["Enums"]["subscription_tier"]
+          tenant_id?: string | null
+          tenant_name?: string | null
           updated_at?: string
         }
         Update: {
@@ -674,6 +684,8 @@ export type Database = {
           name?: string
           slug?: string
           subscription_tier?: Database["public"]["Enums"]["subscription_tier"]
+          tenant_id?: string | null
+          tenant_name?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -742,6 +754,8 @@ export type Database = {
           avatar_url: string | null
           created_at: string
           display_name: string
+          entra_oid: string | null
+          entra_tid: string | null
           equipped_avatar_id: string | null
           id: string
           points: number
@@ -751,6 +765,8 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           display_name: string
+          entra_oid?: string | null
+          entra_tid?: string | null
           equipped_avatar_id?: string | null
           id: string
           points?: number
@@ -760,6 +776,8 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           display_name?: string
+          entra_oid?: string | null
+          entra_tid?: string | null
           equipped_avatar_id?: string | null
           id?: string
           points?: number
@@ -1214,6 +1232,19 @@ export type Database = {
       is_session_player: {
         Args: { _session_id: string; _user_id: string }
         Returns: boolean
+      }
+      join_or_create_tenant_org: {
+        Args: {
+          _display: string
+          _tenant_name: string
+          _tid: string
+          _user: string
+        }
+        Returns: {
+          created: boolean
+          org_id: string
+          role: Database["public"]["Enums"]["org_role"]
+        }[]
       }
       org_has_tier: {
         Args: {

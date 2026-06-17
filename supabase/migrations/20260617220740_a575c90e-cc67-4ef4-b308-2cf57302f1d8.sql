@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.join_or_create_tenant_org(uuid, uuid, text, text) FROM PUBLIC;

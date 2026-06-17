@@ -193,3 +193,78 @@ export const setOrgTier = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true, tier: data.tier };
   });
+
+// ---------- Teams channel ↔ department mapping ----------
+
+export const linkTeamsChannelToDepartment = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        departmentId: z.string().uuid(),
+        teamsTeamId: z.string().min(1).max(128),
+        teamsChannelId: z.string().min(1).max(128),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    // Look up the department's org and verify caller is an org admin.
+    const { data: dept, error: deptErr } = await context.supabase
+      .from("departments")
+      .select("id, org_id")
+      .eq("id", data.departmentId)
+      .maybeSingle();
+    if (deptErr) throw new Error(deptErr.message);
+    if (!dept) throw new Error("Department not found");
+
+    const { data: isAdmin, error: roleErr } = await context.supabase.rpc(
+      "is_org_admin",
+      { _org: dept.org_id, _user: context.userId },
+    );
+    if (roleErr) throw new Error(roleErr.message);
+    if (!isAdmin) throw new Error("Only org admins can map Teams channels.");
+
+    const { error } = await context.supabase
+      .from("departments")
+      .update({
+        teams_team_id: data.teamsTeamId,
+        teams_channel_id: data.teamsChannelId,
+      })
+      .eq("id", data.departmentId);
+    if (error) {
+      if (/duplicate|unique/i.test(error.message)) {
+        throw new Error("That Teams channel is already mapped to another department.");
+      }
+      throw new Error(error.message);
+    }
+    return { ok: true };
+  });
+
+export const unlinkTeamsChannel = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({ departmentId: z.string().uuid() }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const { data: dept, error: deptErr } = await context.supabase
+      .from("departments")
+      .select("id, org_id")
+      .eq("id", data.departmentId)
+      .maybeSingle();
+    if (deptErr) throw new Error(deptErr.message);
+    if (!dept) throw new Error("Department not found");
+
+    const { data: isAdmin, error: roleErr } = await context.supabase.rpc(
+      "is_org_admin",
+      { _org: dept.org_id, _user: context.userId },
+    );
+    if (roleErr) throw new Error(roleErr.message);
+    if (!isAdmin) throw new Error("Only org admins can unmap Teams channels.");
+
+    const { error } = await context.supabase
+      .from("departments")
+      .update({ teams_team_id: null, teams_channel_id: null })
+      .eq("id", data.departmentId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
