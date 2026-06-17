@@ -63,35 +63,30 @@ export const exchangeTeamsToken = createServerFn({ method: "POST" })
       (payload.name as string | undefined) ?? email.split("@")[0];
     const tenantClaim = (payload.tid as string | undefined) ?? tenantId;
     const oid = payload.oid as string | undefined;
+    const tenantName =
+      (payload.tenant_display_name as string | undefined) ?? null;
 
     const { supabaseAdmin } = await import(
       "@/integrations/supabase/client.server"
     );
 
-    // Find-or-create the auth user. Admin list-by-email isn't directly
-    // available, so we attempt createUser and fall back to lookup on
-    // duplicate-email errors.
-    const { data: created, error: createErr } =
-      await supabaseAdmin.auth.admin.createUser({
-        email,
-        email_confirm: true,
-        user_metadata: {
-          display_name: displayName,
-          full_name: displayName,
-          teams_oid: oid,
-          teams_tid: tenantClaim,
-          provider: "microsoft_teams",
-        },
-      });
-
+    // Find-or-create the auth user.
+    const { error: createErr } = await supabaseAdmin.auth.admin.createUser({
+      email,
+      email_confirm: true,
+      user_metadata: {
+        display_name: displayName,
+        full_name: displayName,
+        teams_oid: oid,
+        teams_tid: tenantClaim,
+        provider: "microsoft_teams",
+      },
+    });
     if (createErr && !/already|exist|registered/i.test(createErr.message)) {
       throw new Error(`Provisioning failed: ${createErr.message}`);
     }
-    void created;
 
-    // Mint a single-use magiclink and return its hashed token to the
-    // client. The action_link is discarded; the client redeems via
-    // verifyOtp with the email + token_hash.
+    // Mint a single-use magiclink for the client to redeem.
     const { data: link, error: linkErr } =
       await supabaseAdmin.auth.admin.generateLink({
         type: "magiclink",
@@ -103,8 +98,29 @@ export const exchangeTeamsToken = createServerFn({ method: "POST" })
       );
     }
 
+    // Join or create the tenant-scoped org for this user.
+    let orgId: string | null = null;
+    const userId = link.user?.id;
+    if (userId) {
+      const { data: orgRow, error: orgErr } = await supabaseAdmin.rpc(
+        "join_or_create_tenant_org",
+        {
+          _user: userId,
+          _tid: tenantClaim,
+          _tenant_name: tenantName,
+          _display: displayName,
+        },
+      );
+      if (orgErr) {
+        console.error("join_or_create_tenant_org failed", orgErr);
+      } else if (Array.isArray(orgRow) && orgRow[0]?.org_id) {
+        orgId = orgRow[0].org_id as string;
+      }
+    }
+
     return {
       email,
       tokenHash: link.properties.hashed_token,
+      orgId,
     };
   });
