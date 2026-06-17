@@ -32,6 +32,13 @@
       "scopes": ["personal"]
     }
   ],
+  "configurableTabs": [
+    {
+      "configurationUrl": "https://id-preview--b147aad7-3ae2-4d89-8d21-625495d54b86.lovable.app/teams/channel/config",
+      "canUpdateConfiguration": true,
+      "scopes": ["team", "groupChat"]
+    }
+  ],
   "permissions": ["identity", "messageTeamMembers"],
   "validDomains": [
     "id-preview--b147aad7-3ae2-4d89-8d21-625495d54b86.lovable.app",
