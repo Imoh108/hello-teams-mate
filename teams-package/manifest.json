@@ -45,6 +45,7 @@
     "project--b147aad7-3ae2-4d89-8d21-625495d54b86.lovable.app",
     "*.lovable.app"
   ],
+  "_localhostForTesting": "For Option A in TESTING.md, add 'localhost' and '127.0.0.1' to validDomains above. Remove for production.",
   "webApplicationInfo": {
     "id": "e38c640c-037f-445b-b2cb-1f6a9c8dcb78",
     "resource": "api://e38c640c-037f-445b-b2cb-1f6a9c8dcb78"
