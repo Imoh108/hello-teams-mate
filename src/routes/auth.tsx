@@ -117,9 +117,8 @@ function AuthPageInner() {
               </form>
             </TabsContent>
           </Tabs>
-        </div>
       </div>
-    </div>
+    </AuthShell>
   );
 }
 
