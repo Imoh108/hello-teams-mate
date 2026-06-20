@@ -16,7 +16,29 @@ export const Route = createFileRoute("/auth")({
   component: AuthPage,
 });
 
+function AuthShell({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="min-h-screen grid place-items-center px-4">
+      <div className="w-full max-w-md">{children}</div>
+    </div>
+  );
+}
+
 function AuthPage() {
+  return (
+    <ClientOnly
+      fallback={
+        <AuthShell>
+          <div className="glass-panel rounded-2xl p-6 h-[420px] animate-pulse" aria-hidden />
+        </AuthShell>
+      }
+    >
+      <AuthPageInner />
+    </ClientOnly>
+  );
+}
+
+function AuthPageInner() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
