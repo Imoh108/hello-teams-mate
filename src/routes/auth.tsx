@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link, ClientOnly } from "@tanstack/react-router";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,7 +16,29 @@ export const Route = createFileRoute("/auth")({
   component: AuthPage,
 });
 
+function AuthShell({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="min-h-screen grid place-items-center px-4">
+      <div className="w-full max-w-md">{children}</div>
+    </div>
+  );
+}
+
 function AuthPage() {
+  return (
+    <ClientOnly
+      fallback={
+        <AuthShell>
+          <div className="glass-panel rounded-2xl p-6 h-[420px] animate-pulse" aria-hidden />
+        </AuthShell>
+      }
+    >
+      <AuthPageInner />
+    </ClientOnly>
+  );
+}
+
+function AuthPageInner() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -59,16 +81,15 @@ function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen grid place-items-center px-4">
-      <div className="w-full max-w-md">
-        <div className="flex items-center justify-between mb-6">
-          <Link to="/" className="flex items-center gap-2">
-            <div className="size-8 rounded-md bg-primary grid place-items-center text-primary-foreground font-display font-bold">Q</div>
-            <span className="font-display text-lg font-semibold">QuizPulse</span>
-          </Link>
-          <LanguageSwitcher compact />
-        </div>
-        <div className="glass-panel rounded-2xl p-6">
+    <AuthShell>
+      <div className="flex items-center justify-between mb-6">
+        <Link to="/" className="flex items-center gap-2">
+          <div className="size-8 rounded-md bg-primary grid place-items-center text-primary-foreground font-display font-bold">Q</div>
+          <span className="font-display text-lg font-semibold">QuizPulse</span>
+        </Link>
+        <LanguageSwitcher compact />
+      </div>
+      <div className="glass-panel rounded-2xl p-6">
           <Tabs defaultValue="signin">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="signin">{t("auth.signIn")}</TabsTrigger>
@@ -96,9 +117,8 @@ function AuthPage() {
               </form>
             </TabsContent>
           </Tabs>
-        </div>
       </div>
-    </div>
+    </AuthShell>
   );
 }
 
