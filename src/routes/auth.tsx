@@ -81,16 +81,15 @@ function AuthPageInner() {
   };
 
   return (
-    <div className="min-h-screen grid place-items-center px-4">
-      <div className="w-full max-w-md">
-        <div className="flex items-center justify-between mb-6">
-          <Link to="/" className="flex items-center gap-2">
-            <div className="size-8 rounded-md bg-primary grid place-items-center text-primary-foreground font-display font-bold">Q</div>
-            <span className="font-display text-lg font-semibold">QuizPulse</span>
-          </Link>
-          <LanguageSwitcher compact />
-        </div>
-        <div className="glass-panel rounded-2xl p-6">
+    <AuthShell>
+      <div className="flex items-center justify-between mb-6">
+        <Link to="/" className="flex items-center gap-2">
+          <div className="size-8 rounded-md bg-primary grid place-items-center text-primary-foreground font-display font-bold">Q</div>
+          <span className="font-display text-lg font-semibold">QuizPulse</span>
+        </Link>
+        <LanguageSwitcher compact />
+      </div>
+      <div className="glass-panel rounded-2xl p-6">
           <Tabs defaultValue="signin">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="signin">{t("auth.signIn")}</TabsTrigger>
