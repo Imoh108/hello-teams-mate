@@ -17,7 +17,7 @@ export const Route = createFileRoute("/_authenticated/quizzes/$id")({
 
 type Question = {
   id?: string; quiz_id: string; position: number; prompt: string;
-  options: string[]; correct_index: number; time_limit_s: number;
+  options: string[]; correct_index: number; time_limit_s: number; round: number;
 };
 
 function QuizEditor() {
