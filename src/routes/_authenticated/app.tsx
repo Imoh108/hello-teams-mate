@@ -179,24 +179,109 @@ function Dashboard() {
             </div>
             <Dialog open={openCreate} onOpenChange={setOpenCreate}>
               <DialogTrigger asChild><Button><Plus className="size-4 mr-1" /> {t("dashboard.newQuiz")}</Button></DialogTrigger>
-              <DialogContent>
+              <DialogContent className="max-w-2xl">
                 <DialogHeader><DialogTitle>Create a quiz</DialogTitle></DialogHeader>
-                <div className="space-y-3">
-                  <div><Label>Title</Label><Input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} /></div>
-                  <div><Label>Description</Label><Input value={desc} onChange={(e) => setDesc(e.target.value)} maxLength={500} /></div>
-                  <div><Label>Topic pack</Label>
-                    <Select value={pack} onValueChange={(v) => setPack(v as any)}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="company_trivia">Company trivia</SelectItem>
-                        <SelectItem value="industry_knowledge">Industry knowledge</SelectItem>
-                        <SelectItem value="general_culture">General culture</SelectItem>
-                        <SelectItem value="custom">Custom</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                <DialogFooter><Button onClick={onCreate}>Create</Button></DialogFooter>
+                <Tabs defaultValue="categories">
+                  <TabsList className="grid grid-cols-2 w-full">
+                    <TabsTrigger value="categories">From categories</TabsTrigger>
+                    <TabsTrigger value="blank">Blank</TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="categories" className="space-y-4 mt-4">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="col-span-2"><Label>Title</Label><Input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} placeholder="Friday night pub quiz" /></div>
+                      <div className="col-span-2"><Label>Description (optional)</Label><Input value={desc} onChange={(e) => setDesc(e.target.value)} maxLength={500} /></div>
+                    </div>
+
+                    <div>
+                      <Label>Categories</Label>
+                      {cats === null ? (
+                        <p className="text-xs text-muted-foreground mt-1">Loading categories…</p>
+                      ) : (
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {cats.map((c) => {
+                            const disabled = c.approved_count === 0;
+                            const active = selectedCats.has(c.id);
+                            return (
+                              <button
+                                key={c.id}
+                                type="button"
+                                disabled={disabled}
+                                onClick={() => {
+                                  const next = new Set(selectedCats);
+                                  if (next.has(c.id)) next.delete(c.id); else next.add(c.id);
+                                  setSelectedCats(next);
+                                }}
+                                className={`text-xs rounded-full border px-3 py-1 transition ${
+                                  active ? "bg-primary text-primary-foreground border-primary"
+                                  : disabled ? "border-border bg-surface text-muted-foreground/50 cursor-not-allowed"
+                                  : "border-border bg-surface hover:bg-surface-2"
+                                }`}
+                              >
+                                {c.name} · {c.approved_count}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-3">
+                      <div>
+                        <Label>Rounds</Label>
+                        <Input type="number" min={1} max={10} value={rounds} onChange={(e) => setRounds(Math.max(1, Math.min(10, Number(e.target.value) || 1)))} />
+                      </div>
+                      <div>
+                        <Label>Questions / round</Label>
+                        <Input type="number" min={1} max={30} value={qpr} onChange={(e) => setQpr(Math.max(1, Math.min(30, Number(e.target.value) || 1)))} />
+                      </div>
+                      <div>
+                        <Label>Difficulty</Label>
+                        <Select value={difficulty} onValueChange={(v) => setDifficulty(v as any)}>
+                          <SelectTrigger><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="mixed">Mixed</SelectItem>
+                            <SelectItem value="easy">Easy</SelectItem>
+                            <SelectItem value="medium">Medium</SelectItem>
+                            <SelectItem value="hard">Hard</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label>Time per question: {timeLimit}s</Label>
+                      <input type="range" min={5} max={60} value={timeLimit} onChange={(e) => setTimeLimit(Number(e.target.value))} className="w-full" />
+                    </div>
+
+                    <div className="text-xs text-muted-foreground rounded-md border border-border bg-surface px-3 py-2">
+                      {rounds} round{rounds > 1 ? "s" : ""} × {qpr} question{qpr > 1 ? "s" : ""} = <span className="text-foreground font-medium">{requestedTotal} total</span>. Pool available: {poolAvailable}.
+                    </div>
+
+                    <DialogFooter>
+                      <Button onClick={onBuild} disabled={building}>
+                        {building ? "Building…" : "Build quiz"}
+                      </Button>
+                    </DialogFooter>
+                  </TabsContent>
+
+                  <TabsContent value="blank" className="space-y-3 mt-4">
+                    <div><Label>Title</Label><Input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} /></div>
+                    <div><Label>Description</Label><Input value={desc} onChange={(e) => setDesc(e.target.value)} maxLength={500} /></div>
+                    <div><Label>Topic pack</Label>
+                      <Select value={pack} onValueChange={(v) => setPack(v as any)}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="company_trivia">Company trivia</SelectItem>
+                          <SelectItem value="industry_knowledge">Industry knowledge</SelectItem>
+                          <SelectItem value="general_culture">General culture</SelectItem>
+                          <SelectItem value="custom">Custom</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <DialogFooter><Button onClick={onCreate}>Create empty quiz</Button></DialogFooter>
+                  </TabsContent>
+                </Tabs>
               </DialogContent>
             </Dialog>
           </div>
