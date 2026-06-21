@@ -29,6 +29,7 @@ type Category = Awaited<ReturnType<typeof listCategories>>[number];
 function PipelinePage() {
   const [items, setItems] = useState<Item[]>([]);
   const [jobs, setJobs] = useState<Job[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
   const [topic, setTopic] = useState("");
   const [source, setSource] = useState("manual");
@@ -37,14 +38,26 @@ function PipelinePage() {
 
   async function refresh() {
     try {
-      const [i, j] = await Promise.all([listPendingItems(), listRecentJobs()]);
+      const [i, j, c] = await Promise.all([listPendingItems(), listRecentJobs(), listCategories()]);
       setItems(i as Item[]);
       setJobs(j as Job[]);
+      setCategories(c as Category[]);
     } catch (e: any) {
       toast.error(e?.message ?? "Failed to load");
     }
   }
   useEffect(() => { refresh(); }, []);
+
+  async function changeCategory(itemId: string, categoryId: string) {
+    const next = categoryId === "__none" ? null : categoryId;
+    setItems((s) => s.map((x) => (x.id === itemId ? { ...x, category_id: next } : x)));
+    try {
+      await setItemCategory({ data: { itemId, categoryId: next } });
+    } catch (e: any) {
+      toast.error(e?.message ?? "Failed to set category");
+      refresh();
+    }
+  }
 
   async function onGenerate() {
     if (!topic.trim()) return toast.error("Add a topic");
