@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       ai_generated_items: {
         Row: {
+          category_id: string | null
           choices: Json
           correct_index: number
           created_at: string
@@ -33,6 +34,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          category_id?: string | null
           choices?: Json
           correct_index?: number
           created_at?: string
@@ -50,6 +52,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          category_id?: string | null
           choices?: Json
           correct_index?: number
           created_at?: string
@@ -67,6 +70,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "ai_generated_items_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "question_categories"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "ai_generated_items_job_id_fkey"
             columns: ["job_id"]
@@ -304,6 +314,7 @@ export type Database = {
       bank_questions: {
         Row: {
           bank_id: string
+          category_id: string | null
           choices: Json
           correct_index: number
           created_at: string
@@ -316,6 +327,7 @@ export type Database = {
         }
         Insert: {
           bank_id: string
+          category_id?: string | null
           choices?: Json
           correct_index?: number
           created_at?: string
@@ -328,6 +340,7 @@ export type Database = {
         }
         Update: {
           bank_id?: string
+          category_id?: string | null
           choices?: Json
           correct_index?: number
           created_at?: string
@@ -344,6 +357,13 @@ export type Database = {
             columns: ["bank_id"]
             isOneToOne: false
             referencedRelation: "question_banks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bank_questions_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "question_categories"
             referencedColumns: ["id"]
           },
         ]
@@ -832,6 +852,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      question_categories: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       questions: {
         Row: {

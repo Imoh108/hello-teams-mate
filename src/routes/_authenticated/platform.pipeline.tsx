@@ -13,7 +13,10 @@ import {
   listPendingItems,
   listRecentJobs,
   reviewItem,
+  listCategories,
+  setItemCategory,
 } from "@/lib/ai-pipeline.functions";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export const Route = createFileRoute("/_authenticated/platform/pipeline")({
   component: PipelinePage,
@@ -21,10 +24,12 @@ export const Route = createFileRoute("/_authenticated/platform/pipeline")({
 
 type Item = Awaited<ReturnType<typeof listPendingItems>>[number];
 type Job = Awaited<ReturnType<typeof listRecentJobs>>[number];
+type Category = Awaited<ReturnType<typeof listCategories>>[number];
 
 function PipelinePage() {
   const [items, setItems] = useState<Item[]>([]);
   const [jobs, setJobs] = useState<Job[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
   const [topic, setTopic] = useState("");
   const [source, setSource] = useState("manual");
@@ -33,14 +38,26 @@ function PipelinePage() {
 
   async function refresh() {
     try {
-      const [i, j] = await Promise.all([listPendingItems(), listRecentJobs()]);
+      const [i, j, c] = await Promise.all([listPendingItems(), listRecentJobs(), listCategories()]);
       setItems(i as Item[]);
       setJobs(j as Job[]);
+      setCategories(c as Category[]);
     } catch (e: any) {
       toast.error(e?.message ?? "Failed to load");
     }
   }
   useEffect(() => { refresh(); }, []);
+
+  async function changeCategory(itemId: string, categoryId: string) {
+    const next = categoryId === "__none" ? null : categoryId;
+    setItems((s) => s.map((x) => (x.id === itemId ? { ...x, category_id: next } : x)));
+    try {
+      await setItemCategory({ data: { itemId, categoryId: next } });
+    } catch (e: any) {
+      toast.error(e?.message ?? "Failed to set category");
+      refresh();
+    }
+  }
 
   async function onGenerate() {
     if (!topic.trim()) return toast.error("Add a topic");
@@ -124,10 +141,13 @@ function PipelinePage() {
                   <li key={it.id} className="rounded-md border border-border p-3">
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1">
-                        <div className="text-xs text-muted-foreground mb-1 flex gap-2">
+                        <div className="text-xs text-muted-foreground mb-1 flex flex-wrap items-center gap-2">
                           <Badge variant="secondary">{it.topic}</Badge>
                           <Badge variant="outline">{it.source}</Badge>
                           <span>difficulty {it.difficulty}</span>
+                          {(it as any).question_categories?.name && (
+                            <Badge>{(it as any).question_categories.name}</Badge>
+                          )}
                         </div>
                         <div className="font-medium">{it.prompt}</div>
                         <ol className="mt-2 text-sm space-y-1 list-decimal list-inside">
@@ -139,7 +159,19 @@ function PipelinePage() {
                           <p className="text-xs text-muted-foreground mt-2">{it.explanation}</p>
                         )}
                       </div>
-                      <div className="flex flex-col gap-2 shrink-0">
+                      <div className="flex flex-col gap-2 shrink-0 w-44">
+                        <Select
+                          value={it.category_id ?? "__none"}
+                          onValueChange={(v) => changeCategory(it.id, v)}
+                        >
+                          <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Category" /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="__none">Uncategorised</SelectItem>
+                            {categories.map((c) => (
+                              <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                         <Button size="sm" onClick={() => decide(it.id, "approved")}>
                           <Check className="size-4 mr-1" /> Approve
                         </Button>

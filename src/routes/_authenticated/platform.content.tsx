@@ -8,13 +8,14 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { Library, Plus, Trash2, ExternalLink, ShieldCheck } from "lucide-react";
+import { Library, Plus, Trash2, ExternalLink, ShieldCheck, Sparkles } from "lucide-react";
 import {
   listContentSources,
   createContentSource,
   toggleSourceVerified,
   deleteContentSource,
 } from "@/lib/platform-content.functions";
+import { generateFromSource } from "@/lib/ai-pipeline.functions";
 
 export const Route = createFileRoute("/_authenticated/platform/content")({
   component: ContentPage,
@@ -57,6 +58,16 @@ function ContentPage() {
     if (!confirm("Delete this source?")) return;
     try { await deleteContentSource({ data: { id } }); refresh(); toast.success("Deleted"); }
     catch (e: any) { toast.error(e?.message ?? "Failed"); }
+  }
+
+  async function generate(id: string, name: string) {
+    const t = toast.loading(`Scraping ${name} and generating questions…`);
+    try {
+      const r = await generateFromSource({ data: { sourceId: id, count: 5, difficulty: 2 } });
+      toast.success(`Generated ${r.generated} questions — review them in Pipeline`, { id: t });
+    } catch (e: any) {
+      toast.error(e?.message ?? "Generation failed", { id: t });
+    }
   }
 
   if (err) return <div className="text-destructive">{err}</div>;
@@ -136,7 +147,10 @@ function ContentPage() {
                     {s.license && <div className="text-xs text-muted-foreground mt-0.5">License: {s.license}</div>}
                     {s.notes && <div className="text-xs text-muted-foreground mt-1">{s.notes}</div>}
                   </div>
-                  <div className="flex items-center gap-3 shrink-0">
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Button size="sm" variant="secondary" onClick={() => generate(s.id, s.name)}>
+                      <Sparkles className="size-4 mr-1" /> Generate
+                    </Button>
                     <label className="flex items-center gap-1 text-xs">
                       <Switch checked={s.verified} onCheckedChange={(v) => toggle(s.id, v)} />
                     </label>
