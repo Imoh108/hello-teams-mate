@@ -13,7 +13,10 @@ import {
   listPendingItems,
   listRecentJobs,
   reviewItem,
+  listCategories,
+  setItemCategory,
 } from "@/lib/ai-pipeline.functions";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export const Route = createFileRoute("/_authenticated/platform/pipeline")({
   component: PipelinePage,
@@ -21,6 +24,7 @@ export const Route = createFileRoute("/_authenticated/platform/pipeline")({
 
 type Item = Awaited<ReturnType<typeof listPendingItems>>[number];
 type Job = Awaited<ReturnType<typeof listRecentJobs>>[number];
+type Category = Awaited<ReturnType<typeof listCategories>>[number];
 
 function PipelinePage() {
   const [items, setItems] = useState<Item[]>([]);
