@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
+
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { toast } from "sonner";
 import { Plus, Copy, Play, LogOut, Users, Building2, Trophy, Store, Flame, Shield } from "lucide-react";
