@@ -25,7 +25,64 @@ const QuestionSchema = z.object({
     .max(20),
 });
 
-/** Kick off an AI generation job. Items land in ai_generated_items as 'pending'. */
+const CategorisationSchema = z.object({
+  assignments: z.array(
+    z.object({
+      index: z.number().int().min(0),
+      category_slug: z.string().min(1).max(80),
+    })
+  ),
+});
+
+type GeneratedQ = z.infer<typeof QuestionSchema>["questions"][number];
+
+async function loadCategories(admin: any) {
+  const { data, error } = await admin
+    .from("question_categories")
+    .select("id, slug, name, description");
+  if (error) throw new Error(error.message);
+  return (data ?? []) as { id: string; slug: string; name: string; description: string | null }[];
+}
+
+/**
+ * Ask the AI to assign each generated question to one of the existing categories
+ * by slug. Falls back to `general` for anything it doesn't recognise.
+ */
+async function categoriseQuestions(
+  gateway: ReturnType<typeof import("./ai-gateway.server").createLovableAiGatewayProvider>,
+  questions: GeneratedQ[],
+  categories: { id: string; slug: string; name: string; description: string | null }[]
+): Promise<(string | null)[]> {
+  const slugToId = new Map(categories.map((c) => [c.slug, c.id]));
+  const fallback = slugToId.get("general") ?? null;
+  if (questions.length === 0) return [];
+
+  try {
+    const { generateText, Output } = await import("ai");
+    const catalogue = categories
+      .map((c) => `- ${c.slug}: ${c.name}${c.description ? ` — ${c.description}` : ""}`)
+      .join("\n");
+    const numbered = questions
+      .map((q, i) => `${i}. ${q.prompt}`)
+      .join("\n");
+
+    const { output } = await generateText({
+      model: gateway("google/gemini-3-flash-preview"),
+      output: Output.object({ schema: CategorisationSchema }),
+      system:
+        "You assign each quiz question to ONE category from the provided list. Respond with the category's slug exactly as given. If nothing fits, use 'general'.",
+      prompt: `Categories:\n${catalogue}\n\nQuestions:\n${numbered}\n\nReturn an assignment for every question by index.`,
+    });
+
+    const map = new Map<number, string>();
+    for (const a of output.assignments) map.set(a.index, a.category_slug);
+    return questions.map((_, i) => slugToId.get(map.get(i) ?? "") ?? fallback);
+  } catch {
+    return questions.map(() => fallback);
+  }
+}
+
+/** Kick off an AI generation job from a free-form topic + optional pasted text. */
 export const generatePlatformQuestions = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
@@ -44,6 +101,8 @@ export const generatePlatformQuestions = createServerFn({ method: "POST" })
     const apiKey = process.env.LOVABLE_API_KEY;
     if (!apiKey) throw new Error("AI is not configured");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { createLovableAiGatewayProvider } = await import("./ai-gateway.server");
+    const gateway = createLovableAiGatewayProvider(apiKey);
 
     const { data: job, error: jobErr } = await supabaseAdmin
       .from("ai_generation_jobs")
@@ -60,8 +119,6 @@ export const generatePlatformQuestions = createServerFn({ method: "POST" })
 
     try {
       const { generateText, Output } = await import("ai");
-      const { createLovableAiGatewayProvider } = await import("./ai-gateway.server");
-      const gateway = createLovableAiGatewayProvider(apiKey);
       const { output } = await generateText({
         model: gateway("google/gemini-3-flash-preview"),
         output: Output.object({ schema: QuestionSchema }),
@@ -71,7 +128,10 @@ export const generatePlatformQuestions = createServerFn({ method: "POST" })
           data.context ? `\n\nReference material:\n${data.context}` : ""
         }`,
       });
-      const items = output.questions.slice(0, data.count).map((q) => ({
+      const questions = output.questions.slice(0, data.count);
+      const categories = await loadCategories(supabaseAdmin);
+      const categoryIds = await categoriseQuestions(gateway, questions, categories);
+      const items = questions.map((q, i) => ({
         job_id: job.id,
         topic: data.topic,
         source: data.source,
@@ -80,6 +140,91 @@ export const generatePlatformQuestions = createServerFn({ method: "POST" })
         choices: q.choices,
         correct_index: q.correct_index,
         explanation: q.explanation ?? null,
+        category_id: categoryIds[i] ?? null,
+      }));
+      const { error: insErr } = await supabaseAdmin.from("ai_generated_items").insert(items);
+      if (insErr) throw insErr;
+      await supabaseAdmin
+        .from("ai_generation_jobs")
+        .update({ status: "review", generated_count: items.length })
+        .eq("id", job.id);
+      return { jobId: job.id, generated: items.length };
+    } catch (e: any) {
+      await supabaseAdmin
+        .from("ai_generation_jobs")
+        .update({ status: "failed", error_message: String(e?.message ?? e).slice(0, 500) })
+        .eq("id", job.id);
+      throw new Error("Generation failed: " + (e?.message ?? e));
+    }
+  });
+
+/** Scrape a saved content source with Firecrawl, generate + categorise questions. */
+export const generateFromSource = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        sourceId: z.string().uuid(),
+        count: z.number().int().min(1).max(15).default(5),
+        difficulty: z.number().int().min(1).max(5).default(2),
+      })
+      .parse(d)
+  )
+  .handler(async ({ data, context }) => {
+    await assertPlatformAdmin(context);
+    const apiKey = process.env.LOVABLE_API_KEY;
+    if (!apiKey) throw new Error("AI is not configured");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { scrapeUrlMarkdown } = await import("./firecrawl.server");
+    const { createLovableAiGatewayProvider } = await import("./ai-gateway.server");
+
+    const { data: src, error: srcErr } = await supabaseAdmin
+      .from("content_sources")
+      .select("*")
+      .eq("id", data.sourceId)
+      .single();
+    if (srcErr) throw new Error(srcErr.message);
+    if (!src) throw new Error("Source not found");
+
+    const topic = src.topic || src.name;
+    const gateway = createLovableAiGatewayProvider(apiKey);
+
+    const { data: job, error: jobErr } = await supabaseAdmin
+      .from("ai_generation_jobs")
+      .insert({
+        source: src.name,
+        topic,
+        status: "generating",
+        prompt: `Scraped from ${src.url}`,
+        created_by: context.userId,
+      })
+      .select()
+      .single();
+    if (jobErr) throw new Error(jobErr.message);
+
+    try {
+      const sourceText = await scrapeUrlMarkdown(src.url);
+      const { generateText, Output } = await import("ai");
+      const { output } = await generateText({
+        model: gateway("google/gemini-3-flash-preview"),
+        output: Output.object({ schema: QuestionSchema }),
+        system:
+          "You write high-quality multiple-choice quiz questions strictly grounded in the provided source text. Each question has exactly 4 plausible choices, one correct. Avoid trick wording.",
+        prompt: `Source: ${src.name} (${src.url})\nTopic: ${topic}\nDifficulty: ${data.difficulty}/5\nGenerate exactly ${data.count} multiple-choice questions grounded in the text below.\n\n---\n${sourceText}\n---`,
+      });
+      const questions = output.questions.slice(0, data.count);
+      const categories = await loadCategories(supabaseAdmin);
+      const categoryIds = await categoriseQuestions(gateway, questions, categories);
+      const items = questions.map((q, i) => ({
+        job_id: job.id,
+        topic,
+        source: src.name,
+        difficulty: data.difficulty,
+        prompt: q.prompt,
+        choices: q.choices,
+        correct_index: q.correct_index,
+        explanation: q.explanation ?? null,
+        category_id: categoryIds[i] ?? null,
       }));
       const { error: insErr } = await supabaseAdmin.from("ai_generated_items").insert(items);
       if (insErr) throw insErr;
@@ -104,7 +249,7 @@ export const listPendingItems = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data, error } = await supabaseAdmin
       .from("ai_generated_items")
-      .select("*")
+      .select("*, question_categories(name, slug)")
       .eq("status", "pending")
       .order("created_at", { ascending: false })
       .limit(100);
@@ -124,6 +269,30 @@ export const listRecentJobs = createServerFn({ method: "POST" })
       .limit(20);
     if (error) throw new Error(error.message);
     return data ?? [];
+  });
+
+export const listCategories = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertPlatformAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    return await loadCategories(supabaseAdmin);
+  });
+
+export const setItemCategory = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({ itemId: z.string().uuid(), categoryId: z.string().uuid().nullable() }).parse(d)
+  )
+  .handler(async ({ data, context }) => {
+    await assertPlatformAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin
+      .from("ai_generated_items")
+      .update({ category_id: data.categoryId })
+      .eq("id", data.itemId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
   });
 
 export const reviewItem = createServerFn({ method: "POST" })
@@ -152,7 +321,6 @@ export const reviewItem = createServerFn({ method: "POST" })
       .select()
       .single();
     if (error) throw new Error(error.message);
-    // bump job counters
     if (item?.job_id) {
       const field = data.decision === "approved" ? "approved_count" : "rejected_count";
       const { data: job } = await supabaseAdmin
