@@ -15,7 +15,7 @@ import {
   toggleSourceVerified,
   deleteContentSource,
 } from "@/lib/platform-content.functions";
-import { generateFromSource } from "@/lib/ai-pipeline.functions";
+import { generateFromSource, generateFromAllVerifiedSources } from "@/lib/ai-pipeline.functions";
 
 export const Route = createFileRoute("/_authenticated/platform/content")({
   component: ContentPage,
