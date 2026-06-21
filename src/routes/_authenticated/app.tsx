@@ -34,6 +34,8 @@ function Dashboard() {
   const cloneFn = useServerFn(cloneQuiz);
   const sessionFn = useServerFn(createSession);
   const joinFn = useServerFn(joinSessionByCode);
+  const buildFn = useServerFn(createQuizFromCategories);
+  const loadCatsFn = useServerFn(listCategoryPool);
 
   const [quizzes, setQuizzes] = useState<Quiz[] | null>(null);
   const [publicPacks, setPublicPacks] = useState<Quiz[]>([]);
@@ -44,6 +46,16 @@ function Dashboard() {
   const [pack, setPack] = useState<"company_trivia" | "industry_knowledge" | "general_culture" | "custom">("custom");
   const [joinCode, setJoinCode] = useState("");
   const [isSuper, setIsSuper] = useState(false);
+
+  // Category-builder state
+  type Cat = { id: string; name: string; slug: string; description: string | null; approved_count: number };
+  const [cats, setCats] = useState<Cat[] | null>(null);
+  const [selectedCats, setSelectedCats] = useState<Set<string>>(new Set());
+  const [rounds, setRounds] = useState(3);
+  const [qpr, setQpr] = useState(5);
+  const [difficulty, setDifficulty] = useState<"easy" | "medium" | "hard" | "mixed">("mixed");
+  const [timeLimit, setTimeLimit] = useState(20);
+  const [building, setBuilding] = useState(false);
 
   const load = async () => {
     const { data: u } = await supabase.auth.getUser();
