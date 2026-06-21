@@ -889,6 +889,7 @@ export type Database = {
           position: number
           prompt: string
           quiz_id: string
+          round: number
           time_limit_s: number
         }
         Insert: {
@@ -899,6 +900,7 @@ export type Database = {
           position: number
           prompt: string
           quiz_id: string
+          round?: number
           time_limit_s?: number
         }
         Update: {
@@ -909,6 +911,7 @@ export type Database = {
           position?: number
           prompt?: string
           quiz_id?: string
+          round?: number
           time_limit_s?: number
         }
         Relationships: [
