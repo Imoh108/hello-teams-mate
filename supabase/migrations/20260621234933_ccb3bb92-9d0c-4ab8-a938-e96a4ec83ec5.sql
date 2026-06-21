@@ -1,0 +1,1 @@
+CREATE POLICY "Authenticated can read approved items" ON public.ai_generated_items FOR SELECT TO authenticated USING (status = 'approved');
