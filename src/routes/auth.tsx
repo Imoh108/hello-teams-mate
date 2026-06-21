@@ -13,8 +13,24 @@ import { track } from "@/lib/track";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({ meta: [{ title: "Sign in — QuizPulse" }, { name: "description", content: "Sign in to host or join QuizPulse rounds." }] }),
+  validateSearch: (s: Record<string, unknown>) => ({
+    redirect: typeof s.redirect === "string" ? s.redirect : undefined,
+  }),
   component: AuthPage,
 });
+
+function safeRedirect(target: string | undefined): string {
+  if (!target) return "/app";
+  try {
+    // Only allow same-origin relative paths.
+    if (target.startsWith("/") && !target.startsWith("//")) {
+      // Strip the pathless layout segment if present.
+      const cleaned = target.replace(/^\/_authenticated(\/|$)/, "/");
+      return cleaned || "/app";
+    }
+  } catch {}
+  return "/app";
+}
 
 function AuthShell({ children }: { children: React.ReactNode }) {
   return (
