@@ -60,6 +60,16 @@ function ContentPage() {
     catch (e: any) { toast.error(e?.message ?? "Failed"); }
   }
 
+  async function generate(id: string, name: string) {
+    const t = toast.loading(`Scraping ${name} and generating questions…`);
+    try {
+      const r = await generateFromSource({ data: { sourceId: id, count: 5, difficulty: 2 } });
+      toast.success(`Generated ${r.generated} questions — review them in Pipeline`, { id: t });
+    } catch (e: any) {
+      toast.error(e?.message ?? "Generation failed", { id: t });
+    }
+  }
+
   if (err) return <div className="text-destructive">{err}</div>;
 
   return (
