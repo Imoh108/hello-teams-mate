@@ -34,13 +34,14 @@ function QuizEditor() {
   const load = async () => {
     const { data: q } = await supabase.from("quizzes").select("title,description").eq("id", id).single();
     setQuiz(q ?? null);
-    const { data: rows } = await supabase.from("questions").select("*").eq("quiz_id", id).order("position");
-    setQs((rows ?? []).map((r) => ({ ...r, options: r.options as string[] })) as Question[]);
+    const { data: rows } = await supabase.from("questions").select("*").eq("quiz_id", id).order("round").order("position");
+    setQs((rows ?? []).map((r) => ({ ...r, options: r.options as string[], round: (r as any).round ?? 1 })) as Question[]);
   };
   useEffect(() => { load(); }, [id]);
 
   const newDraft = () => setDraft({
     quiz_id: id, position: qs.length + 1, prompt: "", options: ["", "", "", ""], correct_index: 0, time_limit_s: 20,
+    round: qs.length ? Math.max(...qs.map((q) => q.round)) : 1,
   });
 
   const onSave = async () => {
