@@ -15,7 +15,7 @@ import {
   toggleSourceVerified,
   deleteContentSource,
 } from "@/lib/platform-content.functions";
-import { generateFromSource } from "@/lib/ai-pipeline.functions";
+import { generateFromSource, generateFromAllVerifiedSources } from "@/lib/ai-pipeline.functions";
 
 export const Route = createFileRoute("/_authenticated/platform/content")({
   component: ContentPage,
@@ -70,6 +70,28 @@ function ContentPage() {
     }
   }
 
+  const verifiedCount = sources.filter((s: any) => s.verified).length;
+
+  async function generateAll() {
+    if (verifiedCount === 0) {
+      toast.error("No verified sources to scrape");
+      return;
+    }
+    if (!confirm(`Scrape all ${verifiedCount} verified source(s) and queue questions for review?`)) return;
+    const t = toast.loading(`Scraping ${verifiedCount} sources…`);
+    try {
+      const r = await generateFromAllVerifiedSources({
+        data: { countPerSource: 5, difficulty: 2, limit: 50 },
+      });
+      toast.success(
+        `Queued ${r.totalGenerated} questions from ${r.succeeded}/${r.processed} sources${r.failed ? ` (${r.failed} failed)` : ""}`,
+        { id: t }
+      );
+    } catch (e: any) {
+      toast.error(e?.message ?? "Bulk generation failed", { id: t });
+    }
+  }
+
   if (err) return <div className="text-destructive">{err}</div>;
 
   return (
@@ -118,10 +140,13 @@ function ContentPage() {
       </Card>
 
       <Card>
-        <CardHeader className="pb-2">
+        <CardHeader className="pb-2 flex flex-row items-center justify-between gap-2">
           <CardTitle className="text-base flex items-center gap-2">
             <Library className="size-4" /> Library ({sources.length})
           </CardTitle>
+          <Button size="sm" onClick={generateAll} disabled={verifiedCount === 0}>
+            <Sparkles className="size-4 mr-1" /> Generate from all verified ({verifiedCount})
+          </Button>
         </CardHeader>
         <CardContent>
           {sources.length === 0 ? (

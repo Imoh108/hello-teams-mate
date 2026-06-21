@@ -158,6 +158,72 @@ export const generatePlatformQuestions = createServerFn({ method: "POST" })
     }
   });
 
+/** Shared: scrape one source, generate, categorise, insert pending items. */
+async function runGenerationForSource(opts: {
+  src: any;
+  count: number;
+  difficulty: number;
+  userId: string;
+  supabaseAdmin: any;
+  gateway: ReturnType<typeof import("./ai-gateway.server").createLovableAiGatewayProvider>;
+}) {
+  const { src, count, difficulty, userId, supabaseAdmin, gateway } = opts;
+  const { scrapeUrlMarkdown } = await import("./firecrawl.server");
+  const topic = src.topic || src.name;
+
+  const { data: job, error: jobErr } = await supabaseAdmin
+    .from("ai_generation_jobs")
+    .insert({
+      source: src.name,
+      topic,
+      status: "generating",
+      prompt: `Scraped from ${src.url}`,
+      created_by: userId,
+    })
+    .select()
+    .single();
+  if (jobErr) throw new Error(jobErr.message);
+
+  try {
+    const sourceText = await scrapeUrlMarkdown(src.url);
+    const { generateText, Output } = await import("ai");
+    const { output } = await generateText({
+      model: gateway("google/gemini-3-flash-preview"),
+      output: Output.object({ schema: QuestionSchema }),
+      system:
+        "You write high-quality multiple-choice quiz questions strictly grounded in the provided source text. Each question has exactly 4 plausible choices, one correct. Avoid trick wording.",
+      prompt: `Source: ${src.name} (${src.url})\nTopic: ${topic}\nDifficulty: ${difficulty}/5\nGenerate exactly ${count} multiple-choice questions grounded in the text below.\n\n---\n${sourceText}\n---`,
+    });
+    const questions = output.questions.slice(0, count);
+    const categories = await loadCategories(supabaseAdmin);
+    const categoryIds = await categoriseQuestions(gateway, questions, categories);
+    const items = questions.map((q, i) => ({
+      job_id: job.id,
+      topic,
+      source: src.name,
+      difficulty,
+      prompt: q.prompt,
+      choices: q.choices,
+      correct_index: q.correct_index,
+      explanation: q.explanation ?? null,
+      category_id: categoryIds[i] ?? null,
+    }));
+    const { error: insErr } = await supabaseAdmin.from("ai_generated_items").insert(items);
+    if (insErr) throw insErr;
+    await supabaseAdmin
+      .from("ai_generation_jobs")
+      .update({ status: "review", generated_count: items.length })
+      .eq("id", job.id);
+    return { jobId: job.id, generated: items.length };
+  } catch (e: any) {
+    await supabaseAdmin
+      .from("ai_generation_jobs")
+      .update({ status: "failed", error_message: String(e?.message ?? e).slice(0, 500) })
+      .eq("id", job.id);
+    throw e;
+  }
+}
+
 /** Scrape a saved content source with Firecrawl, generate + categorise questions. */
 export const generateFromSource = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -175,7 +241,6 @@ export const generateFromSource = createServerFn({ method: "POST" })
     const apiKey = process.env.LOVABLE_API_KEY;
     if (!apiKey) throw new Error("AI is not configured");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { scrapeUrlMarkdown } = await import("./firecrawl.server");
     const { createLovableAiGatewayProvider } = await import("./ai-gateway.server");
 
     const { data: src, error: srcErr } = await supabaseAdmin
@@ -186,61 +251,77 @@ export const generateFromSource = createServerFn({ method: "POST" })
     if (srcErr) throw new Error(srcErr.message);
     if (!src) throw new Error("Source not found");
 
-    const topic = src.topic || src.name;
     const gateway = createLovableAiGatewayProvider(apiKey);
-
-    const { data: job, error: jobErr } = await supabaseAdmin
-      .from("ai_generation_jobs")
-      .insert({
-        source: src.name,
-        topic,
-        status: "generating",
-        prompt: `Scraped from ${src.url}`,
-        created_by: context.userId,
-      })
-      .select()
-      .single();
-    if (jobErr) throw new Error(jobErr.message);
-
     try {
-      const sourceText = await scrapeUrlMarkdown(src.url);
-      const { generateText, Output } = await import("ai");
-      const { output } = await generateText({
-        model: gateway("google/gemini-3-flash-preview"),
-        output: Output.object({ schema: QuestionSchema }),
-        system:
-          "You write high-quality multiple-choice quiz questions strictly grounded in the provided source text. Each question has exactly 4 plausible choices, one correct. Avoid trick wording.",
-        prompt: `Source: ${src.name} (${src.url})\nTopic: ${topic}\nDifficulty: ${data.difficulty}/5\nGenerate exactly ${data.count} multiple-choice questions grounded in the text below.\n\n---\n${sourceText}\n---`,
-      });
-      const questions = output.questions.slice(0, data.count);
-      const categories = await loadCategories(supabaseAdmin);
-      const categoryIds = await categoriseQuestions(gateway, questions, categories);
-      const items = questions.map((q, i) => ({
-        job_id: job.id,
-        topic,
-        source: src.name,
+      return await runGenerationForSource({
+        src,
+        count: data.count,
         difficulty: data.difficulty,
-        prompt: q.prompt,
-        choices: q.choices,
-        correct_index: q.correct_index,
-        explanation: q.explanation ?? null,
-        category_id: categoryIds[i] ?? null,
-      }));
-      const { error: insErr } = await supabaseAdmin.from("ai_generated_items").insert(items);
-      if (insErr) throw insErr;
-      await supabaseAdmin
-        .from("ai_generation_jobs")
-        .update({ status: "review", generated_count: items.length })
-        .eq("id", job.id);
-      return { jobId: job.id, generated: items.length };
+        userId: context.userId,
+        supabaseAdmin,
+        gateway,
+      });
     } catch (e: any) {
-      await supabaseAdmin
-        .from("ai_generation_jobs")
-        .update({ status: "failed", error_message: String(e?.message ?? e).slice(0, 500) })
-        .eq("id", job.id);
       throw new Error("Generation failed: " + (e?.message ?? e));
     }
   });
+
+/** Bulk: scrape every verified source and queue generated questions for review. */
+export const generateFromAllVerifiedSources = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        countPerSource: z.number().int().min(1).max(15).default(5),
+        difficulty: z.number().int().min(1).max(5).default(2),
+        limit: z.number().int().min(1).max(50).default(20),
+      })
+      .parse(d)
+  )
+  .handler(async ({ data, context }) => {
+    await assertPlatformAdmin(context);
+    const apiKey = process.env.LOVABLE_API_KEY;
+    if (!apiKey) throw new Error("AI is not configured");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { createLovableAiGatewayProvider } = await import("./ai-gateway.server");
+    const gateway = createLovableAiGatewayProvider(apiKey);
+
+    const { data: sources, error } = await supabaseAdmin
+      .from("content_sources")
+      .select("*")
+      .eq("verified", true)
+      .order("created_at", { ascending: false })
+      .limit(data.limit);
+    if (error) throw new Error(error.message);
+    if (!sources || sources.length === 0) {
+      return { processed: 0, succeeded: 0, failed: 0, totalGenerated: 0, results: [] };
+    }
+
+    const results: { source: string; ok: boolean; generated?: number; error?: string }[] = [];
+    let succeeded = 0;
+    let failed = 0;
+    let totalGenerated = 0;
+    for (const src of sources) {
+      try {
+        const r = await runGenerationForSource({
+          src,
+          count: data.countPerSource,
+          difficulty: data.difficulty,
+          userId: context.userId,
+          supabaseAdmin,
+          gateway,
+        });
+        succeeded++;
+        totalGenerated += r.generated;
+        results.push({ source: src.name, ok: true, generated: r.generated });
+      } catch (e: any) {
+        failed++;
+        results.push({ source: src.name, ok: false, error: String(e?.message ?? e).slice(0, 200) });
+      }
+    }
+    return { processed: sources.length, succeeded, failed, totalGenerated, results };
+  });
+
 
 export const listPendingItems = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
