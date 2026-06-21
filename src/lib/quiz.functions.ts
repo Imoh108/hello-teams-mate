@@ -176,6 +176,7 @@ const SaveQuestionSchema = z.object({
   options: z.array(z.string().min(1).max(200)).length(4),
   correct_index: z.number().int().min(0).max(3),
   time_limit_s: z.number().int().min(5).max(120),
+  round: z.number().int().min(1).max(10).default(1),
 });
 export const saveQuestion = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -185,7 +186,7 @@ export const saveQuestion = createServerFn({ method: "POST" })
     if (data.id) {
       const { error } = await supabase.from("questions").update({
         prompt: data.prompt, options: data.options, correct_index: data.correct_index,
-        time_limit_s: data.time_limit_s, position: data.position,
+        time_limit_s: data.time_limit_s, position: data.position, round: data.round,
       }).eq("id", data.id);
       if (error) throw new Error(error.message);
       return { id: data.id };
@@ -193,6 +194,7 @@ export const saveQuestion = createServerFn({ method: "POST" })
     const { data: row, error } = await supabase.from("questions").insert({
       quiz_id: data.quiz_id, position: data.position, prompt: data.prompt,
       options: data.options, correct_index: data.correct_index, time_limit_s: data.time_limit_s,
+      round: data.round,
     }).select("id").single();
     if (error || !row) throw new Error(error?.message ?? "insert failed");
     return { id: row.id };
