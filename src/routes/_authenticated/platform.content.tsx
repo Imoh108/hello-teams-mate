@@ -147,7 +147,10 @@ function ContentPage() {
                     {s.license && <div className="text-xs text-muted-foreground mt-0.5">License: {s.license}</div>}
                     {s.notes && <div className="text-xs text-muted-foreground mt-1">{s.notes}</div>}
                   </div>
-                  <div className="flex items-center gap-3 shrink-0">
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Button size="sm" variant="secondary" onClick={() => generate(s.id, s.name)}>
+                      <Sparkles className="size-4 mr-1" /> Generate
+                    </Button>
                     <label className="flex items-center gap-1 text-xs">
                       <Switch checked={s.verified} onCheckedChange={(v) => toggle(s.id, v)} />
                     </label>
