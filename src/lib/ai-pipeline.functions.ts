@@ -337,13 +337,14 @@ export const generateFromAllVerifiedSources = createServerFn({ method: "POST" })
       .limit(data.limit);
     if (error) throw new Error(error.message);
     if (!sources || sources.length === 0) {
-      return { processed: 0, succeeded: 0, failed: 0, totalGenerated: 0, results: [] };
+      return { processed: 0, succeeded: 0, failed: 0, totalGenerated: 0, totalDuplicatesSkipped: 0, results: [] };
     }
 
-    const results: { source: string; ok: boolean; generated?: number; error?: string }[] = [];
+    const results: { source: string; ok: boolean; generated?: number; duplicatesSkipped?: number; error?: string }[] = [];
     let succeeded = 0;
     let failed = 0;
     let totalGenerated = 0;
+    let totalDuplicatesSkipped = 0;
     for (const src of sources) {
       try {
         const r = await runGenerationForSource({
@@ -356,13 +357,14 @@ export const generateFromAllVerifiedSources = createServerFn({ method: "POST" })
         });
         succeeded++;
         totalGenerated += r.generated;
-        results.push({ source: src.name, ok: true, generated: r.generated });
+        totalDuplicatesSkipped += r.duplicatesSkipped ?? 0;
+        results.push({ source: src.name, ok: true, generated: r.generated, duplicatesSkipped: r.duplicatesSkipped });
       } catch (e: any) {
         failed++;
         results.push({ source: src.name, ok: false, error: String(e?.message ?? e).slice(0, 200) });
       }
     }
-    return { processed: sources.length, succeeded, failed, totalGenerated, results };
+    return { processed: sources.length, succeeded, failed, totalGenerated, totalDuplicatesSkipped, results };
   });
 
 
