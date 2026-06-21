@@ -1,47 +1,52 @@
-## You can't sideload — here are 3 working alternatives
+# Pull questions from online sources, auto-categorised
 
-Sideloading ("Upload a custom app") is often disabled by your Microsoft 365 tenant admin. You don't need it to test QuizPulse. Pick one of these:
+## Why nothing happens today
+- `content_sources` is a bookmark list — URLs are stored but never fetched.
+- The AI pipeline only consumes text pasted into the "Reference material" box.
+- Generated items carry a free-text `topic` string, with no real category taxonomy.
 
----
+## What we'll build
 
-### Option A — Microsoft 365 Agents Playground (fastest, no admin needed)
+### 1. Firecrawl connector
+- Link the Firecrawl connector (`FIRECRAWL_API_KEY` injected as env).
+- Add a thin server helper `src/lib/firecrawl.server.ts` that calls the Lovable connector gateway (`https://connector-gateway.lovable.dev/firecrawl/v2/scrape`) with `formats: ['markdown']` and `onlyMainContent: true`. Returns trimmed markdown (~12k chars).
 
-A local Teams-like host that runs in your browser and loads your manifest directly. No tenant permission required.
+### 2. Categories (AI auto-assigned)
+- New table `public.question_categories` (name, slug unique, description). Seeded with a starter set (Compliance, Security, HR, Product, Sales, Engineering, Finance, Customer Service, Health & Safety, General). Platform admins manage it from a new tab on `/platform/content`.
+- Add `category_id uuid` (nullable, FK → `question_categories`) to `ai_generated_items` and `bank_questions`.
+- After AI generates a batch, a second short AI call classifies each question into one of the existing categories (returns the category slug). Unmatched → `general`.
 
-Steps I'll guide you through:
-1. Install the Teams Toolkit CLI: `npm i -g @microsoft/teamsapp-cli`
-2. Point it at `teams-package/manifest.json`
-3. Run `teamsapp preview --env local` — it opens a browser window that mounts your tab exactly like Teams would, including `teams-js` SDK calls (SSO, channel context, config save).
+### 3. "Generate from source" action
+- On `/platform/content` each verified source row gets a **Generate** button → calls a new server fn `generateFromSource({ sourceId, count })`.
+- The server fn:
+  1. Loads the source, asserts platform admin.
+  2. Scrapes the URL via Firecrawl helper.
+  3. Creates an `ai_generation_jobs` row (`source = source.name`, `topic = source.topic`).
+  4. Calls Gemini to generate `count` MCQs grounded in the scraped text (reusing the existing `QuestionSchema`).
+  5. Calls Gemini once more to classify each question → `category_id`.
+  6. Inserts into `ai_generated_items` with `status='pending'` and the chosen category.
 
-Best for: verifying the channel config screen, SSO redemption, and the static tab UI without involving your tenant at all.
+### 4. Pipeline UI updates (`/platform/pipeline`)
+- Review queue shows the AI-assigned **Category** badge next to topic/source, with a dropdown to override before approve.
+- "Recent jobs" gains a per-category count summary.
+- Existing manual "Generate" form stays as-is.
 
----
+### 5. (Out of scope for this plan) scheduled crawl
+- Per your choice ("Firecrawl scrape per source"), we trigger on-demand only. A nightly cron can be layered on later using the same server fn.
 
-### Option B — Developer Portal for Teams (web, needs sideload permission too — skip if A failed for the same reason)
+## Technical notes
+- Firecrawl is called server-side only; API key never reaches the browser.
+- Migration adds `question_categories`, seed rows, FK columns on `ai_generated_items` + `bank_questions`, plus GRANTs and RLS (platform_admin read/write on categories; existing policies cover the FK columns).
+- No changes to `quizzes`/`questions` — categories live on bank/generated questions; quiz generation from banks already works.
+- Approving an item carries `category_id` over when it's promoted into a bank question (extends the existing approve path).
 
-Only useful if "upload custom app" is blocked but "Developer Portal" is allowed. Usually both are gated together, so try A first.
+## Files touched
+- new: `src/lib/firecrawl.server.ts`
+- edit: `src/lib/ai-pipeline.functions.ts` (add `generateFromSource`, AI categoriser, category in review/approve)
+- edit: `src/lib/platform-content.functions.ts` (load sources with topic; expose category CRUD)
+- edit: `src/routes/_authenticated/platform.content.tsx` (Generate button per source + Categories tab)
+- edit: `src/routes/_authenticated/platform.pipeline.tsx` (category badge + override)
+- migration: categories table, seed, FK columns, grants, policies
 
----
-
-### Option C — Free Microsoft 365 Developer Tenant (full real Teams, ~15 min)
-
-Sign up at `developer.microsoft.com/microsoft-365/dev-program` → get a free sandbox tenant where **you are the admin**, so sideloading is on by default. Then upload `quizpulse-teams.zip` normally.
-
-Best for: full end-to-end test including the tenant-org auto-join logic from Phase 2 (you can invite a second sandbox user to verify two users land in the same org).
-
----
-
-### What I'd do (recommendation)
-
-Start with **Option A** today — it tests 90% of the surface in 5 minutes with zero admin friction. Use **Option C** later when you want to validate the multi-user tenant-join flow, which Option A can't simulate (only one fake user).
-
----
-
-### What I will do if you approve
-
-1. Add a short `TESTING.md` at the repo root with the exact commands for Option A and the signup link for Option C, including the manifest path and the localhost URL you need to whitelist in `validDomains` temporarily for the Playground.
-2. Add `localhost` and `127.0.0.1` entries (commented out by default) to `teams-package/manifest.json`'s `validDomains` so you can flip them on for local testing without breaking the production manifest.
-
-No app code changes — this is docs + manifest only.
-
-Reply **go** to apply, or tell me which option you want and I'll tailor the docs to just that one.
+## Prerequisite (one click)
+Link the Firecrawl connector when build starts. If you'd rather skip Firecrawl, say so and I'll fall back to plain server fetch + HTML-to-text (worse quality on JS-heavy sites).
