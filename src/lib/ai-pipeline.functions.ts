@@ -195,9 +195,52 @@ async function runGenerationForSource(opts: {
       prompt: `Source: ${src.name} (${src.url})\nTopic: ${topic}\nDifficulty: ${difficulty}/5\nGenerate exactly ${count} multiple-choice questions grounded in the text below.\n\n---\n${sourceText}\n---`,
     });
     const questions = output.questions.slice(0, count);
+
+    // Dedupe: drop questions whose normalized prompt already exists in pending,
+    // approved (ai_generated_items) or promoted bank_questions for this source.
+    const norm = (s: string) => s.toLowerCase().replace(/\s+/g, " ").trim();
+    const [{ data: existingAi }, { data: existingBank }] = await Promise.all([
+      supabaseAdmin
+        .from("ai_generated_items")
+        .select("prompt")
+        .eq("source", src.name)
+        .limit(2000),
+      supabaseAdmin
+        .from("bank_questions")
+        .select("prompt")
+        .eq("source", src.name)
+        .limit(2000),
+    ]);
+    const seen = new Set<string>([
+      ...((existingAi ?? []).map((r: any) => norm(r.prompt))),
+      ...((existingBank ?? []).map((r: any) => norm(r.prompt))),
+    ]);
+    const uniqueQuestions: typeof questions = [];
+    const uniqueIndices: number[] = [];
+    questions.forEach((q, i) => {
+      const key = norm(q.prompt);
+      if (seen.has(key)) return;
+      seen.add(key);
+      uniqueQuestions.push(q);
+      uniqueIndices.push(i);
+    });
+    const duplicatesSkipped = questions.length - uniqueQuestions.length;
+
+    if (uniqueQuestions.length === 0) {
+      await supabaseAdmin
+        .from("ai_generation_jobs")
+        .update({
+          status: "review",
+          generated_count: 0,
+          error_message: `Skipped ${duplicatesSkipped} duplicate(s); nothing new to review.`,
+        })
+        .eq("id", job.id);
+      return { jobId: job.id, generated: 0, duplicatesSkipped };
+    }
+
     const categories = await loadCategories(supabaseAdmin);
-    const categoryIds = await categoriseQuestions(gateway, questions, categories);
-    const items = questions.map((q, i) => ({
+    const categoryIds = await categoriseQuestions(gateway, uniqueQuestions, categories);
+    const items = uniqueQuestions.map((q, i) => ({
       job_id: job.id,
       topic,
       source: src.name,
@@ -214,7 +257,8 @@ async function runGenerationForSource(opts: {
       .from("ai_generation_jobs")
       .update({ status: "review", generated_count: items.length })
       .eq("id", job.id);
-    return { jobId: job.id, generated: items.length };
+    return { jobId: job.id, generated: items.length, duplicatesSkipped };
+
   } catch (e: any) {
     await supabaseAdmin
       .from("ai_generation_jobs")
