@@ -56,7 +56,7 @@ async function categoriseQuestions(
   categories: { id: string; slug: string; name: string; description: string | null }[]
 ): Promise<(string | null)[]> {
   const slugToId = new Map(categories.map((c) => [c.slug, c.id]));
-  const fallback = slugToId.get("general") ?? null;
+  const fallback = slugToId.get("general-knowledge") ?? null;
   if (questions.length === 0) return [];
 
   try {
