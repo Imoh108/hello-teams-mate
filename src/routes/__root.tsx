@@ -15,6 +15,16 @@ import { useTeamsContext } from "../hooks/use-teams-context";
 import "../lib/i18n";
 
 function NotFoundComponent() {
+  const router = useRouter();
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const path = window.location.pathname;
+    if (path.startsWith("/_authenticated/") || path === "/_authenticated") {
+      const stripped = path.replace(/^\/_authenticated/, "") || "/";
+      window.location.replace(stripped + window.location.search + window.location.hash);
+    }
+  }, [router]);
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">

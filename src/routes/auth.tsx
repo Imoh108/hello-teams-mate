@@ -13,8 +13,24 @@ import { track } from "@/lib/track";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({ meta: [{ title: "Sign in — QuizPulse" }, { name: "description", content: "Sign in to host or join QuizPulse rounds." }] }),
+  validateSearch: (s: Record<string, unknown>) => ({
+    redirect: typeof s.redirect === "string" ? s.redirect : undefined,
+  }),
   component: AuthPage,
 });
+
+function safeRedirect(target: string | undefined): string {
+  if (!target) return "/app";
+  try {
+    // Only allow same-origin relative paths.
+    if (target.startsWith("/") && !target.startsWith("//")) {
+      // Strip the pathless layout segment if present.
+      const cleaned = target.replace(/^\/_authenticated(\/|$)/, "/");
+      return cleaned || "/app";
+    }
+  } catch {}
+  return "/app";
+}
 
 function AuthShell({ children }: { children: React.ReactNode }) {
   return (
@@ -46,12 +62,15 @@ function AuthPageInner() {
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
 
+  const search = Route.useSearch();
+  const dest = safeRedirect(search.redirect);
+
   const onGoogle = async () => {
     setLoading(true);
-    const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin + "/app" });
+    const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin + dest });
     if (result.error) { toast.error("Google sign-in failed"); setLoading(false); return; }
     if (result.redirected) return;
-    navigate({ to: "/app" });
+    navigate({ to: dest as any });
   };
 
   const onSignIn = async (e: React.FormEvent) => {
@@ -60,21 +79,21 @@ function AuthPageInner() {
     setLoading(false);
     if (error) return toast.error(error.message);
     track("sign_in", { method: "password" });
-    navigate({ to: "/app" });
+    navigate({ to: dest as any });
   };
 
   const onSignUp = async (e: React.FormEvent) => {
     e.preventDefault(); setLoading(true);
     const { data, error } = await supabase.auth.signUp({
       email, password,
-      options: { emailRedirectTo: `${window.location.origin}/app`, data: { display_name: displayName || email.split("@")[0] } },
+      options: { emailRedirectTo: `${window.location.origin}${dest}`, data: { display_name: displayName || email.split("@")[0] } },
     });
     setLoading(false);
     if (error) return toast.error(error.message);
     if (data.session) {
       track("sign_up", { method: "password" });
       toast.success("Account created");
-      navigate({ to: "/app" });
+      navigate({ to: dest as any });
     } else {
       toast.success("Check your email to confirm your account.");
     }
