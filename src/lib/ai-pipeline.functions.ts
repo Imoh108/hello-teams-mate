@@ -158,6 +158,72 @@ export const generatePlatformQuestions = createServerFn({ method: "POST" })
     }
   });
 
+/** Shared: scrape one source, generate, categorise, insert pending items. */
+async function runGenerationForSource(opts: {
+  src: any;
+  count: number;
+  difficulty: number;
+  userId: string;
+  supabaseAdmin: any;
+  gateway: ReturnType<typeof import("./ai-gateway.server").createLovableAiGatewayProvider>;
+}) {
+  const { src, count, difficulty, userId, supabaseAdmin, gateway } = opts;
+  const { scrapeUrlMarkdown } = await import("./firecrawl.server");
+  const topic = src.topic || src.name;
+
+  const { data: job, error: jobErr } = await supabaseAdmin
+    .from("ai_generation_jobs")
+    .insert({
+      source: src.name,
+      topic,
+      status: "generating",
+      prompt: `Scraped from ${src.url}`,
+      created_by: userId,
+    })
+    .select()
+    .single();
+  if (jobErr) throw new Error(jobErr.message);
+
+  try {
+    const sourceText = await scrapeUrlMarkdown(src.url);
+    const { generateText, Output } = await import("ai");
+    const { output } = await generateText({
+      model: gateway("google/gemini-3-flash-preview"),
+      output: Output.object({ schema: QuestionSchema }),
+      system:
+        "You write high-quality multiple-choice quiz questions strictly grounded in the provided source text. Each question has exactly 4 plausible choices, one correct. Avoid trick wording.",
+      prompt: `Source: ${src.name} (${src.url})\nTopic: ${topic}\nDifficulty: ${difficulty}/5\nGenerate exactly ${count} multiple-choice questions grounded in the text below.\n\n---\n${sourceText}\n---`,
+    });
+    const questions = output.questions.slice(0, count);
+    const categories = await loadCategories(supabaseAdmin);
+    const categoryIds = await categoriseQuestions(gateway, questions, categories);
+    const items = questions.map((q, i) => ({
+      job_id: job.id,
+      topic,
+      source: src.name,
+      difficulty,
+      prompt: q.prompt,
+      choices: q.choices,
+      correct_index: q.correct_index,
+      explanation: q.explanation ?? null,
+      category_id: categoryIds[i] ?? null,
+    }));
+    const { error: insErr } = await supabaseAdmin.from("ai_generated_items").insert(items);
+    if (insErr) throw insErr;
+    await supabaseAdmin
+      .from("ai_generation_jobs")
+      .update({ status: "review", generated_count: items.length })
+      .eq("id", job.id);
+    return { jobId: job.id, generated: items.length };
+  } catch (e: any) {
+    await supabaseAdmin
+      .from("ai_generation_jobs")
+      .update({ status: "failed", error_message: String(e?.message ?? e).slice(0, 500) })
+      .eq("id", job.id);
+    throw e;
+  }
+}
+
 /** Scrape a saved content source with Firecrawl, generate + categorise questions. */
 export const generateFromSource = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
