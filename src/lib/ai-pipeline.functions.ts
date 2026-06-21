@@ -208,8 +208,7 @@ async function runGenerationForSource(opts: {
       supabaseAdmin
         .from("bank_questions")
         .select("prompt")
-        .eq("source", src.name)
-        .limit(2000),
+        .limit(5000),
     ]);
     const seen = new Set<string>([
       ...((existingAi ?? []).map((r: any) => norm(r.prompt))),
