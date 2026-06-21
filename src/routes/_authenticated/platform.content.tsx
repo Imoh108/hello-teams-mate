@@ -140,10 +140,13 @@ function ContentPage() {
       </Card>
 
       <Card>
-        <CardHeader className="pb-2">
+        <CardHeader className="pb-2 flex flex-row items-center justify-between gap-2">
           <CardTitle className="text-base flex items-center gap-2">
             <Library className="size-4" /> Library ({sources.length})
           </CardTitle>
+          <Button size="sm" onClick={generateAll} disabled={verifiedCount === 0}>
+            <Sparkles className="size-4 mr-1" /> Generate from all verified ({verifiedCount})
+          </Button>
         </CardHeader>
         <CardContent>
           {sources.length === 0 ? (
