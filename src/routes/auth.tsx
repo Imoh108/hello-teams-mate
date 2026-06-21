@@ -70,7 +70,7 @@ function AuthPageInner() {
     const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin + dest });
     if (result.error) { toast.error("Google sign-in failed"); setLoading(false); return; }
     if (result.redirected) return;
-    navigate({ to: dest });
+    navigate({ to: dest as any });
   };
 
   const onSignIn = async (e: React.FormEvent) => {
@@ -79,7 +79,7 @@ function AuthPageInner() {
     setLoading(false);
     if (error) return toast.error(error.message);
     track("sign_in", { method: "password" });
-    navigate({ to: dest });
+    navigate({ to: dest as any });
   };
 
   const onSignUp = async (e: React.FormEvent) => {
@@ -93,7 +93,7 @@ function AuthPageInner() {
     if (data.session) {
       track("sign_up", { method: "password" });
       toast.success("Account created");
-      navigate({ to: dest });
+      navigate({ to: dest as any });
     } else {
       toast.success("Check your email to confirm your account.");
     }
