@@ -87,26 +87,38 @@ function QuizEditor() {
         )}
 
         <div className="space-y-3">
-          {qs.map((q, i) => (
-            <div key={q.id} className="glass-panel rounded-xl p-5">
-              <div className="flex items-start gap-4">
-                <div className="font-mono-tab text-2xl text-primary">{i + 1}</div>
-                <div className="flex-1">
-                  <div className="font-display font-semibold">{q.prompt}</div>
-                  <div className="grid grid-cols-2 gap-2 mt-3">
-                    {q.options.map((o, oi) => (
-                      <div key={oi} className={`text-sm rounded-md border px-3 py-2 ${oi === q.correct_index ? "border-correct/40 bg-correct/10" : "border-border"}`}>
-                        {oi === q.correct_index && <Check className="inline size-3 mr-1 text-correct" />}{o}
-                      </div>
-                    ))}
+          {qs.map((q, i) => {
+            const prevRound = i > 0 ? qs[i - 1].round : 0;
+            const showHeader = q.round !== prevRound;
+            return (
+              <div key={q.id}>
+                {showHeader && (
+                  <div className="text-xs uppercase tracking-wider text-muted-foreground font-display mt-4 mb-2">
+                    Round {q.round}
                   </div>
-                  <div className="text-xs text-muted-foreground mt-2">{q.time_limit_s}s</div>
+                )}
+                <div className="glass-panel rounded-xl p-5">
+                  <div className="flex items-start gap-4">
+                    <div className="font-mono-tab text-2xl text-primary">{i + 1}</div>
+                    <div className="flex-1">
+                      <div className="font-display font-semibold">{q.prompt}</div>
+                      <div className="grid grid-cols-2 gap-2 mt-3">
+                        {q.options.map((o, oi) => (
+                          <div key={oi} className={`text-sm rounded-md border px-3 py-2 ${oi === q.correct_index ? "border-correct/40 bg-correct/10" : "border-border"}`}>
+                            {oi === q.correct_index && <Check className="inline size-3 mr-1 text-correct" />}{o}
+                          </div>
+                        ))}
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-2">{q.time_limit_s}s</div>
+                    </div>
+                    <Button onClick={() => onDelete(q.id!)} variant="ghost" size="icon"><Trash2 className="size-4" /></Button>
+                  </div>
                 </div>
-                <Button onClick={() => onDelete(q.id!)} variant="ghost" size="icon"><Trash2 className="size-4" /></Button>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
+
 
         {draft ? (
           <div className="glass-panel rounded-xl p-5 mt-4 space-y-3">
