@@ -8,13 +8,14 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { Library, Plus, Trash2, ExternalLink, ShieldCheck } from "lucide-react";
+import { Library, Plus, Trash2, ExternalLink, ShieldCheck, Sparkles } from "lucide-react";
 import {
   listContentSources,
   createContentSource,
   toggleSourceVerified,
   deleteContentSource,
 } from "@/lib/platform-content.functions";
+import { generateFromSource } from "@/lib/ai-pipeline.functions";
 
 export const Route = createFileRoute("/_authenticated/platform/content")({
   component: ContentPage,
