@@ -141,10 +141,13 @@ function PipelinePage() {
                   <li key={it.id} className="rounded-md border border-border p-3">
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1">
-                        <div className="text-xs text-muted-foreground mb-1 flex gap-2">
+                        <div className="text-xs text-muted-foreground mb-1 flex flex-wrap items-center gap-2">
                           <Badge variant="secondary">{it.topic}</Badge>
                           <Badge variant="outline">{it.source}</Badge>
                           <span>difficulty {it.difficulty}</span>
+                          {(it as any).question_categories?.name && (
+                            <Badge>{(it as any).question_categories.name}</Badge>
+                          )}
                         </div>
                         <div className="font-medium">{it.prompt}</div>
                         <ol className="mt-2 text-sm space-y-1 list-decimal list-inside">
@@ -156,7 +159,19 @@ function PipelinePage() {
                           <p className="text-xs text-muted-foreground mt-2">{it.explanation}</p>
                         )}
                       </div>
-                      <div className="flex flex-col gap-2 shrink-0">
+                      <div className="flex flex-col gap-2 shrink-0 w-44">
+                        <Select
+                          value={it.category_id ?? "__none"}
+                          onValueChange={(v) => changeCategory(it.id, v)}
+                        >
+                          <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Category" /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="__none">Uncategorised</SelectItem>
+                            {categories.map((c) => (
+                              <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                         <Button size="sm" onClick={() => decide(it.id, "approved")}>
                           <Check className="size-4 mr-1" /> Approve
                         </Button>
