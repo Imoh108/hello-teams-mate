@@ -70,6 +70,28 @@ function ContentPage() {
     }
   }
 
+  const verifiedCount = sources.filter((s: any) => s.verified).length;
+
+  async function generateAll() {
+    if (verifiedCount === 0) {
+      toast.error("No verified sources to scrape");
+      return;
+    }
+    if (!confirm(`Scrape all ${verifiedCount} verified source(s) and queue questions for review?`)) return;
+    const t = toast.loading(`Scraping ${verifiedCount} sources…`);
+    try {
+      const r = await generateFromAllVerifiedSources({
+        data: { countPerSource: 5, difficulty: 2, limit: 50 },
+      });
+      toast.success(
+        `Queued ${r.totalGenerated} questions from ${r.succeeded}/${r.processed} sources${r.failed ? ` (${r.failed} failed)` : ""}`,
+        { id: t }
+      );
+    } catch (e: any) {
+      toast.error(e?.message ?? "Bulk generation failed", { id: t });
+    }
+  }
+
   if (err) return <div className="text-destructive">{err}</div>;
 
   return (
