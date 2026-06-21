@@ -85,6 +85,39 @@ function Dashboard() {
     } catch (e: any) { toast.error(e.message); }
   };
 
+  useEffect(() => {
+    if (!openCreate || cats !== null) return;
+    loadCatsFn().then((rows: any) => setCats(rows as Cat[])).catch((e: any) => toast.error(e.message));
+  }, [openCreate]);
+
+  const poolAvailable = useMemo(() => {
+    if (!cats) return 0;
+    return cats.filter((c) => selectedCats.has(c.id)).reduce((sum, c) => sum + c.approved_count, 0);
+  }, [cats, selectedCats]);
+  const requestedTotal = rounds * qpr;
+
+  const onBuild = async () => {
+    if (!title.trim()) return toast.error("Title required");
+    if (selectedCats.size === 0) return toast.error("Pick at least one category");
+    if (requestedTotal > poolAvailable) return toast.error(`Only ${poolAvailable} questions available in the chosen pool`);
+    setBuilding(true);
+    try {
+      const row = await buildFn({ data: {
+        title: title.trim(),
+        description: desc.trim() || undefined,
+        category_ids: Array.from(selectedCats),
+        rounds, questions_per_round: qpr,
+        time_limit_s: timeLimit,
+        difficulty,
+      } });
+      track("quiz_built_from_categories", { rounds, qpr, total: requestedTotal });
+      setOpenCreate(false);
+      setTitle(""); setDesc(""); setSelectedCats(new Set());
+      navigate({ to: "/quizzes/$id", params: { id: (row as any).id } });
+    } catch (e: any) { toast.error(e.message); }
+    finally { setBuilding(false); }
+  };
+
   const onClone = async (id: string) => {
     try {
       const row = await cloneFn({ data: { source_quiz_id: id } });
