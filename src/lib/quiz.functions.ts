@@ -38,6 +38,105 @@ export const createQuiz = createServerFn({ method: "POST" })
     return row;
   });
 
+// --- Create quiz from seeded categories ---
+const CreateFromCategoriesSchema = z.object({
+  title: z.string().min(1).max(120),
+  description: z.string().max(500).optional(),
+  category_ids: z.array(z.string().uuid()).min(1).max(20),
+  rounds: z.number().int().min(1).max(10),
+  questions_per_round: z.number().int().min(1).max(30),
+  time_limit_s: z.number().int().min(5).max(120).default(20),
+  difficulty: z.enum(["easy", "medium", "hard", "mixed"]).default("mixed"),
+});
+
+export const createQuizFromCategories = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => CreateFromCategoriesSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const total = data.rounds * data.questions_per_round;
+
+    await supabase.from("user_roles").upsert(
+      { user_id: userId, role: "manager" },
+      { onConflict: "user_id,role" }
+    );
+
+    // Pull approved items from the chosen categories, filter by difficulty bucket
+    let query = supabase
+      .from("ai_generated_items")
+      .select("prompt,choices,correct_index,difficulty,category_id")
+      .eq("status", "approved")
+      .in("category_id", data.category_ids);
+    if (data.difficulty === "easy") query = query.lte("difficulty", 2);
+    else if (data.difficulty === "medium") query = query.eq("difficulty", 3);
+    else if (data.difficulty === "hard") query = query.gte("difficulty", 4);
+
+    const { data: pool, error: poolErr } = await query.limit(2000);
+    if (poolErr) throw new Error(poolErr.message);
+    if (!pool || pool.length < total) {
+      throw new Error(`Not enough questions in the chosen pool. Requested ${total}, available ${pool?.length ?? 0}.`);
+    }
+
+    // Fisher–Yates shuffle, take total
+    const shuffled = [...pool];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    const picked = shuffled.slice(0, total);
+
+    // Create the quiz
+    const { data: quiz, error: qErr } = await supabase
+      .from("quizzes")
+      .insert({
+        owner_id: userId,
+        title: data.title,
+        description: data.description ?? null,
+        topic_pack: "general_culture",
+      })
+      .select()
+      .single();
+    if (qErr || !quiz) throw new Error(qErr?.message ?? "Failed to create quiz");
+
+    // Distribute round-robin across rounds so categories interleave
+    const rows = picked.map((q, idx) => {
+      const round = (idx % data.rounds) + 1;
+      return {
+        quiz_id: quiz.id,
+        position: idx + 1,
+        round,
+        prompt: q.prompt,
+        options: Array.isArray(q.choices) ? q.choices : [],
+        correct_index: q.correct_index,
+        time_limit_s: data.time_limit_s,
+      };
+    });
+    const { error: insErr } = await supabase.from("questions").insert(rows);
+    if (insErr) throw new Error(insErr.message);
+    return quiz;
+  });
+
+// --- Categories listing with approved-question counts (for builder UI) ---
+export const listCategoryPool = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase } = context;
+    const { data: cats, error } = await supabase
+      .from("question_categories")
+      .select("id,name,slug,description")
+      .order("name");
+    if (error) throw new Error(error.message);
+    const { data: items } = await supabase
+      .from("ai_generated_items")
+      .select("category_id")
+      .eq("status", "approved");
+    const counts = new Map<string, number>();
+    (items ?? []).forEach((r: any) => {
+      counts.set(r.category_id, (counts.get(r.category_id) ?? 0) + 1);
+    });
+    return (cats ?? []).map((c) => ({ ...c, approved_count: counts.get(c.id) ?? 0 }));
+  });
+
 const CloneQuizSchema = z.object({ source_quiz_id: z.string().uuid() });
 export const cloneQuiz = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -77,6 +176,7 @@ const SaveQuestionSchema = z.object({
   options: z.array(z.string().min(1).max(200)).length(4),
   correct_index: z.number().int().min(0).max(3),
   time_limit_s: z.number().int().min(5).max(120),
+  round: z.number().int().min(1).max(10).default(1),
 });
 export const saveQuestion = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -86,7 +186,7 @@ export const saveQuestion = createServerFn({ method: "POST" })
     if (data.id) {
       const { error } = await supabase.from("questions").update({
         prompt: data.prompt, options: data.options, correct_index: data.correct_index,
-        time_limit_s: data.time_limit_s, position: data.position,
+        time_limit_s: data.time_limit_s, position: data.position, round: data.round,
       }).eq("id", data.id);
       if (error) throw new Error(error.message);
       return { id: data.id };
@@ -94,6 +194,7 @@ export const saveQuestion = createServerFn({ method: "POST" })
     const { data: row, error } = await supabase.from("questions").insert({
       quiz_id: data.quiz_id, position: data.position, prompt: data.prompt,
       options: data.options, correct_index: data.correct_index, time_limit_s: data.time_limit_s,
+      round: data.round,
     }).select("id").single();
     if (error || !row) throw new Error(error?.message ?? "insert failed");
     return { id: row.id };
