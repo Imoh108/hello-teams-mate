@@ -239,7 +239,11 @@ export const joinSessionByCode = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const code = data.code.trim().toUpperCase();
-    const { data: session, error } = await supabase.from("sessions").select("*").eq("join_code", code).maybeSingle();
+    // Use admin client for the lookup: sessions RLS only allows the host or
+    // existing players to SELECT, so a brand-new joiner can't find the row
+    // by code through their own client.
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: session, error } = await supabaseAdmin.from("sessions").select("*").eq("join_code", code).maybeSingle();
     if (error) throw new Error(error.message);
     if (!session) throw new Error("Session not found.");
     if (session.status === "ended") throw new Error("This session has ended.");
