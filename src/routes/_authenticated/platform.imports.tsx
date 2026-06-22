@@ -240,24 +240,126 @@ function ImportsPage() {
     );
   };
 
-  const retry = async (source: string) => {
-    setRetrying(source);
+  const retry = async (r: Run) => {
+    setRetrying(r.id);
     try {
-      const fn = source === "Open Trivia DB" ? otdbFn : source === "The Trivia API" ? ttaFn : null;
-      if (!fn) {
-        toast.error(`No retry handler for ${source}`);
-        return;
+      const scoped: any = await retryScopedFn({ data: { runId: r.id, maxPerCategory: 200 } });
+      if (scoped?.scoped) {
+        const cats =
+          (scoped.categories?.otdb?.length ?? 0) + (scoped.categories?.tta?.length ?? 0);
+        toast.success(
+          `Retried ${cats} failed categor${cats === 1 ? "y" : "ies"}: ${scoped.imported} new, ${scoped.skipped} deduped${
+            scoped.errors?.length ? `, ${scoped.errors.length} errors` : ""
+          }`,
+        );
+      } else {
+        const fn =
+          r.source === "Open Trivia DB"
+            ? otdbFn
+            : r.source === "The Trivia API"
+              ? ttaFn
+              : null;
+        if (!fn) {
+          toast.error(`No retry handler for ${r.source}`);
+          return;
+        }
+        toast.info("No scoped failures found — retrying full bank");
+        const full: any = await fn({ data: { maxPerCategory: 200 } });
+        toast.success(
+          `Retried ${r.source}: ${full.imported} new, ${full.skipped} deduped${full.errors?.length ? `, ${full.errors.length} errors` : ""}`,
+        );
       }
-      const r: any = await fn({ data: { maxPerCategory: 200 } });
-      toast.success(
-        `Retried ${source}: ${r.imported} new, ${r.skipped} deduped${r.errors?.length ? `, ${r.errors.length} errors` : ""}`,
-      );
       await load();
     } catch (e: any) {
       toast.error(`Retry failed: ${e?.message ?? "unknown"}`);
     } finally {
       setRetrying(null);
     }
+  };
+
+  const share = async (key: string, filename: string, csv: string) => {
+    setSharing(key);
+    try {
+      const res: any = await shareFn({ data: { filename, csv } });
+      await navigator.clipboard.writeText(res.url);
+      toast.success(`Link copied (valid ${res.expiresInDays} days)`);
+    } catch (e: any) {
+      toast.error(`Share failed: ${e?.message ?? "unknown"}`);
+    } finally {
+      setSharing(null);
+    }
+  };
+
+  const buildHistoryCsv = () => {
+    const rows = filtered.map((r) => ({
+      started_at: r.started_at,
+      finished_at: r.finished_at ?? "",
+      duration_ms: r.finished_at
+        ? new Date(r.finished_at).getTime() - new Date(r.started_at).getTime()
+        : "",
+      source: r.source,
+      fetched: r.fetched,
+      deduplicated: r.deduplicated,
+      inserted: r.inserted,
+      error_count: r.error_count,
+      status: runStatus(r),
+    }));
+    return toCsv(rows, [
+      "started_at",
+      "finished_at",
+      "duration_ms",
+      "source",
+      "fetched",
+      "deduplicated",
+      "inserted",
+      "error_count",
+      "status",
+    ]);
+  };
+
+  const buildLastRunCsv = () => {
+    if (!lastOverall) return "";
+    const summary = [
+      {
+        kind: "summary",
+        source: lastOverall.source,
+        started_at: lastOverall.started_at,
+        finished_at: lastOverall.finished_at ?? "",
+        fetched: lastOverall.fetched,
+        deduplicated: lastOverall.deduplicated,
+        inserted: lastOverall.inserted,
+        error_count: lastOverall.error_count,
+        error_group: "",
+        error_message: "",
+      },
+    ];
+    const errs = (lastOverall.errors ?? []).map((e) => {
+      const m = e.match(/^([^:]+):\s*(.*)$/);
+      return {
+        kind: "error",
+        source: lastOverall.source,
+        started_at: lastOverall.started_at,
+        finished_at: "",
+        fetched: "",
+        deduplicated: "",
+        inserted: "",
+        error_count: "",
+        error_group: m ? m[1] : "Other",
+        error_message: m ? m[2] : e,
+      };
+    });
+    return toCsv([...summary, ...errs] as any, [
+      "kind",
+      "source",
+      "started_at",
+      "finished_at",
+      "fetched",
+      "deduplicated",
+      "inserted",
+      "error_count",
+      "error_group",
+      "error_message",
+    ]);
   };
 
   const canRetry = (r: Run) => runStatus(r) !== "clean";
