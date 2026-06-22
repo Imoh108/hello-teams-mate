@@ -4,6 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useServerFn } from "@tanstack/react-start";
 import { startQuestion, revealAnswers, endSession } from "@/lib/quiz.functions";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { ArrowRight, Eye, Square, Copy, Link2, Share2 } from "lucide-react";
 
@@ -28,6 +30,15 @@ function HostScreen() {
   const [players, setPlayers] = useState<Player[]>([]);
   const [answeredCount, setAnsweredCount] = useState(0);
   const [now, setNow] = useState(Date.now());
+  const [teamsMsg, setTeamsMsg] = useState("");
+
+  // Initialize default Teams share message once we have a session code
+  useEffect(() => {
+    if (session && !teamsMsg) {
+      setTeamsMsg(`Join my QuizPulse round — code ${session.join_code}`);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session?.join_code]);
 
   useEffect(() => {
     const t = setInterval(() => setNow(Date.now()), 250);
@@ -108,12 +119,19 @@ function HostScreen() {
     navigator.clipboard.writeText(joinUrl());
     toast.success("Join link copied");
   };
+  const teamsShareUrl = () => {
+    if (!session) return "";
+    const msg = teamsMsg.trim() || `Join my QuizPulse round — code ${session.join_code}`;
+    return `https://teams.microsoft.com/share?href=${encodeURIComponent(joinUrl())}&msgText=${encodeURIComponent(msg)}&preview=true`;
+  };
   const shareToTeams = () => {
     if (!session) return;
-    const url = joinUrl();
-    const msg = `Join my QuizPulse round — code ${session.join_code}`;
-    const teamsUrl = `https://teams.microsoft.com/share?href=${encodeURIComponent(url)}&msgText=${encodeURIComponent(msg)}&preview=true`;
-    window.open(teamsUrl, "_blank", "noopener,noreferrer");
+    window.open(teamsShareUrl(), "_blank", "noopener,noreferrer");
+  };
+  const copyTeamsLink = () => {
+    if (!session) return;
+    navigator.clipboard.writeText(teamsShareUrl());
+    toast.success("Teams share link copied");
   };
 
   if (!session) return <div className="min-h-screen grid place-items-center text-muted-foreground">Loading…</div>;
@@ -149,7 +167,24 @@ function HostScreen() {
               <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
                 <Button onClick={copyCode} variant="outline" size="sm"><Copy className="size-4 mr-1" /> Copy code</Button>
                 <Button onClick={copyLink} variant="outline" size="sm"><Link2 className="size-4 mr-1" /> Copy join link</Button>
-                <Button onClick={shareToTeams} variant="outline" size="sm"><Share2 className="size-4 mr-1" /> Share to Teams</Button>
+              </div>
+
+              <div className="mt-6 max-w-md mx-auto text-left">
+                <Label htmlFor="teams-msg" className="text-xs text-muted-foreground">Teams share message</Label>
+                <Textarea
+                  id="teams-msg"
+                  value={teamsMsg}
+                  onChange={(e) => setTeamsMsg(e.target.value)}
+                  rows={2}
+                  maxLength={240}
+                  placeholder={`Join my QuizPulse round — code ${session.join_code}`}
+                  className="mt-1 text-sm"
+                />
+                <p className="mt-1 text-[11px] text-muted-foreground text-right">{teamsMsg.length}/240</p>
+                <div className="mt-2 flex flex-wrap items-center justify-center gap-2">
+                  <Button onClick={shareToTeams} variant="outline" size="sm"><Share2 className="size-4 mr-1" /> Share to Teams</Button>
+                  <Button onClick={copyTeamsLink} variant="outline" size="sm"><Copy className="size-4 mr-1" /> Copy Teams share link</Button>
+                </div>
               </div>
               <p className="text-sm text-muted-foreground mt-1">{players.length} player{players.length === 1 ? "" : "s"} joined</p>
               <Button onClick={onNext} size="lg" className="mt-6"><ArrowRight className="size-4 mr-1" /> Start first question</Button>
