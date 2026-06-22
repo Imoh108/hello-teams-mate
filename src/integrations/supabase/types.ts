@@ -25,6 +25,7 @@ export type Database = {
           id: string
           job_id: string | null
           prompt: string
+          prompt_hash: string | null
           reject_reason: string | null
           reviewed_at: string | null
           reviewed_by: string | null
@@ -43,6 +44,7 @@ export type Database = {
           id?: string
           job_id?: string | null
           prompt: string
+          prompt_hash?: string | null
           reject_reason?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
@@ -61,6 +63,7 @@ export type Database = {
           id?: string
           job_id?: string | null
           prompt?: string
+          prompt_hash?: string | null
           reject_reason?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
