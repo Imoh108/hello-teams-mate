@@ -5,7 +5,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { startQuestion, revealAnswers, endSession } from "@/lib/quiz.functions";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { ArrowRight, Eye, Square, Copy, Link2 } from "lucide-react";
+import { ArrowRight, Eye, Square, Copy, Link2, Share2 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/host/$sessionId")({
   head: () => ({ meta: [{ title: "Host — QuizPulse" }] }),
@@ -101,11 +101,19 @@ function HostScreen() {
   };
 
   const copyCode = () => { if (session) { navigator.clipboard.writeText(session.join_code); toast.success("Code copied"); } };
+  const joinUrl = () =>
+    session ? `${window.location.origin}/play?code=${encodeURIComponent(session.join_code)}` : "";
   const copyLink = () => {
     if (!session) return;
-    const url = `${window.location.origin}/play?code=${encodeURIComponent(session.join_code)}`;
-    navigator.clipboard.writeText(url);
+    navigator.clipboard.writeText(joinUrl());
     toast.success("Join link copied");
+  };
+  const shareToTeams = () => {
+    if (!session) return;
+    const url = joinUrl();
+    const msg = `Join my QuizPulse round — code ${session.join_code}`;
+    const teamsUrl = `https://teams.microsoft.com/share?href=${encodeURIComponent(url)}&msgText=${encodeURIComponent(msg)}&preview=true`;
+    window.open(teamsUrl, "_blank", "noopener,noreferrer");
   };
 
   if (!session) return <div className="min-h-screen grid place-items-center text-muted-foreground">Loading…</div>;
@@ -122,6 +130,9 @@ function HostScreen() {
             <button onClick={copyLink} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground rounded-md border border-border px-2 py-1" title="Copy join link">
               <Link2 className="size-3" /> Link
             </button>
+            <button onClick={shareToTeams} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground rounded-md border border-border px-2 py-1" title="Share to Microsoft Teams">
+              <Share2 className="size-3" /> Teams
+            </button>
           </div>
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <span className="live-dot" /> {session.status.toUpperCase()}
@@ -135,9 +146,10 @@ function HostScreen() {
             <div className="glass-panel rounded-2xl p-12 text-center">
               <h2 className="font-display text-2xl font-bold">Lobby</h2>
               <p className="text-muted-foreground mt-2">Share code <span className="font-mono-tab text-foreground">{session.join_code}</span> with your team, or send them a join link.</p>
-              <div className="mt-3 flex items-center justify-center gap-2">
+              <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
                 <Button onClick={copyCode} variant="outline" size="sm"><Copy className="size-4 mr-1" /> Copy code</Button>
                 <Button onClick={copyLink} variant="outline" size="sm"><Link2 className="size-4 mr-1" /> Copy join link</Button>
+                <Button onClick={shareToTeams} variant="outline" size="sm"><Share2 className="size-4 mr-1" /> Share to Teams</Button>
               </div>
               <p className="text-sm text-muted-foreground mt-1">{players.length} player{players.length === 1 ? "" : "s"} joined</p>
               <Button onClick={onNext} size="lg" className="mt-6"><ArrowRight className="size-4 mr-1" /> Start first question</Button>
