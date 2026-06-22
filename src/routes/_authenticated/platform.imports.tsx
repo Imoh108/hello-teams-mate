@@ -160,84 +160,16 @@ function ImportsPage() {
   const hasFilters =
     search.bank.length > 0 || !!search.from || !!search.to || search.status !== "all";
 
-  const exportHistory = () => {
-    const rows = filtered.map((r) => ({
-      started_at: r.started_at,
-      finished_at: r.finished_at ?? "",
-      duration_ms: r.finished_at
-        ? new Date(r.finished_at).getTime() - new Date(r.started_at).getTime()
-        : "",
-      source: r.source,
-      fetched: r.fetched,
-      deduplicated: r.deduplicated,
-      inserted: r.inserted,
-      error_count: r.error_count,
-      status: runStatus(r),
-    }));
-    const csv = toCsv(rows, [
-      "started_at",
-      "finished_at",
-      "duration_ms",
-      "source",
-      "fetched",
-      "deduplicated",
-      "inserted",
-      "error_count",
-      "status",
-    ]);
-    downloadCsv(`import-history-${new Date().toISOString().slice(0, 10)}.csv`, csv);
-  };
+  const historyFilename = () => `import-history-${new Date().toISOString().slice(0, 10)}.csv`;
+  const lastRunFilename = () =>
+    lastOverall
+      ? `import-last-run-${new Date(lastOverall.started_at).toISOString().slice(0, 19).replace(/[:T]/g, "-")}.csv`
+      : "import-last-run.csv";
 
+  const exportHistory = () => downloadCsv(historyFilename(), buildHistoryCsv());
   const exportLastRun = () => {
-    if (!lastOverall) {
-      toast.error("No runs to export");
-      return;
-    }
-    const summary = [
-      {
-        kind: "summary",
-        source: lastOverall.source,
-        started_at: lastOverall.started_at,
-        finished_at: lastOverall.finished_at ?? "",
-        fetched: lastOverall.fetched,
-        deduplicated: lastOverall.deduplicated,
-        inserted: lastOverall.inserted,
-        error_count: lastOverall.error_count,
-        error_group: "",
-        error_message: "",
-      },
-    ];
-    const errs = (lastOverall.errors ?? []).map((e) => {
-      const m = e.match(/^([^:]+):\s*(.*)$/);
-      return {
-        kind: "error",
-        source: lastOverall.source,
-        started_at: lastOverall.started_at,
-        finished_at: "",
-        fetched: "",
-        deduplicated: "",
-        inserted: "",
-        error_count: "",
-        error_group: m ? m[1] : "Other",
-        error_message: m ? m[2] : e,
-      };
-    });
-    const csv = toCsv([...summary, ...errs] as any, [
-      "kind",
-      "source",
-      "started_at",
-      "finished_at",
-      "fetched",
-      "deduplicated",
-      "inserted",
-      "error_count",
-      "error_group",
-      "error_message",
-    ]);
-    downloadCsv(
-      `import-last-run-${new Date(lastOverall.started_at).toISOString().slice(0, 19).replace(/[:T]/g, "-")}.csv`,
-      csv,
-    );
+    if (!lastOverall) return toast.error("No runs to export");
+    downloadCsv(lastRunFilename(), buildLastRunCsv());
   };
 
   const retry = async (r: Run) => {
