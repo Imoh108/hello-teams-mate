@@ -309,14 +309,33 @@ function ImportsPage() {
           <Button variant="outline" size="sm" onClick={exportLastRun} disabled={!lastOverall}>
             <Download className="size-4 mr-1" /> Export last run
           </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => share("last-run", lastRunFilename(), buildLastRunCsv())}
+            disabled={!lastOverall || sharing === "last-run"}
+            title="Upload CSV and copy a 7-day shareable link"
+          >
+            <Link2 className={`size-4 mr-1 ${sharing === "last-run" ? "animate-pulse" : ""}`} /> Share
+          </Button>
           <Button variant="outline" size="sm" onClick={exportHistory} disabled={filtered.length === 0}>
             <Download className="size-4 mr-1" /> Export history
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => share("history", historyFilename(), buildHistoryCsv())}
+            disabled={filtered.length === 0 || sharing === "history"}
+            title="Upload CSV and copy a 7-day shareable link"
+          >
+            <Link2 className={`size-4 mr-1 ${sharing === "history" ? "animate-pulse" : ""}`} /> Share
           </Button>
           <Button variant="outline" size="sm" onClick={load} disabled={loading}>
             <RefreshCw className={`size-4 mr-1 ${loading ? "animate-spin" : ""}`} /> Refresh
           </Button>
         </div>
       </header>
+
 
       {/* Filters */}
       <section className="glass-panel rounded-xl p-3 flex flex-wrap items-center gap-2">
