@@ -334,6 +334,27 @@ async function runTriviaApi(opts: {
 
 const Input = z.object({ maxPerCategory: z.number().int().min(10).max(500).default(200) });
 
+async function logRun(
+  admin: any,
+  userId: string,
+  source: string,
+  startedAt: string,
+  r: { imported: number; skipped: number; errors: string[] },
+) {
+  const fetched = r.imported + r.skipped;
+  await admin.from("trivia_import_runs").insert({
+    source,
+    fetched,
+    inserted: r.imported,
+    deduplicated: r.skipped,
+    error_count: r.errors.length,
+    errors: r.errors.slice(0, 50),
+    started_at: startedAt,
+    finished_at: new Date().toISOString(),
+    run_by: userId,
+  });
+}
+
 export const importFromOpenTriviaDb = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => Input.parse(d ?? {}))
@@ -342,6 +363,7 @@ export const importFromOpenTriviaDb = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const catSlugToId = await loadCategorySlugMap(supabaseAdmin);
     const seen = await loadExistingPromptSet(supabaseAdmin);
+    const startedAt = new Date().toISOString();
     const r = await runOpenTdb({
       admin: supabaseAdmin,
       userId: context.userId,
@@ -349,6 +371,7 @@ export const importFromOpenTriviaDb = createServerFn({ method: "POST" })
       catSlugToId,
       seen,
     });
+    await logRun(supabaseAdmin, context.userId, "Open Trivia DB", startedAt, r);
     return { source: "Open Trivia DB", ...r };
   });
 
@@ -360,6 +383,7 @@ export const importFromTheTriviaApi = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const catSlugToId = await loadCategorySlugMap(supabaseAdmin);
     const seen = await loadExistingPromptSet(supabaseAdmin);
+    const startedAt = new Date().toISOString();
     const r = await runTriviaApi({
       admin: supabaseAdmin,
       userId: context.userId,
@@ -367,6 +391,7 @@ export const importFromTheTriviaApi = createServerFn({ method: "POST" })
       catSlugToId,
       seen,
     });
+    await logRun(supabaseAdmin, context.userId, "The Trivia API", startedAt, r);
     return { source: "The Trivia API", ...r };
   });
 
@@ -378,6 +403,7 @@ export const importAllTriviaBanks = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const catSlugToId = await loadCategorySlugMap(supabaseAdmin);
     const seen = await loadExistingPromptSet(supabaseAdmin);
+    const startA = new Date().toISOString();
     const a = await runOpenTdb({
       admin: supabaseAdmin,
       userId: context.userId,
@@ -385,6 +411,8 @@ export const importAllTriviaBanks = createServerFn({ method: "POST" })
       catSlugToId,
       seen,
     });
+    await logRun(supabaseAdmin, context.userId, "Open Trivia DB", startA, a);
+    const startB = new Date().toISOString();
     const b = await runTriviaApi({
       admin: supabaseAdmin,
       userId: context.userId,
@@ -392,9 +420,23 @@ export const importAllTriviaBanks = createServerFn({ method: "POST" })
       catSlugToId,
       seen,
     });
+    await logRun(supabaseAdmin, context.userId, "The Trivia API", startB, b);
     return {
       imported: a.imported + b.imported,
       skipped: a.skipped + b.skipped,
       sources: [a, b].map((r, i) => ({ source: i === 0 ? "Open Trivia DB" : "The Trivia API", ...r })),
     };
+  });
+
+export const listImportRuns = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertPlatformAdmin(context);
+    const { data, error } = await context.supabase
+      .from("trivia_import_runs")
+      .select("id, source, fetched, inserted, deduplicated, error_count, errors, started_at, finished_at")
+      .order("started_at", { ascending: false })
+      .limit(50);
+    if (error) throw new Error(error.message);
+    return { runs: data ?? [] };
   });
