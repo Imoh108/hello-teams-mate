@@ -1,47 +1,37 @@
-
 ## Goal
+Enhance `/platform/imports` with filtering, richer error visibility, CSV export, and one-click retry for failed/partial bank runs.
 
-1. Bulk-import thousands of high-quality multiple-choice questions from public global trivia APIs into the existing `ai_generated_items` table as **auto-approved** items so they appear immediately in the quiz builder pool.
-2. Verify the existing Firecrawl scraping pipeline still works (with a one-click admin health-check), since it's the secondary path for AI-generated questions.
+## Changes
 
-## What gets built
+### 1. Filters (bank, date range, status)
+In `src/routes/_authenticated/platform.imports.tsx`:
+- Add a filter bar above the history table:
+  - **Bank**: multi-select (`Open Trivia DB`, `The Trivia API`) sourced from distinct `source` values in the loaded runs.
+  - **Date range**: two date pickers (from / to) using shadcn `Calendar` in a `Popover` — defaults empty (all time).
+  - **Status**: select with `All` / `Clean` (error_count = 0) / `Errors` (error_count > 0) / `Partial` (inserted < fetched AND error_count > 0).
+- Filter the `runs` array client-side before rendering "All runs" table and latest-per-source cards.
+- Persist filter state in URL search params via TanStack `validateSearch` (`bank[]`, `from`, `to`, `status`) so links/refresh preserve view.
 
-### 1. New server module `src/lib/trivia-import.functions.ts`
+### 2. Per-bank error details
+- Errors are already stored as `errors jsonb[]` (up to 50 per run) and the source/category prefix is included (e.g. `OpenTDB cat 23: <message>`).
+- In the "Last run per source" cards: keep the existing collapsible, but render errors grouped by category prefix (parse `Source cat X:` / `TTA <slug>:` → group key) with count + sample messages.
+- In the "All runs" table: add an expandable row (chevron) that, when toggled, shows the same grouped error breakdown for that run.
+- No backend change needed (data already persisted).
 
-Three platform-admin server functions (all use `requireSupabaseAuth` + `assertPlatformAdmin`, all write directly to `ai_generated_items` with `status='approved'`):
+### 3. CSV export
+- Add two buttons in the header:
+  - **Export last run** — exports the latest run's per-source summary + its errors (one row per error).
+  - **Export full history** — exports filtered runs as one row per run with columns: `started_at, finished_at, duration_ms, source, fetched, deduplicated, inserted, error_count`.
+- Pure client-side CSV builder (no new deps); trigger download via `Blob` + anchor click. Filename includes ISO date.
 
-- **`importFromOpenTriviaDb`** — paginated fetch from `https://opentdb.com/api.php` (50 questions per call, looped per category, all difficulties). Maps OpenTDB's 24 categories → our 12 `question_categories` via a slug map (e.g. `Geography → geography`, `Entertainment: Film → film-tv`, `Science & Nature → science`). HTML-decodes prompts/choices, shuffles the 4 options, computes `correct_index`, dedupes against existing prompts (normalized lowercase).
-- **`importFromTheTriviaApi`** — paginated fetch from `https://the-trivia-api.com/v2/questions?limit=50&difficulties=easy,medium,hard`. Maps their `category` field → our 12 categories. Same shuffle/dedupe/insert logic.
-- **`importAllTriviaBanks`** — convenience wrapper that runs both importers back-to-back and returns combined totals.
+### 4. One-click Retry
+- A run is "retry-worthy" when `error_count > 0` OR `inserted < fetched` (partial).
+- On qualifying cards (latest-per-source) and rows (table), show a **Retry** button.
+- Wire it to the existing server functions: `importFromOpenTriviaDb` for `source = "Open Trivia DB"`, `importFromTheTriviaApi` for `source = "The Trivia API"`. Reuse `useServerFn` + toast feedback, then refresh runs.
+- No new server function needed — dedup already prevents duplicate inserts, so re-running is safe and only fills gaps.
 
-All three accept an optional `maxPerCategory` (default 200) to cap volume. Inserts are batched at 200 rows.
-
-### 2. Firecrawl health check `src/lib/firecrawl.functions.ts`
-
-- **`testFirecrawl`** — admin-only server fn that scrapes `https://en.wikipedia.org/wiki/Quiz` and returns `{ ok, chars, preview }`. Surfaces gateway/credential failures clearly.
-
-### 3. Admin UI: extend `src/routes/_authenticated/platform.content.tsx`
-
-Add a new card **"Global question banks"** above the existing "Add source" card with three buttons + live result toasts:
-- `Import from Open Trivia DB` → calls `importFromOpenTriviaDb`
-- `Import from The Trivia API` → calls `importFromTheTriviaApi`
-- `Import everything (recommended)` → calls `importAllTriviaBanks`
-- `Test Firecrawl` (small ghost button) → calls `testFirecrawl`, shows ✅/❌ with character count or error.
-
-Each button shows a loading toast and a success toast with the imported / skipped counts.
-
-### 4. Quiz builder unchanged
-
-The existing `createQuizFromCategories` / `listCategoryPool` already read approved `ai_generated_items` by `category_id`, so newly imported rows appear in the pool counts automatically — no further changes needed.
-
-## Technical details
-
-- **Category mapping** is a static map in `trivia-import.functions.ts` keyed by API category name → our `question_categories.slug`. Slugs that don't map fall back to `general-knowledge`.
-- **Dedupe**: before each insert batch, fetch existing prompts from `ai_generated_items` (last 10k) into a Set, skip matches.
-- **Rate limiting**: 250 ms `await sleep` between API page fetches to be polite.
-- **No new tables / migrations needed** — everything reuses `ai_generated_items` and `question_categories`. Auto-approval = set `status='approved'`, `reviewed_at=now()`, `reviewed_by=context.userId`.
-- **No new secrets** — Open Trivia DB and The Trivia API are both keyless. Firecrawl already configured via connector.
-
-## Expected outcome
-
-After clicking "Import everything", ~1500–3000 approved MCQs flow into the bank across the 12 categories within ~30 s. The quiz builder pool counts (currently 50 per seeded category) jump significantly, and the "Test Firecrawl" button confirms the scraping path is healthy for the AI-generation pipeline.
+## Technical notes
+- All work is in `src/routes/_authenticated/platform.imports.tsx` plus a small `src/lib/csv.ts` helper for CSV escaping.
+- No DB migration required; `errors`, `fetched`, `inserted`, `deduplicated`, `error_count` are already on `trivia_import_runs`.
+- No changes to `src/lib/trivia-import.functions.ts` — retry calls existing import functions.
+- Bank list is hardcoded to the two known sources (matches the import buttons in `platform.content.tsx`).
