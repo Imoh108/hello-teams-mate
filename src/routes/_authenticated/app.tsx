@@ -29,7 +29,6 @@ function Dashboard() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   useEnsureCurrentOrg();
-  const createFn = useServerFn(createQuiz);
   const cloneFn = useServerFn(cloneQuiz);
   const sessionFn = useServerFn(createSession);
   const joinFn = useServerFn(joinSessionByCode);
