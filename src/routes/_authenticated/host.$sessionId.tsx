@@ -30,6 +30,15 @@ function HostScreen() {
   const [players, setPlayers] = useState<Player[]>([]);
   const [answeredCount, setAnsweredCount] = useState(0);
   const [now, setNow] = useState(Date.now());
+  const [teamsMsg, setTeamsMsg] = useState("");
+
+  // Initialize default Teams share message once we have a session code
+  useEffect(() => {
+    if (session && !teamsMsg) {
+      setTeamsMsg(`Join my QuizPulse round — code ${session.join_code}`);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session?.join_code]);
 
   useEffect(() => {
     const t = setInterval(() => setNow(Date.now()), 250);
