@@ -101,11 +101,19 @@ function HostScreen() {
   };
 
   const copyCode = () => { if (session) { navigator.clipboard.writeText(session.join_code); toast.success("Code copied"); } };
+  const joinUrl = () =>
+    session ? `${window.location.origin}/play?code=${encodeURIComponent(session.join_code)}` : "";
   const copyLink = () => {
     if (!session) return;
-    const url = `${window.location.origin}/play?code=${encodeURIComponent(session.join_code)}`;
-    navigator.clipboard.writeText(url);
+    navigator.clipboard.writeText(joinUrl());
     toast.success("Join link copied");
+  };
+  const shareToTeams = () => {
+    if (!session) return;
+    const url = joinUrl();
+    const msg = `Join my QuizPulse round — code ${session.join_code}`;
+    const teamsUrl = `https://teams.microsoft.com/share?href=${encodeURIComponent(url)}&msgText=${encodeURIComponent(msg)}&preview=true`;
+    window.open(teamsUrl, "_blank", "noopener,noreferrer");
   };
 
   if (!session) return <div className="min-h-screen grid place-items-center text-muted-foreground">Loading…</div>;
