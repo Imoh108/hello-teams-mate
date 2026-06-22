@@ -107,12 +107,25 @@ async function loadCategorySlugMap(admin: any): Promise<Map<string, string>> {
 
 async function loadExistingPromptSet(admin: any): Promise<Set<string>> {
   const set = new Set<string>();
-  let from = 0;
   const page = 1000;
-  // up to 20k
+  // ai_generated_items (up to 20k)
+  let from = 0;
   for (let i = 0; i < 20; i++) {
     const { data, error } = await admin
       .from("ai_generated_items")
+      .select("prompt")
+      .range(from, from + page - 1);
+    if (error) break;
+    if (!data || data.length === 0) break;
+    for (const r of data) set.add(norm(r.prompt));
+    if (data.length < page) break;
+    from += page;
+  }
+  // bank_questions (curated banks) — dedupe against those too
+  from = 0;
+  for (let i = 0; i < 20; i++) {
+    const { data, error } = await admin
+      .from("bank_questions")
       .select("prompt")
       .range(from, from + page - 1);
     if (error) break;
@@ -139,15 +152,23 @@ type Row = {
   reviewed_at: string;
 };
 
-async function insertBatched(admin: any, rows: Row[]): Promise<number> {
+// Upsert with ignoreDuplicates so the DB-level unique index on prompt_hash
+// absorbs in-memory-set misses and race conditions across concurrent imports.
+async function insertBatched(admin: any, rows: Row[]): Promise<{ inserted: number; deduped: number }> {
   let inserted = 0;
+  let deduped = 0;
   for (let i = 0; i < rows.length; i += 200) {
     const chunk = rows.slice(i, i + 200);
-    const { error } = await admin.from("ai_generated_items").insert(chunk);
+    const { data, error } = await admin
+      .from("ai_generated_items")
+      .upsert(chunk, { onConflict: "prompt_hash", ignoreDuplicates: true })
+      .select("id");
     if (error) throw new Error(error.message);
-    inserted += chunk.length;
+    const got = data?.length ?? 0;
+    inserted += got;
+    deduped += chunk.length - got;
   }
-  return inserted;
+  return { inserted, deduped };
 }
 
 async function runOpenTdb(opts: {
