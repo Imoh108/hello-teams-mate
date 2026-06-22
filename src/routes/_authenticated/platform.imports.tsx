@@ -99,11 +99,14 @@ function ImportsPage() {
   const listFn = useServerFn(listImportRuns);
   const otdbFn = useServerFn(importFromOpenTriviaDb);
   const ttaFn = useServerFn(importFromTheTriviaApi);
+  const retryScopedFn = useServerFn(retryFailedFromRun);
+  const shareFn = useServerFn(createExportLink);
 
   const [runs, setRuns] = useState<Run[]>([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [retrying, setRetrying] = useState<string | null>(null);
+  const [sharing, setSharing] = useState<string | null>(null);
 
   const load = async () => {
     setLoading(true);
