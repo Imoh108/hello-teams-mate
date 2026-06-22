@@ -456,13 +456,14 @@ function ImportsPage() {
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => retry(r.source)}
-                            disabled={retrying === r.source}
+                            onClick={() => retry(r)}
+                            disabled={retrying === r.id}
+                            title="Retry only categories that failed in this run"
                           >
                             <RotateCw
-                              className={`size-3 mr-1 ${retrying === r.source ? "animate-spin" : ""}`}
+                              className={`size-3 mr-1 ${retrying === r.id ? "animate-spin" : ""}`}
                             />
-                            Retry
+                            Retry failed
                           </Button>
                         )}
                       </div>
