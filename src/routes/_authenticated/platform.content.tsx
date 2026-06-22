@@ -95,7 +95,39 @@ function ContentPage() {
       );
     } catch (e: any) {
       toast.error(e?.message ?? "Bulk generation failed", { id: t });
+  }
+
+  const [importing, setImporting] = useState<null | "otdb" | "tta" | "all">(null);
+  const [fcBusy, setFcBusy] = useState(false);
+
+  async function runImport(which: "otdb" | "tta" | "all") {
+    setImporting(which);
+    const label = which === "otdb" ? "Open Trivia DB" : which === "tta" ? "The Trivia API" : "all global banks";
+    const t = toast.loading(`Importing from ${label}…`);
+    try {
+      const fn = which === "otdb" ? importFromOpenTriviaDb : which === "tta" ? importFromTheTriviaApi : importAllTriviaBanks;
+      const r: any = await fn({ data: { maxPerCategory: 200 } });
+      toast.success(`Imported ${r.imported} new questions (${r.skipped} duplicates skipped)`, { id: t });
+    } catch (e: any) {
+      toast.error(e?.message ?? "Import failed", { id: t });
+    } finally {
+      setImporting(null);
     }
+  }
+
+  async function runFirecrawlTest() {
+    setFcBusy(true);
+    const t = toast.loading("Testing Firecrawl…");
+    try {
+      const r: any = await testFirecrawl({ data: {} });
+      if (r.ok) toast.success(`Firecrawl OK — scraped ${r.chars} chars`, { id: t });
+      else toast.error(`Firecrawl failed: ${r.error}`, { id: t });
+    } catch (e: any) {
+      toast.error(e?.message ?? "Test failed", { id: t });
+    } finally {
+      setFcBusy(false);
+    }
+  }
   }
 
   if (err) return <div className="text-destructive">{err}</div>;
