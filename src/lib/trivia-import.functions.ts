@@ -186,6 +186,7 @@ async function runOpenTdb(opts: {
   const nowIso = new Date().toISOString();
 
   for (const cat of OPENTDB_CATEGORIES) {
+    if (onlyCategoryIds && !onlyCategoryIds.has(cat.id)) continue;
     const catId = catSlugToId.get(cat.slug) ?? null;
     let collected = 0;
     let failures = 0;
