@@ -130,6 +130,9 @@ function HostScreen() {
             <button onClick={copyLink} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground rounded-md border border-border px-2 py-1" title="Copy join link">
               <Link2 className="size-3" /> Link
             </button>
+            <button onClick={shareToTeams} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground rounded-md border border-border px-2 py-1" title="Share to Microsoft Teams">
+              <Share2 className="size-3" /> Teams
+            </button>
           </div>
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <span className="live-dot" /> {session.status.toUpperCase()}
