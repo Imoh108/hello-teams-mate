@@ -101,6 +101,12 @@ function HostScreen() {
   };
 
   const copyCode = () => { if (session) { navigator.clipboard.writeText(session.join_code); toast.success("Code copied"); } };
+  const copyLink = () => {
+    if (!session) return;
+    const url = `${window.location.origin}/play?code=${encodeURIComponent(session.join_code)}`;
+    navigator.clipboard.writeText(url);
+    toast.success("Join link copied");
+  };
 
   if (!session) return <div className="min-h-screen grid place-items-center text-muted-foreground">Loading…</div>;
 
