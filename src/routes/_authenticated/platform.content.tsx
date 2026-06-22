@@ -95,7 +95,10 @@ function ContentPage() {
       );
     } catch (e: any) {
       toast.error(e?.message ?? "Bulk generation failed", { id: t });
+    }
   }
+
+
 
   const [importing, setImporting] = useState<null | "otdb" | "tta" | "all">(null);
   const [fcBusy, setFcBusy] = useState(false);
