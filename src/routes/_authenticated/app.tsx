@@ -73,15 +73,8 @@ function Dashboard() {
     isPlatformAdmin().then((r: any) => setIsSuper(!!r?.isAdmin)).catch(() => {});
   }, []);
 
-  const onCreate = async () => {
-    if (!title.trim()) return toast.error("Title required");
-    try {
-      const row = await createFn({ data: { title: title.trim(), description: desc.trim() || undefined, topic_pack: pack } });
-      track("quiz_created", { topic_pack: pack });
-      setOpenCreate(false); setTitle(""); setDesc("");
-      navigate({ to: "/quizzes/$id", params: { id: (row as any).id } });
-    } catch (e: any) { toast.error(e.message); }
-  };
+
+
 
   useEffect(() => {
     if (!openCreate || cats !== null) return;
