@@ -143,9 +143,10 @@ function HostScreen() {
             <div className="glass-panel rounded-2xl p-12 text-center">
               <h2 className="font-display text-2xl font-bold">Lobby</h2>
               <p className="text-muted-foreground mt-2">Share code <span className="font-mono-tab text-foreground">{session.join_code}</span> with your team, or send them a join link.</p>
-              <div className="mt-3 flex items-center justify-center gap-2">
+              <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
                 <Button onClick={copyCode} variant="outline" size="sm"><Copy className="size-4 mr-1" /> Copy code</Button>
                 <Button onClick={copyLink} variant="outline" size="sm"><Link2 className="size-4 mr-1" /> Copy join link</Button>
+                <Button onClick={shareToTeams} variant="outline" size="sm"><Share2 className="size-4 mr-1" /> Share to Teams</Button>
               </div>
               <p className="text-sm text-muted-foreground mt-1">{players.length} player{players.length === 1 ? "" : "s"} joined</p>
               <Button onClick={onNext} size="lg" className="mt-6"><ArrowRight className="size-4 mr-1" /> Start first question</Button>
