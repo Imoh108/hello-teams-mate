@@ -169,6 +169,72 @@ function PlatformOverview() {
           </CardContent>
         </Card>
       </div>
+
+      <Card>
+        <CardHeader className="pb-2 flex flex-row items-center justify-between">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Download className="size-4" /> Recent imports
+          </CardTitle>
+          <Link
+            to="/platform/imports"
+            className="text-xs text-muted-foreground hover:text-foreground"
+          >
+            View all →
+          </Link>
+        </CardHeader>
+        <CardContent>
+          {importRuns.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              No imports yet. Trigger one from Content sources.
+            </p>
+          ) : (
+            <ul className="divide-y divide-border">
+              {importRuns.map((r) => {
+                const hasErrors = r.error_count > 0;
+                const lowYield =
+                  r.fetched >= 20 && r.inserted < r.fetched * 0.5;
+                return (
+                  <li
+                    key={r.id}
+                    className="flex flex-wrap items-center gap-3 py-2 text-sm"
+                  >
+                    <span className="font-medium min-w-[140px]">{r.source}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {timeAgo(r.started_at)}
+                    </span>
+                    <span className="text-xs tabular-nums text-muted-foreground">
+                      fetched <b className="text-foreground">{r.fetched}</b> ·
+                      dedup <b className="text-foreground">{r.deduplicated}</b> ·
+                      inserted{" "}
+                      <b className={lowYield ? "text-amber-600" : "text-primary"}>
+                        {r.inserted}
+                      </b>
+                    </span>
+                    <span className="ml-auto flex items-center gap-2">
+                      {hasErrors && (
+                        <Badge variant="destructive" className="gap-1">
+                          <AlertTriangle className="size-3" />
+                          {r.error_count} error{r.error_count > 1 ? "s" : ""}
+                        </Badge>
+                      )}
+                      {lowYield && (
+                        <Badge className="gap-1 bg-amber-500/15 text-amber-600 hover:bg-amber-500/15">
+                          <AlertTriangle className="size-3" /> low yield
+                        </Badge>
+                      )}
+                      {!hasErrors && !lowYield && (
+                        <Badge variant="secondary" className="gap-1">
+                          <CheckCircle2 className="size-3" /> clean
+                        </Badge>
+                      )}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
