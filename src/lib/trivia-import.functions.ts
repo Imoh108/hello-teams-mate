@@ -246,8 +246,8 @@ async function runOpenTdb(opts: {
       }
     }
   }
-  const imported = rows.length ? await insertBatched(admin, rows) : 0;
-  return { imported, skipped, errors };
+  const res = rows.length ? await insertBatched(admin, rows) : { inserted: 0, deduped: 0 };
+  return { imported: res.inserted, skipped: skipped + res.deduped, errors };
 }
 
 async function runTriviaApi(opts: {
