@@ -4,6 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useServerFn } from "@tanstack/react-start";
 import { startQuestion, revealAnswers, endSession } from "@/lib/quiz.functions";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { ArrowRight, Eye, Square, Copy, Link2, Share2 } from "lucide-react";
 
