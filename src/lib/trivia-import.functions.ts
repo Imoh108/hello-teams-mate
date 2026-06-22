@@ -177,8 +177,9 @@ async function runOpenTdb(opts: {
   maxPerCategory: number;
   catSlugToId: Map<string, string>;
   seen: Set<string>;
+  onlyCategoryIds?: Set<number>;
 }): Promise<{ imported: number; skipped: number; errors: string[] }> {
-  const { admin, userId, maxPerCategory, catSlugToId, seen } = opts;
+  const { admin, userId, maxPerCategory, catSlugToId, seen, onlyCategoryIds } = opts;
   const errors: string[] = [];
   const rows: Row[] = [];
   let skipped = 0;
