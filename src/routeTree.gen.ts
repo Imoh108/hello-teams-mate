@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PlayIndexRouteImport } from './routes/play.index'
 import { Route as AuthTeamsStartRouteImport } from './routes/auth.teams-start'
 import { Route as AuthTeamsEndRouteImport } from './routes/auth.teams-end'
 import { Route as AuthenticatedShopRouteImport } from './routes/_authenticated/shop'
@@ -60,6 +61,11 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlayIndexRoute = PlayIndexRouteImport.update({
+  id: '/play/',
+  path: '/play/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthTeamsStartRoute = AuthTeamsStartRouteImport.update({
@@ -272,6 +278,7 @@ export interface FileRoutesByFullPath {
   '/shop': typeof AuthenticatedShopRoute
   '/auth/teams-end': typeof AuthTeamsEndRoute
   '/auth/teams-start': typeof AuthTeamsStartRoute
+  '/play/': typeof PlayIndexRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/admin/badges': typeof AuthenticatedAdminBadgesRoute
   '/admin/banks': typeof AuthenticatedAdminBanksRouteWithChildren
@@ -309,6 +316,7 @@ export interface FileRoutesByTo {
   '/shop': typeof AuthenticatedShopRoute
   '/auth/teams-end': typeof AuthTeamsEndRoute
   '/auth/teams-start': typeof AuthTeamsStartRoute
+  '/play': typeof PlayIndexRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/admin/badges': typeof AuthenticatedAdminBadgesRoute
   '/admin/banks': typeof AuthenticatedAdminBanksRouteWithChildren
@@ -350,6 +358,7 @@ export interface FileRoutesById {
   '/_authenticated/shop': typeof AuthenticatedShopRoute
   '/auth/teams-end': typeof AuthTeamsEndRoute
   '/auth/teams-start': typeof AuthTeamsStartRoute
+  '/play/': typeof PlayIndexRoute
   '/_authenticated/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/_authenticated/admin/badges': typeof AuthenticatedAdminBadgesRoute
   '/_authenticated/admin/banks': typeof AuthenticatedAdminBanksRouteWithChildren
@@ -391,6 +400,7 @@ export interface FileRouteTypes {
     | '/shop'
     | '/auth/teams-end'
     | '/auth/teams-start'
+    | '/play/'
     | '/admin/analytics'
     | '/admin/badges'
     | '/admin/banks'
@@ -428,6 +438,7 @@ export interface FileRouteTypes {
     | '/shop'
     | '/auth/teams-end'
     | '/auth/teams-start'
+    | '/play'
     | '/admin/analytics'
     | '/admin/badges'
     | '/admin/banks'
@@ -468,6 +479,7 @@ export interface FileRouteTypes {
     | '/_authenticated/shop'
     | '/auth/teams-end'
     | '/auth/teams-start'
+    | '/play/'
     | '/_authenticated/admin/analytics'
     | '/_authenticated/admin/badges'
     | '/_authenticated/admin/banks'
@@ -500,6 +512,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRouteWithChildren
+  PlayIndexRoute: typeof PlayIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -523,6 +536,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/play/': {
+      id: '/play/'
+      path: '/play'
+      fullPath: '/play/'
+      preLoaderRoute: typeof PlayIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth/teams-start': {
@@ -896,6 +916,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRouteWithChildren,
+  PlayIndexRoute: PlayIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

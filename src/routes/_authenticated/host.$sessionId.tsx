@@ -133,6 +133,11 @@ function HostScreen() {
     navigator.clipboard.writeText(teamsShareUrl());
     toast.success("Teams share link copied");
   };
+  const previewAsPlayer = () => {
+    if (!session) return;
+    const url = `/play?code=${encodeURIComponent(session.join_code)}&preview=1&name=${encodeURIComponent("Host preview")}`;
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
 
   if (!session) return <div className="min-h-screen grid place-items-center text-muted-foreground">Loading…</div>;
 
