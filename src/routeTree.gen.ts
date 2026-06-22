@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PlayIndexRouteImport } from './routes/play.index'
 import { Route as AuthTeamsStartRouteImport } from './routes/auth.teams-start'
 import { Route as AuthTeamsEndRouteImport } from './routes/auth.teams-end'
 import { Route as AuthenticatedShopRouteImport } from './routes/_authenticated/shop'
@@ -21,7 +22,6 @@ import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authentic
 import { Route as AuthenticatedChallengesRouteImport } from './routes/_authenticated/challenges'
 import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
-import { Route as AuthenticatedPlayIndexRouteImport } from './routes/_authenticated/play.index'
 import { Route as AuthenticatedPlatformIndexRouteImport } from './routes/_authenticated/platform.index'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as AuthenticatedResultsSessionIdRouteImport } from './routes/_authenticated/results.$sessionId'
@@ -61,6 +61,11 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlayIndexRoute = PlayIndexRouteImport.update({
+  id: '/play/',
+  path: '/play/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthTeamsStartRoute = AuthTeamsStartRouteImport.update({
@@ -106,11 +111,6 @@ const AuthenticatedAppRoute = AuthenticatedAppRouteImport.update({
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedPlayIndexRoute = AuthenticatedPlayIndexRouteImport.update({
-  id: '/play/',
-  path: '/play/',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedPlatformIndexRoute =
@@ -278,6 +278,7 @@ export interface FileRoutesByFullPath {
   '/shop': typeof AuthenticatedShopRoute
   '/auth/teams-end': typeof AuthTeamsEndRoute
   '/auth/teams-start': typeof AuthTeamsStartRoute
+  '/play/': typeof PlayIndexRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/admin/badges': typeof AuthenticatedAdminBadgesRoute
   '/admin/banks': typeof AuthenticatedAdminBanksRouteWithChildren
@@ -302,7 +303,6 @@ export interface FileRoutesByFullPath {
   '/results/$sessionId': typeof AuthenticatedResultsSessionIdRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/platform/': typeof AuthenticatedPlatformIndexRoute
-  '/play/': typeof AuthenticatedPlayIndexRoute
   '/admin/banks/$bankId': typeof AuthenticatedAdminBanksBankIdRoute
   '/teams/channel/config': typeof AuthenticatedTeamsChannelConfigRoute
 }
@@ -316,6 +316,7 @@ export interface FileRoutesByTo {
   '/shop': typeof AuthenticatedShopRoute
   '/auth/teams-end': typeof AuthTeamsEndRoute
   '/auth/teams-start': typeof AuthTeamsStartRoute
+  '/play': typeof PlayIndexRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/admin/badges': typeof AuthenticatedAdminBadgesRoute
   '/admin/banks': typeof AuthenticatedAdminBanksRouteWithChildren
@@ -340,7 +341,6 @@ export interface FileRoutesByTo {
   '/results/$sessionId': typeof AuthenticatedResultsSessionIdRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/platform': typeof AuthenticatedPlatformIndexRoute
-  '/play': typeof AuthenticatedPlayIndexRoute
   '/admin/banks/$bankId': typeof AuthenticatedAdminBanksBankIdRoute
   '/teams/channel/config': typeof AuthenticatedTeamsChannelConfigRoute
 }
@@ -358,6 +358,7 @@ export interface FileRoutesById {
   '/_authenticated/shop': typeof AuthenticatedShopRoute
   '/auth/teams-end': typeof AuthTeamsEndRoute
   '/auth/teams-start': typeof AuthTeamsStartRoute
+  '/play/': typeof PlayIndexRoute
   '/_authenticated/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/_authenticated/admin/badges': typeof AuthenticatedAdminBadgesRoute
   '/_authenticated/admin/banks': typeof AuthenticatedAdminBanksRouteWithChildren
@@ -382,7 +383,6 @@ export interface FileRoutesById {
   '/_authenticated/results/$sessionId': typeof AuthenticatedResultsSessionIdRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/platform/': typeof AuthenticatedPlatformIndexRoute
-  '/_authenticated/play/': typeof AuthenticatedPlayIndexRoute
   '/_authenticated/admin/banks/$bankId': typeof AuthenticatedAdminBanksBankIdRoute
   '/_authenticated/teams/channel/config': typeof AuthenticatedTeamsChannelConfigRoute
 }
@@ -400,6 +400,7 @@ export interface FileRouteTypes {
     | '/shop'
     | '/auth/teams-end'
     | '/auth/teams-start'
+    | '/play/'
     | '/admin/analytics'
     | '/admin/badges'
     | '/admin/banks'
@@ -424,7 +425,6 @@ export interface FileRouteTypes {
     | '/results/$sessionId'
     | '/admin/'
     | '/platform/'
-    | '/play/'
     | '/admin/banks/$bankId'
     | '/teams/channel/config'
   fileRoutesByTo: FileRoutesByTo
@@ -438,6 +438,7 @@ export interface FileRouteTypes {
     | '/shop'
     | '/auth/teams-end'
     | '/auth/teams-start'
+    | '/play'
     | '/admin/analytics'
     | '/admin/badges'
     | '/admin/banks'
@@ -462,7 +463,6 @@ export interface FileRouteTypes {
     | '/results/$sessionId'
     | '/admin'
     | '/platform'
-    | '/play'
     | '/admin/banks/$bankId'
     | '/teams/channel/config'
   id:
@@ -479,6 +479,7 @@ export interface FileRouteTypes {
     | '/_authenticated/shop'
     | '/auth/teams-end'
     | '/auth/teams-start'
+    | '/play/'
     | '/_authenticated/admin/analytics'
     | '/_authenticated/admin/badges'
     | '/_authenticated/admin/banks'
@@ -503,7 +504,6 @@ export interface FileRouteTypes {
     | '/_authenticated/results/$sessionId'
     | '/_authenticated/admin/'
     | '/_authenticated/platform/'
-    | '/_authenticated/play/'
     | '/_authenticated/admin/banks/$bankId'
     | '/_authenticated/teams/channel/config'
   fileRoutesById: FileRoutesById
@@ -512,6 +512,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRouteWithChildren
+  PlayIndexRoute: typeof PlayIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -535,6 +536,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/play/': {
+      id: '/play/'
+      path: '/play'
+      fullPath: '/play/'
+      preLoaderRoute: typeof PlayIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth/teams-start': {
@@ -598,13 +606,6 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/play/': {
-      id: '/_authenticated/play/'
-      path: '/play'
-      fullPath: '/play/'
-      preLoaderRoute: typeof AuthenticatedPlayIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/platform/': {
@@ -877,7 +878,6 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPlaySessionIdRoute: typeof AuthenticatedPlaySessionIdRoute
   AuthenticatedQuizzesIdRoute: typeof AuthenticatedQuizzesIdRoute
   AuthenticatedResultsSessionIdRoute: typeof AuthenticatedResultsSessionIdRoute
-  AuthenticatedPlayIndexRoute: typeof AuthenticatedPlayIndexRoute
   AuthenticatedTeamsChannelConfigRoute: typeof AuthenticatedTeamsChannelConfigRoute
 }
 
@@ -894,7 +894,6 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedPlaySessionIdRoute: AuthenticatedPlaySessionIdRoute,
   AuthenticatedQuizzesIdRoute: AuthenticatedQuizzesIdRoute,
   AuthenticatedResultsSessionIdRoute: AuthenticatedResultsSessionIdRoute,
-  AuthenticatedPlayIndexRoute: AuthenticatedPlayIndexRoute,
   AuthenticatedTeamsChannelConfigRoute: AuthenticatedTeamsChannelConfigRoute,
 }
 
@@ -917,6 +916,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRouteWithChildren,
+  PlayIndexRoute: PlayIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

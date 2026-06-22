@@ -1,56 +1,52 @@
-# Import enhancements plan
+## Goal
 
-Three features added on top of the existing `/platform/imports` page.
+Anyone with a join link can play instantly with just a display name — no account required. Signed-in users still get the richer experience (persistent profile, points, badges, challenges, leaderboards across sessions). The host can also one-click test the join flow as a player without a second account.
 
-## 1. Dashboard widget: latest import runs
+## What changes for participants
 
-Add a new card to `src/routes/_authenticated/platform.index.tsx` (the platform dashboard) titled "Recent imports".
+1. Clicking `https://<app>/play?code=ABC123` opens a **public** join page (no auth gate).
+2. The page asks for a display name only (code is prefilled from the URL).
+3. They tap **Join as guest** → land in the live player view at `/play/<sessionId>`.
+4. A secondary "Sign in for points & badges" link is shown for those who want the full experience; signed-in users skip the name prompt and auto-join (today's behavior).
 
-- Reuses the existing `listImportRuns` server function — no new backend.
-- Shows the last 5 runs as compact rows: source, time-ago, fetched / inserted / dedup counts, status pill.
-- Highlights two conditions in red/amber:
-  - `error_count > 0` → red "Errors" badge with count.
-  - `inserted < fetched * 0.5` AND `fetched >= 20` → amber "Low yield" badge (unusually low insertion rate vs. fetched, ignoring tiny runs).
-- "View all" link → `/platform/imports`.
+## What changes for the host
 
-## 2. Retry only failed categories (not whole bank)
+- New **Preview as player** button on the host page (next to Copy code / Share to Teams). Opens `/play?code=<code>&preview=1` in a new tab with a generated guest name like "Host preview" so you can see exactly what teammates see — no second account needed.
 
-The current "Retry" button re-runs the entire bank. We change it to re-run only the *categories that produced errors* in that run.
+## Capability matrix (guest vs registered)
 
-Approach (no schema change — error strings already carry the category):
-- Errors are stored as `"OpenTDB cat 23: ..."` or `"TTA geography: ..."`. We parse them to a set of failing category IDs/slugs per source.
-- New server fn `retryFailedFromRun({ runId })` in `src/lib/trivia-import.functions.ts`:
-  - Loads the run row, extracts the failed category list from `errors[]`.
-  - Calls a refactored `runOpenTdb` / `runTriviaApi` with an optional `categoryFilter` arg so the existing per-category loops skip non-failing categories.
-  - Logs a new run with `source` suffixed `" (retry)"` so the history clearly shows scoped retries.
-- On the imports page, the "Retry" button on a failed/partial card or row calls this new fn. If a run has no parseable failed categories (e.g. only top-level network errors), fall back to the existing full retry and toast "no scoped failures found — retrying full bank".
+| Capability | Guest | Registered |
+|---|---|---|
+| Join via link / code | ✅ | ✅ |
+| Answer questions, see live results | ✅ | ✅ |
+| Session leaderboard | ✅ | ✅ |
+| Persistent points / badges / streaks | ❌ | ✅ |
+| Cross-session history & profile | ❌ | ✅ |
+| Org challenges & rewards | ❌ | ✅ |
+| Host a quiz | ❌ | ✅ |
 
-Dedup already prevents duplicate inserts, so retries are safe.
+## Technical approach (for reference)
 
-## 3. Shareable CSV export links
+1. **Route move**: split `/play` into a **public** route `src/routes/play.index.tsx` (current file moves out from under `_authenticated/`). The existing `/play/$sessionId` player view also moves to a public route so guests can reach it. The `_authenticated/play.*` files are removed.
+2. **Guest identity**: store a `guest_id` (uuid) + `display_name` in `localStorage` on first join. No `auth.users` row.
+3. **DB changes** (one migration):
+   - `session_players`: make `user_id` nullable, add `guest_id uuid`, add a CHECK that exactly one of `user_id` / `guest_id` is set, unique index on `(session_id, guest_id)`.
+   - `answers`: same nullable `user_id` + `guest_id` pair.
+   - RLS: add policies so a row with `guest_id = <header-supplied id>` is readable/insertable by the anon role for that specific session. Enforced via a server function that validates the guest id + session code, never raw client writes.
+   - GRANTs added per public-table rules.
+4. **Server fns**: add `joinSessionAsGuest({ code, display_name, guest_id })` and `submitGuestAnswer(...)` that mirror the authenticated versions but key off `guest_id`. Existing authenticated fns are unchanged.
+5. **Scoring/points**: `award_points` is only called when `user_id` is present — guests show on the session leaderboard but don't get profile points.
+6. **Host page** (`host.$sessionId.tsx`): add `Preview as player` button → `window.open('/play?code=' + code + '&preview=1', '_blank')`. The join page treats `preview=1` as a hint to prefill display name "Host preview".
+7. **Player view**: shows a small "Playing as guest — sign in to save your points" banner when no auth user.
 
-Currently CSVs are generated client-side and downloaded. We add a "Copy share link" action next to each Export button.
+## Out of scope
 
-- New private storage bucket `import-exports` (created via migration).
-- New server fn `createExportLink({ filename, csv })`:
-  - Uploads the CSV to `import-exports/{userId}/{uuid}.csv`.
-  - Returns a 7-day signed URL via `supabaseAdmin.storage.from(...).createSignedUrl(path, 60*60*24*7)`.
-  - Authorized to `platform_admin` only (callers).
-- UI changes in `platform.imports.tsx`:
-  - Each export button gets a sibling "Share" button (link icon). Click → builds the same CSV, posts to `createExportLink`, copies signed URL to clipboard, toasts "Link copied (valid 7 days)".
-  - Same for the "Export last run" CSV.
+- Migrating a guest's session score into a real account after sign-up (can be added later).
+- Changing email confirmation settings or default sign-in providers.
+- Changing host permissions — hosting still requires an account.
 
-Recipients open the signed URL directly — no auth needed for the link itself, but the link expires in 7 days and is unguessable.
+## Verification
 
-## Files
-
-- `src/lib/trivia-import.functions.ts` — refactor `runOpenTdb`/`runTriviaApi` to accept optional category filter; add `retryFailedFromRun`, `createExportLink`.
-- `src/routes/_authenticated/platform.imports.tsx` — wire scoped retry + share buttons.
-- `src/routes/_authenticated/platform.index.tsx` — add "Recent imports" widget.
-- `supabase/migrations/<timestamp>_import_exports_bucket.sql` — create private storage bucket with RLS allowing `platform_admin` to read/write own folder, plus signed-URL access.
-
-## Notes / trade-offs
-
-- Scoped retry relies on parsing error strings. If we later want pinpoint per-question retry, we'd need to persist the raw failed payloads (new column / table) — not in this change.
-- Signed-URL approach avoids building a public download route and keeps the bucket private.
-- "Low yield" threshold (50% with min 20 fetched) is a sensible default; easy to tune later.
+- Open the join link in an incognito window → name prompt → join → answer questions → appears on host's player list.
+- Click **Preview as player** from the host page → join page opens in a new tab and auto-fills.
+- Signed-in flow unchanged: clicking a join link while logged in still auto-joins as the registered user.
