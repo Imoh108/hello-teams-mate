@@ -41,7 +41,7 @@ function Dashboard() {
   const [openCreate, setOpenCreate] = useState(false);
   const [title, setTitle] = useState("");
   const [desc, setDesc] = useState("");
-  const [pack, setPack] = useState<"company_trivia" | "industry_knowledge" | "general_culture" | "custom">("custom");
+  
   const [joinCode, setJoinCode] = useState("");
   const [isSuper, setIsSuper] = useState(false);
 
