@@ -167,7 +167,24 @@ function HostScreen() {
               <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
                 <Button onClick={copyCode} variant="outline" size="sm"><Copy className="size-4 mr-1" /> Copy code</Button>
                 <Button onClick={copyLink} variant="outline" size="sm"><Link2 className="size-4 mr-1" /> Copy join link</Button>
-                <Button onClick={shareToTeams} variant="outline" size="sm"><Share2 className="size-4 mr-1" /> Share to Teams</Button>
+              </div>
+
+              <div className="mt-6 max-w-md mx-auto text-left">
+                <Label htmlFor="teams-msg" className="text-xs text-muted-foreground">Teams share message</Label>
+                <Textarea
+                  id="teams-msg"
+                  value={teamsMsg}
+                  onChange={(e) => setTeamsMsg(e.target.value)}
+                  rows={2}
+                  maxLength={240}
+                  placeholder={`Join my QuizPulse round — code ${session.join_code}`}
+                  className="mt-1 text-sm"
+                />
+                <p className="mt-1 text-[11px] text-muted-foreground text-right">{teamsMsg.length}/240</p>
+                <div className="mt-2 flex flex-wrap items-center justify-center gap-2">
+                  <Button onClick={shareToTeams} variant="outline" size="sm"><Share2 className="size-4 mr-1" /> Share to Teams</Button>
+                  <Button onClick={copyTeamsLink} variant="outline" size="sm"><Copy className="size-4 mr-1" /> Copy Teams share link</Button>
+                </div>
               </div>
               <p className="text-sm text-muted-foreground mt-1">{players.length} player{players.length === 1 ? "" : "s"} joined</p>
               <Button onClick={onNext} size="lg" className="mt-6"><ArrowRight className="size-4 mr-1" /> Start first question</Button>
