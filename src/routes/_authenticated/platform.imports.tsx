@@ -9,6 +9,8 @@ import {
   listImportRuns,
   importFromOpenTriviaDb,
   importFromTheTriviaApi,
+  retryFailedFromRun,
+  createExportLink,
 } from "@/lib/trivia-import.functions";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -33,6 +35,7 @@ import {
   ChevronDown,
   ChevronRight,
   X,
+  Link2,
 } from "lucide-react";
 
 const KNOWN_BANKS = ["Open Trivia DB", "The Trivia API"] as const;
@@ -96,11 +99,14 @@ function ImportsPage() {
   const listFn = useServerFn(listImportRuns);
   const otdbFn = useServerFn(importFromOpenTriviaDb);
   const ttaFn = useServerFn(importFromTheTriviaApi);
+  const retryScopedFn = useServerFn(retryFailedFromRun);
+  const shareFn = useServerFn(createExportLink);
 
   const [runs, setRuns] = useState<Run[]>([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [retrying, setRetrying] = useState<string | null>(null);
+  const [sharing, setSharing] = useState<string | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -154,7 +160,69 @@ function ImportsPage() {
   const hasFilters =
     search.bank.length > 0 || !!search.from || !!search.to || search.status !== "all";
 
-  const exportHistory = () => {
+  const historyFilename = () => `import-history-${new Date().toISOString().slice(0, 10)}.csv`;
+  const lastRunFilename = () =>
+    lastOverall
+      ? `import-last-run-${new Date(lastOverall.started_at).toISOString().slice(0, 19).replace(/[:T]/g, "-")}.csv`
+      : "import-last-run.csv";
+
+  const exportHistory = () => downloadCsv(historyFilename(), buildHistoryCsv());
+  const exportLastRun = () => {
+    if (!lastOverall) return toast.error("No runs to export");
+    downloadCsv(lastRunFilename(), buildLastRunCsv());
+  };
+
+  const retry = async (r: Run) => {
+    setRetrying(r.id);
+    try {
+      const scoped: any = await retryScopedFn({ data: { runId: r.id, maxPerCategory: 200 } });
+      if (scoped?.scoped) {
+        const cats =
+          (scoped.categories?.otdb?.length ?? 0) + (scoped.categories?.tta?.length ?? 0);
+        toast.success(
+          `Retried ${cats} failed categor${cats === 1 ? "y" : "ies"}: ${scoped.imported} new, ${scoped.skipped} deduped${
+            scoped.errors?.length ? `, ${scoped.errors.length} errors` : ""
+          }`,
+        );
+      } else {
+        const fn =
+          r.source === "Open Trivia DB"
+            ? otdbFn
+            : r.source === "The Trivia API"
+              ? ttaFn
+              : null;
+        if (!fn) {
+          toast.error(`No retry handler for ${r.source}`);
+          return;
+        }
+        toast.info("No scoped failures found — retrying full bank");
+        const full: any = await fn({ data: { maxPerCategory: 200 } });
+        toast.success(
+          `Retried ${r.source}: ${full.imported} new, ${full.skipped} deduped${full.errors?.length ? `, ${full.errors.length} errors` : ""}`,
+        );
+      }
+      await load();
+    } catch (e: any) {
+      toast.error(`Retry failed: ${e?.message ?? "unknown"}`);
+    } finally {
+      setRetrying(null);
+    }
+  };
+
+  const share = async (key: string, filename: string, csv: string) => {
+    setSharing(key);
+    try {
+      const res: any = await shareFn({ data: { filename, csv } });
+      await navigator.clipboard.writeText(res.url);
+      toast.success(`Link copied (valid ${res.expiresInDays} days)`);
+    } catch (e: any) {
+      toast.error(`Share failed: ${e?.message ?? "unknown"}`);
+    } finally {
+      setSharing(null);
+    }
+  };
+
+  const buildHistoryCsv = () => {
     const rows = filtered.map((r) => ({
       started_at: r.started_at,
       finished_at: r.finished_at ?? "",
@@ -168,7 +236,7 @@ function ImportsPage() {
       error_count: r.error_count,
       status: runStatus(r),
     }));
-    const csv = toCsv(rows, [
+    return toCsv(rows, [
       "started_at",
       "finished_at",
       "duration_ms",
@@ -179,14 +247,10 @@ function ImportsPage() {
       "error_count",
       "status",
     ]);
-    downloadCsv(`import-history-${new Date().toISOString().slice(0, 10)}.csv`, csv);
   };
 
-  const exportLastRun = () => {
-    if (!lastOverall) {
-      toast.error("No runs to export");
-      return;
-    }
+  const buildLastRunCsv = () => {
+    if (!lastOverall) return "";
     const summary = [
       {
         kind: "summary",
@@ -216,7 +280,7 @@ function ImportsPage() {
         error_message: m ? m[2] : e,
       };
     });
-    const csv = toCsv([...summary, ...errs] as any, [
+    return toCsv([...summary, ...errs] as any, [
       "kind",
       "source",
       "started_at",
@@ -228,30 +292,6 @@ function ImportsPage() {
       "error_group",
       "error_message",
     ]);
-    downloadCsv(
-      `import-last-run-${new Date(lastOverall.started_at).toISOString().slice(0, 19).replace(/[:T]/g, "-")}.csv`,
-      csv,
-    );
-  };
-
-  const retry = async (source: string) => {
-    setRetrying(source);
-    try {
-      const fn = source === "Open Trivia DB" ? otdbFn : source === "The Trivia API" ? ttaFn : null;
-      if (!fn) {
-        toast.error(`No retry handler for ${source}`);
-        return;
-      }
-      const r: any = await fn({ data: { maxPerCategory: 200 } });
-      toast.success(
-        `Retried ${source}: ${r.imported} new, ${r.skipped} deduped${r.errors?.length ? `, ${r.errors.length} errors` : ""}`,
-      );
-      await load();
-    } catch (e: any) {
-      toast.error(`Retry failed: ${e?.message ?? "unknown"}`);
-    } finally {
-      setRetrying(null);
-    }
   };
 
   const canRetry = (r: Run) => runStatus(r) !== "clean";
@@ -269,14 +309,33 @@ function ImportsPage() {
           <Button variant="outline" size="sm" onClick={exportLastRun} disabled={!lastOverall}>
             <Download className="size-4 mr-1" /> Export last run
           </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => share("last-run", lastRunFilename(), buildLastRunCsv())}
+            disabled={!lastOverall || sharing === "last-run"}
+            title="Upload CSV and copy a 7-day shareable link"
+          >
+            <Link2 className={`size-4 mr-1 ${sharing === "last-run" ? "animate-pulse" : ""}`} /> Share
+          </Button>
           <Button variant="outline" size="sm" onClick={exportHistory} disabled={filtered.length === 0}>
             <Download className="size-4 mr-1" /> Export history
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => share("history", historyFilename(), buildHistoryCsv())}
+            disabled={filtered.length === 0 || sharing === "history"}
+            title="Upload CSV and copy a 7-day shareable link"
+          >
+            <Link2 className={`size-4 mr-1 ${sharing === "history" ? "animate-pulse" : ""}`} /> Share
           </Button>
           <Button variant="outline" size="sm" onClick={load} disabled={loading}>
             <RefreshCw className={`size-4 mr-1 ${loading ? "animate-spin" : ""}`} /> Refresh
           </Button>
         </div>
       </header>
+
 
       {/* Filters */}
       <section className="glass-panel rounded-xl p-3 flex flex-wrap items-center gap-2">
@@ -397,13 +456,14 @@ function ImportsPage() {
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => retry(r.source)}
-                            disabled={retrying === r.source}
+                            onClick={() => retry(r)}
+                            disabled={retrying === r.id}
+                            title="Retry only categories that failed in this run"
                           >
                             <RotateCw
-                              className={`size-3 mr-1 ${retrying === r.source ? "animate-spin" : ""}`}
+                              className={`size-3 mr-1 ${retrying === r.id ? "animate-spin" : ""}`}
                             />
-                            Retry
+                            Retry failed
                           </Button>
                         )}
                       </div>
@@ -532,13 +592,14 @@ function ImportsPage() {
                               <Button
                                 size="sm"
                                 variant="ghost"
-                                onClick={() => retry(r.source)}
-                                disabled={retrying === r.source}
+                                onClick={() => retry(r)}
+                                disabled={retrying === r.id}
+                                title="Retry only categories that failed in this run"
                               >
                                 <RotateCw
-                                  className={`size-3 mr-1 ${retrying === r.source ? "animate-spin" : ""}`}
+                                  className={`size-3 mr-1 ${retrying === r.id ? "animate-spin" : ""}`}
                                 />
-                                Retry
+                                Retry failed
                               </Button>
                             )}
                           </td>

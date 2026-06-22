@@ -1,13 +1,25 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import {
   getPlatformOverview,
   getActivityTimeline,
   getTopEvents,
   getOrgTierBreakdown,
 } from "@/lib/platform.functions";
-import { Users, Building2, Activity, Calendar, TrendingUp } from "lucide-react";
+import { listImportRuns } from "@/lib/trivia-import.functions";
+import {
+  Users,
+  Building2,
+  Activity,
+  Calendar,
+  TrendingUp,
+  AlertTriangle,
+  CheckCircle2,
+  Download,
+} from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/platform/")({
   component: PlatformOverview,
@@ -18,30 +30,56 @@ type Timeline = Awaited<ReturnType<typeof getActivityTimeline>>;
 type TopEvents = Awaited<ReturnType<typeof getTopEvents>>;
 type Tiers = Awaited<ReturnType<typeof getOrgTierBreakdown>>;
 
+type ImportRun = {
+  id: string;
+  source: string;
+  fetched: number;
+  inserted: number;
+  deduplicated: number;
+  error_count: number;
+  started_at: string;
+  finished_at: string | null;
+};
+
+function timeAgo(iso: string) {
+  const ms = Date.now() - new Date(iso).getTime();
+  const m = Math.floor(ms / 60_000);
+  if (m < 1) return "just now";
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h ago`;
+  return `${Math.floor(h / 24)}d ago`;
+}
+
 function PlatformOverview() {
   const [overview, setOverview] = useState<Overview | null>(null);
   const [timeline, setTimeline] = useState<Timeline>([]);
   const [events, setEvents] = useState<TopEvents>([]);
   const [tiers, setTiers] = useState<Tiers | null>(null);
+  const [importRuns, setImportRuns] = useState<ImportRun[]>([]);
   const [err, setErr] = useState<string | null>(null);
+  const listRunsFn = useServerFn(listImportRuns);
 
   useEffect(() => {
     (async () => {
       try {
-        const [o, t, e, b] = await Promise.all([
+        const [o, t, e, b, r] = await Promise.all([
           getPlatformOverview(),
           getActivityTimeline(),
           getTopEvents(),
           getOrgTierBreakdown(),
+          listRunsFn().catch(() => ({ runs: [] as ImportRun[] })),
         ]);
         setOverview(o);
         setTimeline(t);
         setEvents(e);
         setTiers(b);
+        setImportRuns(((r as any)?.runs ?? []).slice(0, 5));
       } catch (e: any) {
         setErr(e?.message ?? "Failed to load");
       }
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (err) return <div className="text-destructive">{err}</div>;
@@ -131,6 +169,72 @@ function PlatformOverview() {
           </CardContent>
         </Card>
       </div>
+
+      <Card>
+        <CardHeader className="pb-2 flex flex-row items-center justify-between">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Download className="size-4" /> Recent imports
+          </CardTitle>
+          <Link
+            to="/platform/imports"
+            className="text-xs text-muted-foreground hover:text-foreground"
+          >
+            View all →
+          </Link>
+        </CardHeader>
+        <CardContent>
+          {importRuns.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              No imports yet. Trigger one from Content sources.
+            </p>
+          ) : (
+            <ul className="divide-y divide-border">
+              {importRuns.map((r) => {
+                const hasErrors = r.error_count > 0;
+                const lowYield =
+                  r.fetched >= 20 && r.inserted < r.fetched * 0.5;
+                return (
+                  <li
+                    key={r.id}
+                    className="flex flex-wrap items-center gap-3 py-2 text-sm"
+                  >
+                    <span className="font-medium min-w-[140px]">{r.source}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {timeAgo(r.started_at)}
+                    </span>
+                    <span className="text-xs tabular-nums text-muted-foreground">
+                      fetched <b className="text-foreground">{r.fetched}</b> ·
+                      dedup <b className="text-foreground">{r.deduplicated}</b> ·
+                      inserted{" "}
+                      <b className={lowYield ? "text-amber-600" : "text-primary"}>
+                        {r.inserted}
+                      </b>
+                    </span>
+                    <span className="ml-auto flex items-center gap-2">
+                      {hasErrors && (
+                        <Badge variant="destructive" className="gap-1">
+                          <AlertTriangle className="size-3" />
+                          {r.error_count} error{r.error_count > 1 ? "s" : ""}
+                        </Badge>
+                      )}
+                      {lowYield && (
+                        <Badge className="gap-1 bg-amber-500/15 text-amber-600 hover:bg-amber-500/15">
+                          <AlertTriangle className="size-3" /> low yield
+                        </Badge>
+                      )}
+                      {!hasErrors && !lowYield && (
+                        <Badge variant="secondary" className="gap-1">
+                          <CheckCircle2 className="size-3" /> clean
+                        </Badge>
+                      )}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
