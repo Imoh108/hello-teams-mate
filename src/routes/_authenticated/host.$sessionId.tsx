@@ -119,12 +119,19 @@ function HostScreen() {
     navigator.clipboard.writeText(joinUrl());
     toast.success("Join link copied");
   };
+  const teamsShareUrl = () => {
+    if (!session) return "";
+    const msg = teamsMsg.trim() || `Join my QuizPulse round — code ${session.join_code}`;
+    return `https://teams.microsoft.com/share?href=${encodeURIComponent(joinUrl())}&msgText=${encodeURIComponent(msg)}&preview=true`;
+  };
   const shareToTeams = () => {
     if (!session) return;
-    const url = joinUrl();
-    const msg = `Join my QuizPulse round — code ${session.join_code}`;
-    const teamsUrl = `https://teams.microsoft.com/share?href=${encodeURIComponent(url)}&msgText=${encodeURIComponent(msg)}&preview=true`;
-    window.open(teamsUrl, "_blank", "noopener,noreferrer");
+    window.open(teamsShareUrl(), "_blank", "noopener,noreferrer");
+  };
+  const copyTeamsLink = () => {
+    if (!session) return;
+    navigator.clipboard.writeText(teamsShareUrl());
+    toast.success("Teams share link copied");
   };
 
   if (!session) return <div className="min-h-screen grid place-items-center text-muted-foreground">Loading…</div>;
