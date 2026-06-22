@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { Library, Plus, Trash2, ExternalLink, ShieldCheck, Sparkles } from "lucide-react";
+import { Library, Plus, Trash2, ExternalLink, ShieldCheck, Sparkles, Globe, Activity } from "lucide-react";
 import {
   listContentSources,
   createContentSource,
@@ -16,6 +16,12 @@ import {
   deleteContentSource,
 } from "@/lib/platform-content.functions";
 import { generateFromSource, generateFromAllVerifiedSources } from "@/lib/ai-pipeline.functions";
+import {
+  importFromOpenTriviaDb,
+  importFromTheTriviaApi,
+  importAllTriviaBanks,
+} from "@/lib/trivia-import.functions";
+import { testFirecrawl } from "@/lib/firecrawl.functions";
 
 export const Route = createFileRoute("/_authenticated/platform/content")({
   component: ContentPage,
@@ -92,6 +98,40 @@ function ContentPage() {
     }
   }
 
+
+
+  const [importing, setImporting] = useState<null | "otdb" | "tta" | "all">(null);
+  const [fcBusy, setFcBusy] = useState(false);
+
+  async function runImport(which: "otdb" | "tta" | "all") {
+    setImporting(which);
+    const label = which === "otdb" ? "Open Trivia DB" : which === "tta" ? "The Trivia API" : "all global banks";
+    const t = toast.loading(`Importing from ${label}…`);
+    try {
+      const fn = which === "otdb" ? importFromOpenTriviaDb : which === "tta" ? importFromTheTriviaApi : importAllTriviaBanks;
+      const r: any = await fn({ data: { maxPerCategory: 200 } });
+      toast.success(`Imported ${r.imported} new questions (${r.skipped} duplicates skipped)`, { id: t });
+    } catch (e: any) {
+      toast.error(e?.message ?? "Import failed", { id: t });
+    } finally {
+      setImporting(null);
+    }
+  }
+
+  async function runFirecrawlTest() {
+    setFcBusy(true);
+    const t = toast.loading("Testing Firecrawl…");
+    try {
+      const r: any = await testFirecrawl();
+      if (r.ok) toast.success(`Firecrawl OK — scraped ${r.chars} chars`, { id: t });
+      else toast.error(`Firecrawl failed: ${r.error}`, { id: t });
+    } catch (e: any) {
+      toast.error(e?.message ?? "Test failed", { id: t });
+    } finally {
+      setFcBusy(false);
+    }
+  }
+
   if (err) return <div className="text-destructive">{err}</div>;
 
   return (
@@ -102,6 +142,34 @@ function ContentPage() {
           Curated free online references the AI pipeline can use when generating questions.
         </p>
       </div>
+
+      <Card>
+        <CardHeader className="pb-2 flex flex-row items-center justify-between gap-2">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Globe className="size-4" /> Global question banks
+          </CardTitle>
+          <Button size="sm" variant="ghost" onClick={runFirecrawlTest} disabled={fcBusy}>
+            <Activity className="size-4 mr-1" /> {fcBusy ? "Testing…" : "Test Firecrawl"}
+          </Button>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-sm text-muted-foreground">
+            Bulk-import ready-made trivia questions from public global APIs. Imports are auto-approved and immediately available in the quiz builder.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <Button onClick={() => runImport("all")} disabled={importing !== null}>
+              <Sparkles className="size-4 mr-1" /> {importing === "all" ? "Importing…" : "Import everything (recommended)"}
+            </Button>
+            <Button variant="secondary" onClick={() => runImport("otdb")} disabled={importing !== null}>
+              {importing === "otdb" ? "Importing…" : "Open Trivia DB"}
+            </Button>
+            <Button variant="secondary" onClick={() => runImport("tta")} disabled={importing !== null}>
+              {importing === "tta" ? "Importing…" : "The Trivia API"}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
 
       <Card>
         <CardHeader className="pb-2">
