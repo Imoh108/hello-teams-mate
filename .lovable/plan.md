@@ -1,68 +1,47 @@
 
 ## Goal
 
-When a manager creates a new quiz, let them assemble it from the seeded question categories (the 12 we just added) by choosing categories, number of rounds, and questions per round — like a normal pub-quiz builder. No AI generation, no manual writing required.
+1. Bulk-import thousands of high-quality multiple-choice questions from public global trivia APIs into the existing `ai_generated_items` table as **auto-approved** items so they appear immediately in the quiz builder pool.
+2. Verify the existing Firecrawl scraping pipeline still works (with a one-click admin health-check), since it's the secondary path for AI-generated questions.
 
-## What changes
+## What gets built
 
-### 1. Database — add `round` to `questions`
-Quizzes currently have no rounds concept. Add one small column so the round structure survives into gameplay/review.
+### 1. New server module `src/lib/trivia-import.functions.ts`
 
-- Migration: `ALTER TABLE public.questions ADD COLUMN round int NOT NULL DEFAULT 1;`
-- Backfill existing rows stay at round 1. No RLS/GRANT change needed (existing policies still apply).
+Three platform-admin server functions (all use `requireSupabaseAuth` + `assertPlatformAdmin`, all write directly to `ai_generated_items` with `status='approved'`):
 
-### 2. New server function — `createQuizFromCategories`
-File: `src/lib/quiz.functions.ts`
+- **`importFromOpenTriviaDb`** — paginated fetch from `https://opentdb.com/api.php` (50 questions per call, looped per category, all difficulties). Maps OpenTDB's 24 categories → our 12 `question_categories` via a slug map (e.g. `Geography → geography`, `Entertainment: Film → film-tv`, `Science & Nature → science`). HTML-decodes prompts/choices, shuffles the 4 options, computes `correct_index`, dedupes against existing prompts (normalized lowercase).
+- **`importFromTheTriviaApi`** — paginated fetch from `https://the-trivia-api.com/v2/questions?limit=50&difficulties=easy,medium,hard`. Maps their `category` field → our 12 categories. Same shuffle/dedupe/insert logic.
+- **`importAllTriviaBanks`** — convenience wrapper that runs both importers back-to-back and returns combined totals.
 
-Input:
-- `title` (string), `description?` (string)
-- `category_ids` (uuid[], min 1)
-- `rounds` (int 1–10)
-- `questions_per_round` (int 1–30)
-- `time_limit_s` (int 5–120, default 20)
-- `difficulty?` ('easy' | 'medium' | 'hard' | 'mixed', default 'mixed')
+All three accept an optional `maxPerCategory` (default 200) to cap volume. Inserts are batched at 200 rows.
 
-Behaviour:
-- Upserts `manager` role for the caller (matches existing pattern).
-- Inserts a `quizzes` row (`topic_pack: 'general_culture'`, owner = caller, org/department from caller's current org).
-- Pulls approved `ai_generated_items` filtered by `category_id IN (...)` and difficulty bucket (1=easy, 3=medium, 5=hard; 'mixed' = no filter).
-- Shuffles and takes `rounds * questions_per_round` items. Returns an error if the pool is smaller than requested, with the available count.
-- Distributes across rounds round-robin so each round mixes categories evenly.
-- Bulk-inserts into `questions` with `round` (1..N), sequential `position` (1..total), `options = choices`, `correct_index`, `time_limit_s`.
-- Returns the new quiz row.
+### 2. Firecrawl health check `src/lib/firecrawl.functions.ts`
 
-### 3. Update the "Create a quiz" dialog on `/app`
-File: `src/routes/_authenticated/app.tsx`
+- **`testFirecrawl`** — admin-only server fn that scrapes `https://en.wikipedia.org/wiki/Quiz` and returns `{ ok, chars, preview }`. Surfaces gateway/credential failures clearly.
 
-Replace the current single form with a tabbed dialog:
+### 3. Admin UI: extend `src/routes/_authenticated/platform.content.tsx`
 
-- **From categories** (default tab)
-  - Title, Description
-  - Category multi-select: chips listing every `question_categories` row that has ≥1 approved question, with the approved count shown ("History · 50"). Categories with 0 questions appear disabled.
-  - Rounds: number input (1–10, default 3)
-  - Questions per round: number input (1–30, default 5)
-  - Difficulty: segmented control (Easy / Medium / Hard / Mixed)
-  - Time per question: slider (5–60s, default 20s)
-  - Live summary line: "3 rounds × 5 questions = 15 total. Pool available: 250."
-  - Submit → calls `createQuizFromCategories`, navigates to `/quizzes/$id`.
+Add a new card **"Global question banks"** above the existing "Add source" card with three buttons + live result toasts:
+- `Import from Open Trivia DB` → calls `importFromOpenTriviaDb`
+- `Import from The Trivia API` → calls `importFromTheTriviaApi`
+- `Import everything (recommended)` → calls `importAllTriviaBanks`
+- `Test Firecrawl` (small ghost button) → calls `testFirecrawl`, shows ✅/❌ with character count or error.
 
-- **Blank** tab — the existing flow (title + description + topic pack) unchanged, for users who want to write their own questions.
+Each button shows a loading toast and a success toast with the imported / skipped counts.
 
-### 4. Show round grouping in the quiz editor
-File: `src/routes/_authenticated/quizzes.$id.tsx`
+### 4. Quiz builder unchanged
 
-- Load `round` alongside questions, order by `round, position`.
-- Render a `Round N` header before each group. Read-only display; no editing of `round` in this pass.
-- New blank questions added via the existing "Add question" button default to `round = last round || 1`.
+The existing `createQuizFromCategories` / `listCategoryPool` already read approved `ai_generated_items` by `category_id`, so newly imported rows appear in the pool counts automatically — no further changes needed.
 
-## Out of scope (call out, don't build)
+## Technical details
 
-- Round breaks / inter-round screens in the host runtime — host still plays questions sequentially in `position` order. Round labels are visible but don't pause the game. Say the word and I'll add round transitions next.
-- Re-rolling / swapping individual questions after generation.
-- Editing category assignments per question after generation.
+- **Category mapping** is a static map in `trivia-import.functions.ts` keyed by API category name → our `question_categories.slug`. Slugs that don't map fall back to `general-knowledge`.
+- **Dedupe**: before each insert batch, fetch existing prompts from `ai_generated_items` (last 10k) into a Set, skip matches.
+- **Rate limiting**: 250 ms `await sleep` between API page fetches to be polite.
+- **No new tables / migrations needed** — everything reuses `ai_generated_items` and `question_categories`. Auto-approval = set `status='approved'`, `reviewed_at=now()`, `reviewed_by=context.userId`.
+- **No new secrets** — Open Trivia DB and The Trivia API are both keyless. Firecrawl already configured via connector.
 
-## Technical notes
+## Expected outcome
 
-- `ai_generated_items.choices` is already `jsonb` with the 4 options — copied straight into `questions.options`.
-- Sampling uses `ORDER BY random() LIMIT n` per category to keep it server-side and cheap.
-- The function uses `requireSupabaseAuth` so RLS applies as the user; `quizzes`/`questions` inserts already work under existing policies (`createQuiz` uses the same path).
+After clicking "Import everything", ~1500–3000 approved MCQs flow into the bank across the 12 categories within ~30 s. The quiz builder pool counts (currently 50 per seeded category) jump significantly, and the "Test Firecrawl" button confirms the scraping path is healthy for the AI-generation pipeline.
