@@ -5,7 +5,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { startQuestion, revealAnswers, endSession } from "@/lib/quiz.functions";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { ArrowRight, Eye, Square, Copy } from "lucide-react";
+import { ArrowRight, Eye, Square, Copy, Link2 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/host/$sessionId")({
   head: () => ({ meta: [{ title: "Host — QuizPulse" }] }),
