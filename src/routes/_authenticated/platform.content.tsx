@@ -119,7 +119,7 @@ function ContentPage() {
     setFcBusy(true);
     const t = toast.loading("Testing Firecrawl…");
     try {
-      const r: any = await testFirecrawl({ data: {} });
+      const r: any = await testFirecrawl();
       if (r.ok) toast.success(`Firecrawl OK — scraped ${r.chars} chars`, { id: t });
       else toast.error(`Firecrawl failed: ${r.error}`, { id: t });
     } catch (e: any) {
