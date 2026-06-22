@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { Library, Plus, Trash2, ExternalLink, ShieldCheck, Sparkles } from "lucide-react";
+import { Library, Plus, Trash2, ExternalLink, ShieldCheck, Sparkles, Globe, Activity } from "lucide-react";
 import {
   listContentSources,
   createContentSource,
@@ -16,6 +16,12 @@ import {
   deleteContentSource,
 } from "@/lib/platform-content.functions";
 import { generateFromSource, generateFromAllVerifiedSources } from "@/lib/ai-pipeline.functions";
+import {
+  importFromOpenTriviaDb,
+  importFromTheTriviaApi,
+  importAllTriviaBanks,
+} from "@/lib/trivia-import.functions";
+import { testFirecrawl } from "@/lib/firecrawl.functions";
 
 export const Route = createFileRoute("/_authenticated/platform/content")({
   component: ContentPage,
