@@ -258,14 +258,16 @@ async function runTriviaApi(opts: {
   maxPerCategory: number;
   catSlugToId: Map<string, string>;
   seen: Set<string>;
+  onlyApiCategories?: Set<string>;
 }): Promise<{ imported: number; skipped: number; errors: string[] }> {
-  const { admin, userId, maxPerCategory, catSlugToId, seen } = opts;
+  const { admin, userId, maxPerCategory, catSlugToId, seen, onlyApiCategories } = opts;
   const errors: string[] = [];
   const rows: Row[] = [];
   let skipped = 0;
   const nowIso = new Date().toISOString();
 
   for (const [apiCat, slug] of Object.entries(TTA_CATEGORIES)) {
+    if (onlyApiCategories && !onlyApiCategories.has(apiCat)) continue;
     const catId = catSlugToId.get(slug) ?? null;
     let collected = 0;
     let failures = 0;
