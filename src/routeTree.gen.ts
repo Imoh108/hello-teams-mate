@@ -31,6 +31,7 @@ import { Route as AuthenticatedPlatformTeamRouteImport } from './routes/_authent
 import { Route as AuthenticatedPlatformSettingsRouteImport } from './routes/_authenticated/platform.settings'
 import { Route as AuthenticatedPlatformReportsRouteImport } from './routes/_authenticated/platform.reports'
 import { Route as AuthenticatedPlatformPipelineRouteImport } from './routes/_authenticated/platform.pipeline'
+import { Route as AuthenticatedPlatformImportsRouteImport } from './routes/_authenticated/platform.imports'
 import { Route as AuthenticatedPlatformHealthRouteImport } from './routes/_authenticated/platform.health'
 import { Route as AuthenticatedPlatformContentRouteImport } from './routes/_authenticated/platform.content'
 import { Route as AuthenticatedPlatformBillingRouteImport } from './routes/_authenticated/platform.billing'
@@ -164,6 +165,12 @@ const AuthenticatedPlatformPipelineRoute =
     path: '/pipeline',
     getParentRoute: () => AuthenticatedPlatformRoute,
   } as any)
+const AuthenticatedPlatformImportsRoute =
+  AuthenticatedPlatformImportsRouteImport.update({
+    id: '/imports',
+    path: '/imports',
+    getParentRoute: () => AuthenticatedPlatformRoute,
+  } as any)
 const AuthenticatedPlatformHealthRoute =
   AuthenticatedPlatformHealthRouteImport.update({
     id: '/health',
@@ -285,6 +292,7 @@ export interface FileRoutesByFullPath {
   '/platform/billing': typeof AuthenticatedPlatformBillingRoute
   '/platform/content': typeof AuthenticatedPlatformContentRoute
   '/platform/health': typeof AuthenticatedPlatformHealthRoute
+  '/platform/imports': typeof AuthenticatedPlatformImportsRoute
   '/platform/pipeline': typeof AuthenticatedPlatformPipelineRoute
   '/platform/reports': typeof AuthenticatedPlatformReportsRoute
   '/platform/settings': typeof AuthenticatedPlatformSettingsRoute
@@ -322,6 +330,7 @@ export interface FileRoutesByTo {
   '/platform/billing': typeof AuthenticatedPlatformBillingRoute
   '/platform/content': typeof AuthenticatedPlatformContentRoute
   '/platform/health': typeof AuthenticatedPlatformHealthRoute
+  '/platform/imports': typeof AuthenticatedPlatformImportsRoute
   '/platform/pipeline': typeof AuthenticatedPlatformPipelineRoute
   '/platform/reports': typeof AuthenticatedPlatformReportsRoute
   '/platform/settings': typeof AuthenticatedPlatformSettingsRoute
@@ -363,6 +372,7 @@ export interface FileRoutesById {
   '/_authenticated/platform/billing': typeof AuthenticatedPlatformBillingRoute
   '/_authenticated/platform/content': typeof AuthenticatedPlatformContentRoute
   '/_authenticated/platform/health': typeof AuthenticatedPlatformHealthRoute
+  '/_authenticated/platform/imports': typeof AuthenticatedPlatformImportsRoute
   '/_authenticated/platform/pipeline': typeof AuthenticatedPlatformPipelineRoute
   '/_authenticated/platform/reports': typeof AuthenticatedPlatformReportsRoute
   '/_authenticated/platform/settings': typeof AuthenticatedPlatformSettingsRoute
@@ -404,6 +414,7 @@ export interface FileRouteTypes {
     | '/platform/billing'
     | '/platform/content'
     | '/platform/health'
+    | '/platform/imports'
     | '/platform/pipeline'
     | '/platform/reports'
     | '/platform/settings'
@@ -441,6 +452,7 @@ export interface FileRouteTypes {
     | '/platform/billing'
     | '/platform/content'
     | '/platform/health'
+    | '/platform/imports'
     | '/platform/pipeline'
     | '/platform/reports'
     | '/platform/settings'
@@ -481,6 +493,7 @@ export interface FileRouteTypes {
     | '/_authenticated/platform/billing'
     | '/_authenticated/platform/content'
     | '/_authenticated/platform/health'
+    | '/_authenticated/platform/imports'
     | '/_authenticated/platform/pipeline'
     | '/_authenticated/platform/reports'
     | '/_authenticated/platform/settings'
@@ -657,6 +670,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPlatformPipelineRouteImport
       parentRoute: typeof AuthenticatedPlatformRoute
     }
+    '/_authenticated/platform/imports': {
+      id: '/_authenticated/platform/imports'
+      path: '/imports'
+      fullPath: '/platform/imports'
+      preLoaderRoute: typeof AuthenticatedPlatformImportsRouteImport
+      parentRoute: typeof AuthenticatedPlatformRoute
+    }
     '/_authenticated/platform/health': {
       id: '/_authenticated/platform/health'
       path: '/health'
@@ -819,6 +839,7 @@ interface AuthenticatedPlatformRouteChildren {
   AuthenticatedPlatformBillingRoute: typeof AuthenticatedPlatformBillingRoute
   AuthenticatedPlatformContentRoute: typeof AuthenticatedPlatformContentRoute
   AuthenticatedPlatformHealthRoute: typeof AuthenticatedPlatformHealthRoute
+  AuthenticatedPlatformImportsRoute: typeof AuthenticatedPlatformImportsRoute
   AuthenticatedPlatformPipelineRoute: typeof AuthenticatedPlatformPipelineRoute
   AuthenticatedPlatformReportsRoute: typeof AuthenticatedPlatformReportsRoute
   AuthenticatedPlatformSettingsRoute: typeof AuthenticatedPlatformSettingsRoute
@@ -830,6 +851,7 @@ const AuthenticatedPlatformRouteChildren: AuthenticatedPlatformRouteChildren = {
   AuthenticatedPlatformBillingRoute: AuthenticatedPlatformBillingRoute,
   AuthenticatedPlatformContentRoute: AuthenticatedPlatformContentRoute,
   AuthenticatedPlatformHealthRoute: AuthenticatedPlatformHealthRoute,
+  AuthenticatedPlatformImportsRoute: AuthenticatedPlatformImportsRoute,
   AuthenticatedPlatformPipelineRoute: AuthenticatedPlatformPipelineRoute,
   AuthenticatedPlatformReportsRoute: AuthenticatedPlatformReportsRoute,
   AuthenticatedPlatformSettingsRoute: AuthenticatedPlatformSettingsRoute,
