@@ -138,12 +138,12 @@ function ImportsPage() {
   for (const r of filtered) if (!latestBySource.has(r.source)) latestBySource.set(r.source, r);
   const lastOverall = filtered[0];
 
-  const setSearch = (patch: Partial<typeof search>) =>
-    navigate({ search: (prev) => ({ ...prev, ...patch }) as any });
+  const setSearch = (patch: Record<string, unknown>) =>
+    navigate({ search: ((prev: Record<string, unknown>) => ({ ...prev, ...patch })) as any });
 
   const toggleBank = (b: string) => {
     const next = search.bank.includes(b)
-      ? search.bank.filter((x) => x !== b)
+      ? search.bank.filter((x: string) => x !== b)
       : [...search.bank, b];
     setSearch({ bank: next });
   };
