@@ -1160,6 +1160,48 @@ export type Database = {
           },
         ]
       }
+      trivia_import_runs: {
+        Row: {
+          created_at: string
+          deduplicated: number
+          error_count: number
+          errors: Json
+          fetched: number
+          finished_at: string | null
+          id: string
+          inserted: number
+          run_by: string | null
+          source: string
+          started_at: string
+        }
+        Insert: {
+          created_at?: string
+          deduplicated?: number
+          error_count?: number
+          errors?: Json
+          fetched?: number
+          finished_at?: string | null
+          id?: string
+          inserted?: number
+          run_by?: string | null
+          source: string
+          started_at?: string
+        }
+        Update: {
+          created_at?: string
+          deduplicated?: number
+          error_count?: number
+          errors?: Json
+          fetched?: number
+          finished_at?: string | null
+          id?: string
+          inserted?: number
+          run_by?: string | null
+          source?: string
+          started_at?: string
+        }
+        Relationships: []
+      }
       user_avatar_items: {
         Row: {
           acquired_at: string
