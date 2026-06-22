@@ -172,7 +172,9 @@ function HostScreen() {
               <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
                 <Button onClick={copyCode} variant="outline" size="sm"><Copy className="size-4 mr-1" /> Copy code</Button>
                 <Button onClick={copyLink} variant="outline" size="sm"><Link2 className="size-4 mr-1" /> Copy join link</Button>
+                <Button onClick={previewAsPlayer} variant="outline" size="sm" title="Open the player view in a new tab as a guest"><Eye className="size-4 mr-1" /> Preview as player</Button>
               </div>
+              <p className="mt-2 text-xs text-muted-foreground">Anyone with the link can join as a guest — no account needed.</p>
 
               <div className="mt-6 max-w-md mx-auto text-left">
                 <Label htmlFor="teams-msg" className="text-xs text-muted-foreground">Teams share message</Label>
