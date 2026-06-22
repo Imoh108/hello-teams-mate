@@ -1,7 +1,7 @@
 import { createFileRoute, Link, Outlet, useRouterState, redirect } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { LayoutDashboard, Shield, ArrowLeft, Activity, Sparkles, DollarSign, Users, Settings as SettingsIcon, Library, FileDown } from "lucide-react";
+import { LayoutDashboard, Shield, ArrowLeft, Activity, Sparkles, DollarSign, Users, Settings as SettingsIcon, Library, FileDown, History } from "lucide-react";
 import { isPlatformAdmin } from "@/lib/platform.functions";
 
 export const Route = createFileRoute("/_authenticated/platform")({
