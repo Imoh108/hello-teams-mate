@@ -26,6 +26,7 @@ function PlatformLayout() {
     { to: "/platform/pipeline", label: "AI pipeline", icon: Sparkles },
     { to: "/platform/billing", label: "Billing & orgs", icon: DollarSign },
     { to: "/platform/content", label: "Content sources", icon: Library },
+    { to: "/platform/imports", label: "Import history", icon: History },
     { to: "/platform/reports", label: "Usage reports", icon: FileDown },
     { to: "/platform/team", label: "Team access", icon: Users },
     { to: "/platform/settings", label: "Settings", icon: SettingsIcon },
