@@ -444,3 +444,124 @@ export const listImportRuns = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     return { runs: data ?? [] };
   });
+
+function parseFailedCategories(source: string, errors: string[]) {
+  const otdb = new Set<number>();
+  const tta = new Set<string>();
+  for (const e of errors ?? []) {
+    let m = e.match(/^OpenTDB cat (\d+):/);
+    if (m) {
+      otdb.add(Number(m[1]));
+      continue;
+    }
+    m = e.match(/^TTA ([a-z_]+):/);
+    if (m) tta.add(m[1]);
+  }
+  return source === "Open Trivia DB" ? { otdb } : source === "The Trivia API" ? { tta } : { otdb, tta };
+}
+
+const RetryInput = z.object({
+  runId: z.string().uuid(),
+  maxPerCategory: z.number().int().min(10).max(500).default(200),
+});
+
+export const retryFailedFromRun = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => RetryInput.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertPlatformAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: run, error } = await supabaseAdmin
+      .from("trivia_import_runs")
+      .select("id, source, errors")
+      .eq("id", data.runId)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!run) throw new Error("Run not found");
+
+    const parsed = parseFailedCategories(run.source, (run.errors as string[]) ?? []);
+    const otdb = (parsed as any).otdb as Set<number> | undefined;
+    const tta = (parsed as any).tta as Set<string> | undefined;
+    const hasOtdb = otdb && otdb.size > 0;
+    const hasTta = tta && tta.size > 0;
+
+    if (!hasOtdb && !hasTta) {
+      return { scoped: false, source: run.source, imported: 0, skipped: 0, errors: [] as string[] };
+    }
+
+    const catSlugToId = await loadCategorySlugMap(supabaseAdmin);
+    const seen = await loadExistingPromptSet(supabaseAdmin);
+
+    let imported = 0;
+    let skipped = 0;
+    const allErrors: string[] = [];
+
+    if (hasOtdb) {
+      const startedAt = new Date().toISOString();
+      const r = await runOpenTdb({
+        admin: supabaseAdmin,
+        userId: context.userId,
+        maxPerCategory: data.maxPerCategory,
+        catSlugToId,
+        seen,
+        onlyCategoryIds: otdb,
+      });
+      await logRun(supabaseAdmin, context.userId, "Open Trivia DB (retry)", startedAt, r);
+      imported += r.imported;
+      skipped += r.skipped;
+      allErrors.push(...r.errors);
+    }
+    if (hasTta) {
+      const startedAt = new Date().toISOString();
+      const r = await runTriviaApi({
+        admin: supabaseAdmin,
+        userId: context.userId,
+        maxPerCategory: data.maxPerCategory,
+        catSlugToId,
+        seen,
+        onlyApiCategories: tta,
+      });
+      await logRun(supabaseAdmin, context.userId, "The Trivia API (retry)", startedAt, r);
+      imported += r.imported;
+      skipped += r.skipped;
+      allErrors.push(...r.errors);
+    }
+
+    return {
+      scoped: true,
+      source: run.source,
+      categories: { otdb: [...(otdb ?? [])], tta: [...(tta ?? [])] },
+      imported,
+      skipped,
+      errors: allErrors,
+    };
+  });
+
+const ExportInput = z.object({
+  filename: z.string().min(1).max(120),
+  csv: z.string().min(1).max(10_000_000),
+});
+
+export const createExportLink = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => ExportInput.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertPlatformAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const safe = data.filename.replace(/[^a-zA-Z0-9._-]/g, "_");
+    const id = (globalThis.crypto as any)?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    const path = `${context.userId}/${id}-${safe}`;
+    const { error: upErr } = await supabaseAdmin.storage
+      .from("import-exports")
+      .upload(path, new Blob([data.csv], { type: "text/csv;charset=utf-8" }), {
+        contentType: "text/csv;charset=utf-8",
+        upsert: false,
+      });
+    if (upErr) throw new Error(upErr.message);
+    const { data: signed, error: sErr } = await supabaseAdmin.storage
+      .from("import-exports")
+      .createSignedUrl(path, 60 * 60 * 24 * 7);
+    if (sErr || !signed) throw new Error(sErr?.message ?? "Failed to create link");
+    return { url: signed.signedUrl, expiresInDays: 7 };
+  });
+
