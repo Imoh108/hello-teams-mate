@@ -115,9 +115,14 @@ function HostScreen() {
       <header className="border-b border-border">
         <div className="container mx-auto flex items-center justify-between px-6 py-3">
           <Link to="/app" className="text-sm text-muted-foreground hover:text-foreground">← Dashboard</Link>
-          <button onClick={copyCode} className="flex items-center gap-2 font-mono-tab text-lg tracking-widest">
-            {session.join_code} <Copy className="size-4 text-muted-foreground" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button onClick={copyCode} className="flex items-center gap-2 font-mono-tab text-lg tracking-widest" title="Copy code">
+              {session.join_code} <Copy className="size-4 text-muted-foreground" />
+            </button>
+            <button onClick={copyLink} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground rounded-md border border-border px-2 py-1" title="Copy join link">
+              <Link2 className="size-3" /> Link
+            </button>
+          </div>
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <span className="live-dot" /> {session.status.toUpperCase()}
           </div>
