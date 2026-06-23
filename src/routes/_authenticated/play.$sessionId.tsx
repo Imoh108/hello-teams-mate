@@ -188,8 +188,8 @@ function PlayScreen() {
   // Leaderboard between questions
   if (session.status === "reveal" || !question) {
     return (
-      <div className="min-h-screen px-4 py-6 max-w-2xl mx-auto w-full">
-        <h1 className="font-display text-3xl font-black text-center mb-4">Leaderboard</h1>
+      <div className="min-h-[100dvh] px-3 sm:px-4 py-4 sm:py-6 max-w-2xl mx-auto w-full">
+        <h1 className="font-display text-2xl sm:text-3xl font-black text-center mb-4">Leaderboard</h1>
         <PodiumLeaderboard rows={lbRows} highlightUserId={userId} />
         <p className="text-center text-sm text-muted-foreground mt-6">Get ready for the next question…</p>
       </div>
