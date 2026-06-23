@@ -74,14 +74,18 @@ function HostScreen() {
     return () => { supabase.removeChannel(ch); };
   }, [sessionId]);
 
-  // Track answered count per current question (counts any submitted row, including timeouts)
+  // Per-option distribution for current question
+  const [distribution, setDistribution] = useState<number[]>([0, 0, 0, 0]);
   useEffect(() => {
-    if (!currentQuestionId) { setAnsweredCount(0); return; }
+    if (!currentQuestionId) { setAnsweredCount(0); setDistribution([0, 0, 0, 0]); return; }
     let cancelled = false;
     const refresh = async () => {
-      const { count } = await supabase.from("answers").select("id", { head: true, count: "exact" })
+      const { data } = await supabase.from("answers")
+        .select("selected_index")
         .eq("session_id", sessionId).eq("question_id", currentQuestionId);
-      if (!cancelled) setAnsweredCount(count ?? 0);
+      const dist = [0, 0, 0, 0];
+      (data ?? []).forEach((r: any) => { if (typeof r.selected_index === "number" && r.selected_index >= 0 && r.selected_index < 4) dist[r.selected_index]++; });
+      if (!cancelled) { setDistribution(dist); setAnsweredCount((data ?? []).length); }
     };
     refresh();
     const ch = supabase.channel(`host-answers-${sessionId}-${currentQuestionId}`)
