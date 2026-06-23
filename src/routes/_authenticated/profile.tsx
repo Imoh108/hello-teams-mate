@@ -45,16 +45,25 @@ function ProfilePage() {
         </div>
       </header>
       <main className="container mx-auto px-6 py-10 space-y-8 max-w-4xl">
-        <section className="flex items-center gap-6 glass-panel rounded-xl p-6">
-          <Avatar className="size-20">
+        <section className="kahoot-radius kahoot-shadow border-4 border-black/10 bg-gradient-to-br from-kahoot-purple to-kahoot-blue text-white p-6 flex items-center gap-6">
+          <Avatar className="size-24 ring-4 ring-white/40 kahoot-shadow-sm">
             {equipped?.image_url && <AvatarImage src={equipped.image_url} />}
-            <AvatarFallback>{state.profile?.display_name?.[0] ?? "U"}</AvatarFallback>
+            <AvatarFallback className="bg-kahoot-yellow text-kahoot-yellow-foreground font-display font-black text-3xl">
+              {state.profile?.display_name?.[0] ?? "U"}
+            </AvatarFallback>
           </Avatar>
-          <div className="flex-1">
-            <h1 className="font-display text-2xl font-bold">{state.profile?.display_name ?? "Player"}</h1>
-            <div className="text-3xl font-mono-tab text-primary mt-1">{state.profile?.points ?? 0} pts</div>
+          <div className="flex-1 min-w-0">
+            <h1 className="font-display text-3xl font-black truncate">{state.profile?.display_name ?? "Player"}</h1>
+            <div className="text-2xl font-display font-black tabular-nums mt-1">{state.profile?.points ?? 0} pts</div>
           </div>
         </section>
+
+        <section className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <StatTile color="bg-kahoot-yellow text-kahoot-yellow-foreground" icon={<Coins className="size-6" />} label="Total points earned" value={stats?.totalPoints ?? 0} />
+          <StatTile color="bg-kahoot-red text-kahoot-red-foreground" icon={<Flame className="size-6 fill-current" />} label="Highest streak" value={stats?.highestStreak ?? 0} />
+          <StatTile color="bg-kahoot-green text-kahoot-green-foreground" icon={<Medal className="size-6" />} label="Podium finishes" value={stats?.podiumFinishes ?? 0} />
+        </section>
+
 
         <section>
           <h2 className="font-display text-lg font-semibold mb-3">Inventory ({state.items.length})</h2>
