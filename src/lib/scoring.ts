@@ -19,12 +19,13 @@ export function permutationFor(seed: string, n: number): number[] {
   return arr;
 }
 
-// Scoring: correct gets 200 base + up to 1000 speed bonus
+// Kahoot-style scoring: correct answers earn 1000 at t=0,
+// ticking linearly down to 500 at the buzzer. Wrong = 0.
 export function computePoints(isCorrect: boolean, elapsedMs: number, limitS: number): number {
   if (!isCorrect) return 0;
-  const limitMs = limitS * 1000;
-  const speed = Math.max(0, 1 - elapsedMs / limitMs);
-  return 200 + Math.round(1000 * speed);
+  const limitMs = Math.max(1, limitS * 1000);
+  const t = Math.min(1, Math.max(0, elapsedMs / limitMs));
+  return Math.round(1000 - 500 * t);
 }
 
 export function generateJoinCode(): string {
