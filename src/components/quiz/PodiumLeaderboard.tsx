@@ -23,26 +23,26 @@ export function PodiumLeaderboard({ rows, highlightUserId, max = 10 }: Props) {
   const rest = sorted.slice(3);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 w-full min-w-0">
       {top3.length > 0 && (
-        <div className="grid grid-cols-3 gap-2 items-end">
+        <div className="grid grid-cols-3 gap-1.5 sm:gap-2 items-end">
           {[1, 0, 2].map((i) => {
             const p = top3[i];
             if (!p) return <div key={i} />;
-            const heights = ["h-20", "h-28", "h-16"];
+            const heights = ["h-14 sm:h-20", "h-20 sm:h-28", "h-10 sm:h-16"];
             return (
               <motion.div
                 key={p.user_id}
                 layout
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className={cn("kahoot-radius kahoot-shadow-sm border-4 border-black/10 p-3 text-center", PODIUM_BG[i])}
+                className={cn("kahoot-radius kahoot-shadow-sm border-4 border-black/10 p-2 sm:p-3 text-center min-w-0", PODIUM_BG[i])}
               >
-                {i === 0 && <Crown className="size-5 mx-auto fill-current" />}
-                <div className="font-display font-black text-sm truncate">{p.display_name}</div>
-                <div className="font-display font-black text-xl tabular-nums">{p.score}</div>
+                {i === 0 && <Crown className="size-4 sm:size-5 mx-auto fill-current" />}
+                <div className="font-display font-black text-xs sm:text-sm truncate">{p.display_name}</div>
+                <div className="font-display font-black text-base sm:text-xl tabular-nums">{p.score}</div>
                 <div className={cn("mt-2 mx-auto rounded-md bg-black/15", heights[i])} />
-                <div className="font-display font-black text-xs mt-1">#{i + 1}</div>
+                <div className="font-display font-black text-[10px] sm:text-xs mt-1">#{i + 1}</div>
               </motion.div>
             );
           })}
