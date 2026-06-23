@@ -8,6 +8,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { ArrowRight, Eye, Square, Copy, Link2, Share2 } from "lucide-react";
+import { AnswerBlock, KAHOOT_COLORS } from "@/components/quiz/AnswerBlock";
+import { CircularTimer } from "@/components/quiz/CircularTimer";
+import { PodiumLeaderboard, type LbRow } from "@/components/quiz/PodiumLeaderboard";
 
 export const Route = createFileRoute("/_authenticated/host/$sessionId")({
   head: () => ({ meta: [{ title: "Host — QuizPulse" }] }),
