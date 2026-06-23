@@ -58,6 +58,18 @@
   --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  /* Kahoot-style palette */
+  --color-kahoot-red: oklch(0.62 0.22 27);
+  --color-kahoot-red-foreground: oklch(0.99 0 0);
+  --color-kahoot-blue: oklch(0.55 0.20 255);
+  --color-kahoot-blue-foreground: oklch(0.99 0 0);
+  --color-kahoot-yellow: oklch(0.83 0.17 85);
+  --color-kahoot-yellow-foreground: oklch(0.18 0.02 80);
+  --color-kahoot-green: oklch(0.68 0.18 150);
+  --color-kahoot-green-foreground: oklch(0.99 0 0);
+  --color-kahoot-purple: oklch(0.55 0.20 305);
+  --color-kahoot-purple-foreground: oklch(0.99 0 0);
 }
 
 :root {
