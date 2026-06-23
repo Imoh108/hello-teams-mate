@@ -166,5 +166,32 @@
   .timer-ring {
     background: conic-gradient(var(--color-primary) calc(var(--p, 0) * 1%), oklch(1 0 0 / 0.08) 0);
   }
+
+  /* Kahoot-style chunky shadow + radii */
+  .kahoot-shadow { box-shadow: 0 8px 0 0 oklch(0 0 0 / 0.35), 0 14px 30px -8px oklch(0 0 0 / 0.45); }
+  .kahoot-shadow-sm { box-shadow: 0 5px 0 0 oklch(0 0 0 / 0.3); }
+  .kahoot-radius { border-radius: 1.5rem; }
+
+  @keyframes kahoot-pop {
+    0% { transform: scale(0.6); opacity: 0; }
+    60% { transform: scale(1.12); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .animate-kahoot-pop { animation: kahoot-pop 0.35s cubic-bezier(.2,.9,.3,1.3) both; }
+
+  @keyframes kahoot-shake {
+    0%,100% { transform: translateX(0); }
+    20% { transform: translateX(-8px); }
+    40% { transform: translateX(8px); }
+    60% { transform: translateX(-6px); }
+    80% { transform: translateX(6px); }
+  }
+  .animate-kahoot-shake { animation: kahoot-shake 0.5s ease-in-out; }
+
+  @keyframes kahoot-confetti {
+    0% { transform: translateY(-20vh) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+  }
+  .animate-confetti { animation: kahoot-confetti linear forwards; }
 }
 
