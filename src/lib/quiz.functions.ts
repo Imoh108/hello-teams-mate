@@ -371,3 +371,46 @@ async function flaggedCount(supabase: any, sessionId: string, userId: string) {
     .eq("session_id", sessionId).eq("user_id", userId).eq("flagged", true);
   return count ?? 0;
 }
+
+// --- Profile stats: total points, highest streak, podium finishes ---
+export const getProfileStats = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId } = context;
+    // total points from point_events (fallback to profiles.points if empty)
+    const [{ data: events }, { data: profile }, { data: ans }] = await Promise.all([
+      supabase.from("point_events").select("delta").eq("user_id", userId),
+      supabase.from("profiles").select("points").eq("id", userId).maybeSingle(),
+      supabase.from("answers").select("session_id,is_correct,created_at").eq("user_id", userId).order("created_at"),
+    ]);
+    const totalPointsEvents = (events ?? []).reduce((s: number, e: any) => s + (e.delta ?? 0), 0);
+    const totalPoints = totalPointsEvents > 0 ? totalPointsEvents : (profile?.points ?? 0);
+
+    // highest streak across all answers
+    let best = 0, cur = 0;
+    (ans ?? []).forEach((a: any) => { if (a.is_correct) { cur++; if (cur > best) best = cur; } else cur = 0; });
+
+    // podium finishes: for each ended session this user played, rank players by sum(points) and see if top 3
+    const sessionIds = Array.from(new Set((ans ?? []).map((a: any) => a.session_id)));
+    let podiumFinishes = 0;
+    if (sessionIds.length) {
+      const { data: ended } = await supabase
+        .from("sessions").select("id").in("id", sessionIds).eq("status", "ended");
+      const endedIds = new Set((ended ?? []).map((s: any) => s.id));
+      if (endedIds.size) {
+        const { data: allAns } = await supabase
+          .from("answers").select("session_id,user_id,points").in("session_id", Array.from(endedIds));
+        const bySession: Record<string, Record<string, number>> = {};
+        (allAns ?? []).forEach((r: any) => {
+          (bySession[r.session_id] ||= {});
+          bySession[r.session_id][r.user_id] = (bySession[r.session_id][r.user_id] ?? 0) + (r.points ?? 0);
+        });
+        for (const sid of Object.keys(bySession)) {
+          const ranked = Object.entries(bySession[sid]).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([uid]) => uid);
+          if (ranked.includes(userId)) podiumFinishes++;
+        }
+      }
+    }
+
+    return { totalPoints, highestStreak: best, podiumFinishes };
+  });
