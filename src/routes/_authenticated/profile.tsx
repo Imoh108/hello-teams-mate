@@ -2,11 +2,12 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { getMyProfile, equipAvatar } from "@/lib/gamification.functions";
+import { getProfileStats } from "@/lib/quiz.functions";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Trophy, ArrowLeft, Store, Flame } from "lucide-react";
+import { Trophy, ArrowLeft, Store, Flame, Coins, Medal } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/profile")({
   head: () => ({ meta: [{ title: "Profile — QuizPulse" }] }),
@@ -15,9 +16,14 @@ export const Route = createFileRoute("/_authenticated/profile")({
 
 function ProfilePage() {
   const getFn = useServerFn(getMyProfile);
+  const statsFn = useServerFn(getProfileStats);
   const equipFn = useServerFn(equipAvatar);
   const [state, setState] = useState<any>(null);
-  const refresh = async () => setState(await getFn({}));
+  const [stats, setStats] = useState<{ totalPoints: number; highestStreak: number; podiumFinishes: number } | null>(null);
+  const refresh = async () => {
+    const [s, st] = await Promise.all([getFn({}), statsFn({})]);
+    setState(s); setStats(st as any);
+  };
   useEffect(() => { refresh(); }, []);
   if (!state) return <div className="p-8 text-muted-foreground">Loading…</div>;
   const equipped = state.items.find((i: any) => i.item_id === state.profile?.equipped_avatar_id)?.avatar_items;
