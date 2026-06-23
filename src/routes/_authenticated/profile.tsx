@@ -121,3 +121,12 @@ function ProfilePage() {
     </div>
   );
 }
+
+function StatTile({ color, icon, label, value }: { color: string; icon: React.ReactNode; label: string; value: number }) {
+  return (
+    <div className={`kahoot-radius kahoot-shadow-sm border-4 border-black/10 p-5 ${color}`}>
+      <div className="flex items-center gap-2 font-display font-black text-sm opacity-90">{icon}{label}</div>
+      <div className="font-display font-black text-4xl tabular-nums mt-2">{value}</div>
+    </div>
+  );
+}
