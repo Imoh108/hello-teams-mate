@@ -67,12 +67,12 @@ export function PodiumLeaderboard({ rows, highlightUserId, max = 10 }: Props) {
                   me ? "border-primary bg-primary/15" : "border-border bg-surface"
                 )}
               >
-                <span className="flex items-center gap-2 min-w-0">
-                  <span className="font-mono-tab text-muted-foreground w-6">{rank}</span>
-                  <span className="truncate">{p.display_name}</span>
-                  {(p.streak ?? 0) >= 2 && <Flame className="size-4 text-kahoot-yellow fill-current" />}
+                <span className="flex items-center gap-2 min-w-0 flex-1">
+                  <span className="font-mono-tab text-muted-foreground w-6 shrink-0">{rank}</span>
+                  <span className="truncate min-w-0">{p.display_name}</span>
+                  {(p.streak ?? 0) >= 2 && <Flame className="size-4 text-kahoot-yellow fill-current shrink-0" />}
                 </span>
-                <span className="font-mono-tab">{p.score}</span>
+                <span className="font-mono-tab shrink-0 ml-2">{p.score}</span>
               </motion.li>
             );
           })}
