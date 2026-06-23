@@ -45,9 +45,9 @@ export function AnswerBlock({ displayIndex, label, onClick, disabled, state = "i
         className,
       )}
     >
-      <Icon className="size-8 sm:size-10 shrink-0 fill-current" strokeWidth={2.5} />
+      <Icon className="size-7 sm:size-10 shrink-0 fill-current" strokeWidth={2.5} />
       {showLabel && label && (
-        <span className="text-lg sm:text-2xl leading-tight break-words">{label}</span>
+        <span className="text-base sm:text-2xl leading-tight break-words min-w-0">{label}</span>
       )}
     </button>
   );
