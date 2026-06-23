@@ -260,13 +260,18 @@ function HostScreen() {
 
 function Leaderboard({ sessionId, players }: { sessionId: string; players: Player[] }) {
   const [scores, setScores] = useState<Record<string, number>>({});
+  const [streaks, setStreaks] = useState<Record<string, number>>({});
 
   useEffect(() => {
     const load = async () => {
-      const { data } = await supabase.from("answers").select("user_id,points").eq("session_id", sessionId);
+      const { data } = await supabase.from("answers").select("user_id,points,is_correct,created_at").eq("session_id", sessionId).order("created_at");
       const s: Record<string, number> = {};
-      (data ?? []).forEach((r: any) => { s[r.user_id] = (s[r.user_id] ?? 0) + (r.points ?? 0); });
-      setScores(s);
+      const cur: Record<string, number> = {};
+      (data ?? []).forEach((r: any) => {
+        s[r.user_id] = (s[r.user_id] ?? 0) + (r.points ?? 0);
+        if (r.is_correct) cur[r.user_id] = (cur[r.user_id] ?? 0) + 1; else cur[r.user_id] = 0;
+      });
+      setScores(s); setStreaks(cur);
     };
     load();
     const ch = supabase.channel(`lb-${sessionId}`)
@@ -275,16 +280,9 @@ function Leaderboard({ sessionId, players }: { sessionId: string; players: Playe
     return () => { supabase.removeChannel(ch); };
   }, [sessionId]);
 
-  const sorted = [...players].sort((a, b) => (scores[b.user_id] ?? 0) - (scores[a.user_id] ?? 0));
   if (players.length === 0) return <p className="text-sm text-muted-foreground">Waiting for players…</p>;
-  return (
-    <ol className="space-y-1.5">
-      {sorted.map((p, i) => (
-        <li key={p.user_id} className="flex items-center justify-between rounded-md bg-surface px-3 py-2 text-sm">
-          <span className="flex items-center gap-2"><span className="text-muted-foreground font-mono-tab w-5">{i + 1}</span>{p.display_name}{p.flagged_count > 0 && <span title="Flagged" className="text-incorrect text-xs">⚠</span>}</span>
-          <span className="font-mono-tab">{scores[p.user_id] ?? 0}</span>
-        </li>
-      ))}
-    </ol>
-  );
+  const rows: LbRow[] = players.map((p) => ({
+    user_id: p.user_id, display_name: p.display_name, score: scores[p.user_id] ?? 0, streak: streaks[p.user_id] ?? 0,
+  }));
+  return <PodiumLeaderboard rows={rows} max={10} />;
 }
