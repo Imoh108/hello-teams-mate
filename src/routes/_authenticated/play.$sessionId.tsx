@@ -200,27 +200,29 @@ function PlayScreen() {
   const locked = submittedFor === question.id;
 
   return (
-    <div className="min-h-screen flex flex-col px-4 py-4 max-w-3xl mx-auto w-full">
+    <div className="min-h-[100dvh] flex flex-col px-3 sm:px-4 py-3 sm:py-4 max-w-3xl mx-auto w-full">
       {showCountdown && <CountdownGo onDone={() => setShowCountdown(false)} />}
       {result && <FeedbackOverlay isCorrect={result.isCorrect} points={result.points} streak={streak} />}
 
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <span className="font-mono-tab">{session.join_code}</span>
+      <div className="flex items-center justify-between gap-3 shrink-0">
+        <div className="flex items-center gap-2 text-xs text-muted-foreground min-w-0">
+          <span className="font-mono-tab truncate">{session.join_code}</span>
           {streak >= 2 && (
-            <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-kahoot-yellow text-kahoot-yellow-foreground font-display font-bold">
+            <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-kahoot-yellow text-kahoot-yellow-foreground font-display font-bold shrink-0">
               <Flame className="size-3 fill-current" /> {streak}
             </span>
           )}
         </div>
-        <CircularTimer remaining={remaining} limit={limit} size={72} />
+        <div className="shrink-0">
+          <CircularTimer remaining={remaining} limit={limit} size={64} />
+        </div>
       </div>
 
-      <div className="kahoot-radius bg-card border-4 border-black/10 kahoot-shadow-sm p-6 mt-4">
-        <h1 className="font-display text-xl sm:text-3xl font-black leading-tight text-center">{question.prompt}</h1>
+      <div className="kahoot-radius bg-card border-4 border-black/10 kahoot-shadow-sm p-4 sm:p-6 mt-3 sm:mt-4 shrink-0">
+        <h1 className="font-display text-lg sm:text-3xl font-black leading-tight text-center">{question.prompt}</h1>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-6">
+      <div className="grid grid-cols-2 grid-rows-2 gap-2 sm:gap-3 mt-4 sm:mt-6 flex-1 min-h-0">
         {permutation.map((origIdx, displayIdx) => {
           const isPicked = selected === origIdx;
           const state = isReveal
