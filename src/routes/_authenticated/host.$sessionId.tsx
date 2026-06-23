@@ -204,21 +204,38 @@ function HostScreen() {
               <Button onClick={onNext} size="lg" className="mt-6"><ArrowRight className="size-4 mr-1" /> Start first question</Button>
             </div>
           ) : (
-            <div className="glass-panel rounded-2xl p-8">
-              <div className="flex items-center justify-between text-xs text-muted-foreground">
-                <span>Q{currentIdx + 1} / {questions.length}</span>
-                <span className="font-mono-tab text-2xl text-foreground">{remaining.toFixed(1)}s</span>
+            <div className="kahoot-radius bg-card border-4 border-black/10 kahoot-shadow-sm p-6 sm:p-8">
+              <div className="flex items-center justify-between">
+                <span className="font-display font-black text-sm text-muted-foreground">Q{currentIdx + 1} / {questions.length}</span>
+                <CircularTimer remaining={remaining} limit={limit} size={80} />
               </div>
-              <h2 className="font-display text-3xl font-bold mt-4">{current.prompt}</h2>
-              <div className="grid grid-cols-2 gap-3 mt-6">
-                {current.options.map((o, i) => (
-                  <div key={i} className={`rounded-lg border p-4 ${session.status === "reveal" && i === current.correct_index ? "border-correct/50 bg-correct/10" : "border-border bg-surface"}`}>
-                    <span className="text-xs text-muted-foreground mr-2">{String.fromCharCode(65 + i)}</span>{o}
-                  </div>
-                ))}
+              <h2 className="font-display text-2xl sm:text-4xl font-black mt-4 leading-tight">{current.prompt}</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-6">
+                {current.options.map((o, i) => {
+                  const isReveal = session.status === "reveal";
+                  const isCorrect = isReveal && i === current.correct_index;
+                  const total = Math.max(1, distribution.reduce((a, b) => a + b, 0));
+                  const pct = Math.round((distribution[i] / total) * 100);
+                  return (
+                    <div key={i} className="space-y-1">
+                      <AnswerBlock
+                        displayIndex={i as 0 | 1 | 2 | 3}
+                        label={o}
+                        disabled={!isReveal}
+                        state={isReveal ? (isCorrect ? "correct" : "wrong") : "idle"}
+                      />
+                      <div className="px-1 flex items-center gap-2">
+                        <div className="flex-1 h-2 rounded-full bg-surface overflow-hidden">
+                          <div className={`h-full ${KAHOOT_COLORS[i].bg} transition-[width] duration-500`} style={{ width: `${pct}%` }} />
+                        </div>
+                        <span className="font-mono-tab text-xs text-muted-foreground w-12 text-right">{distribution[i]} ({pct}%)</span>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
               <div className="flex items-center justify-between mt-6">
-                <div className="text-sm text-muted-foreground">{answeredCount} / {players.length} answered</div>
+                <div className="text-sm text-muted-foreground font-display font-bold">{answeredCount} / {players.length} answered</div>
                 <div className="flex gap-2">
                   {session.status === "active" && <Button onClick={onReveal} variant="outline"><Eye className="size-4 mr-1" /> Reveal</Button>}
                   {currentIdx + 1 < questions.length ? (
@@ -232,8 +249,8 @@ function HostScreen() {
           )}
         </div>
 
-        <aside className="glass-panel rounded-2xl p-5">
-          <h3 className="font-display font-semibold mb-3">Players</h3>
+        <aside className="kahoot-radius bg-card border-4 border-black/10 kahoot-shadow-sm p-5">
+          <h3 className="font-display font-black text-lg mb-3">Leaderboard</h3>
           <Leaderboard sessionId={sessionId} players={players} />
         </aside>
       </main>
