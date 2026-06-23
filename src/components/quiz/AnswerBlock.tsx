@@ -32,8 +32,8 @@ export function AnswerBlock({ displayIndex, label, onClick, disabled, state = "i
       disabled={disabled}
       aria-label={c.label}
       className={cn(
-        "group relative w-full min-h-[110px] sm:min-h-[140px] kahoot-radius kahoot-shadow",
-        "flex items-center gap-3 px-5 py-4 text-left font-display font-bold",
+        "group relative w-full h-full min-h-[88px] sm:min-h-[140px] kahoot-radius kahoot-shadow",
+        "flex items-center gap-2 sm:gap-3 px-3 sm:px-5 py-3 sm:py-4 text-left font-display font-bold",
         "border-4 border-black/10 transition-transform duration-150",
         "active:translate-y-1 active:[box-shadow:0_2px_0_0_oklch(0_0_0/0.35)]",
         !disabled && "hover:scale-[1.02] hover:-translate-y-0.5 cursor-pointer",
@@ -45,9 +45,9 @@ export function AnswerBlock({ displayIndex, label, onClick, disabled, state = "i
         className,
       )}
     >
-      <Icon className="size-8 sm:size-10 shrink-0 fill-current" strokeWidth={2.5} />
+      <Icon className="size-7 sm:size-10 shrink-0 fill-current" strokeWidth={2.5} />
       {showLabel && label && (
-        <span className="text-lg sm:text-2xl leading-tight break-words">{label}</span>
+        <span className="text-base sm:text-2xl leading-tight break-words min-w-0">{label}</span>
       )}
     </button>
   );
