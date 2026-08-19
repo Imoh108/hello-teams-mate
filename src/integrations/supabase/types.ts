@@ -1293,6 +1293,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_org_invite: { Args: { _token: string }; Returns: string }
       award_points: {
         Args: {
           _delta: number
@@ -1351,6 +1352,10 @@ export type Database = {
       org_tier: {
         Args: { _org: string }
         Returns: Database["public"]["Enums"]["subscription_tier"]
+      }
+      shares_context_with: {
+        Args: { _a: string; _b: string }
+        Returns: boolean
       }
       tier_rank: {
         Args: { _t: Database["public"]["Enums"]["subscription_tier"] }
