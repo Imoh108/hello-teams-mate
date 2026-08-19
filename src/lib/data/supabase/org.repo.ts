@@ -112,26 +112,12 @@ export const supabaseOrgRepository: OrgRepository = {
 
   async acceptInvite(ctx, token) {
     const sb = client(ctx);
-    const { data: invite, error } = await sb
-      .from("organization_invites")
-      .select("*")
-      .eq("token", token)
-      .maybeSingle();
+    // Invite rows are not readable by clients; a security-definer routine
+    // validates the token server-side and joins the caller to the org.
+    const { data, error } = await (sb as any).rpc("accept_org_invite", { _token: token });
     if (error) throw new Error(error.message);
-    if (!invite) throw new Error("Invite not found");
-    if (invite.accepted_at) throw new Error("Invite already used");
-    if (new Date(invite.expires_at).getTime() < Date.now()) throw new Error("Invite expired");
-    const { error: mErr } = await sb.from("organization_members").upsert(
-      {
-        org_id: invite.org_id,
-        user_id: ctx.userId,
-        org_role: invite.org_role,
-        department_id: invite.department_id,
-      },
-      { onConflict: "org_id,user_id" }
-    );
-    if (mErr) throw new Error(mErr.message);
-    await sb.from("organization_invites").update({ accepted_at: new Date().toISOString() }).eq("id", invite.id);
-    return { orgId: invite.org_id };
+    if (!data) throw new Error("Invite not found");
+    return { orgId: data as string };
   },
+
 };
