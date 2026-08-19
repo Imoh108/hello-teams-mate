@@ -23,8 +23,8 @@ function Landing() {
           <span className="font-display text-lg font-semibold tracking-tight">QuizPulse</span>
         </div>
         <nav className="flex items-center gap-3">
-          <Link to="/auth" className="text-sm text-muted-foreground hover:text-foreground">Sign in</Link>
-          <Button asChild size="sm"><Link to="/auth">Get started</Link></Button>
+          <Link to="/auth" search={{ redirect: undefined }} className="text-sm text-muted-foreground hover:text-foreground">Sign in</Link>
+          <Button asChild size="sm"><Link to="/auth" search={{ redirect: undefined }}>Get started</Link></Button>
         </nav>
       </header>
 
@@ -41,7 +41,7 @@ function Landing() {
             scores update instantly — with anti-cheating built in.
           </p>
           <div className="mt-8 flex items-center justify-center gap-3">
-            <Button asChild size="lg" className="font-semibold"><Link to="/auth">Host a quiz</Link></Button>
+            <Button asChild size="lg" className="font-semibold"><Link to="/auth" search={{ redirect: undefined }}>Host a quiz</Link></Button>
             <Button asChild size="lg" variant="outline"><Link to="/play">Join with code</Link></Button>
           </div>
         </section>
