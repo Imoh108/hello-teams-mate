@@ -12,6 +12,8 @@ import { FeedbackOverlay } from "@/components/quiz/FeedbackOverlay";
 import { CountdownGo } from "@/components/quiz/CountdownGo";
 import { PodiumLeaderboard, type LbRow } from "@/components/quiz/PodiumLeaderboard";
 import { Flame } from "lucide-react";
+import { ReactionBar, ReactionLayer, MuteToggle } from "@/components/quiz/Reactions";
+import { sfx } from "@/lib/sfx";
 
 export const Route = createFileRoute("/_authenticated/play/$sessionId")({
   head: () => ({ meta: [{ title: "Play — QuizPulse" }] }),
@@ -110,6 +112,11 @@ function PlayScreen() {
   const limit = session?.time_limit_override_s ?? question?.time_limit_s ?? 20;
   const elapsed = session?.question_started_at ? Math.max(0, (now - new Date(session.question_started_at).getTime()) / 1000) : 0;
   const remaining = Math.max(0, limit - elapsed);
+  const remSec = Math.ceil(remaining);
+  useEffect(() => {
+    if (session?.status === "active" && question && submittedFor !== question.id && remSec > 0 && remSec <= 5) sfx.tick();
+  }, [remSec, session?.status, question, submittedFor]);
+  useEffect(() => { if (result) (result.isCorrect ? sfx.correct : sfx.wrong)(); }, [result]);
 
   // Auto-submit when time is up
   useEffect(() => {
@@ -159,6 +166,7 @@ function PlayScreen() {
   const onPick = async (originalIdx: number) => {
     if (!question || submittedFor === question.id || !session || session.status !== "active") return;
     setSelected(originalIdx);
+    sfx.tap();
     try {
       const r: any = await submitFn({ data: { session_id: sessionId, question_id: question.id, selected_index: originalIdx } });
       setSubmittedFor(question.id);
@@ -181,6 +189,8 @@ function PlayScreen() {
           <p className="mt-4 text-white/90">Waiting for the host to start. Stay on this tab — leaving flags your answer.</p>
           <div className="live-dot mx-auto mt-6" />
         </div>
+        <div className="mt-6"><ReactionBar sessionId={sessionId} /></div>
+        <ReactionLayer sessionId={sessionId} />
       </div>
     );
   }
@@ -189,9 +199,11 @@ function PlayScreen() {
   if (session.status === "reveal" || !question) {
     return (
       <div className="min-h-[100dvh] px-3 sm:px-4 py-4 sm:py-6 max-w-2xl mx-auto w-full">
+        <ReactionLayer sessionId={sessionId} />
         <h1 className="font-display text-2xl sm:text-3xl font-black text-center mb-4">Leaderboard</h1>
         <PodiumLeaderboard rows={lbRows} highlightUserId={userId} />
         <p className="text-center text-sm text-muted-foreground mt-6">Get ready for the next question…</p>
+        <div className="mt-6"><ReactionBar sessionId={sessionId} /></div>
       </div>
     );
   }
@@ -213,7 +225,8 @@ function PlayScreen() {
             </span>
           )}
         </div>
-        <div className="shrink-0">
+        <div className="shrink-0 flex items-center gap-2">
+          <MuteToggle />
           <CircularTimer remaining={remaining} limit={limit} size={64} />
         </div>
       </div>
@@ -242,6 +255,7 @@ function PlayScreen() {
       </div>
 
       {locked && !result && <p className="text-center text-sm text-muted-foreground mt-6 animate-pulse">Locked in. Waiting for others…</p>}
+      {locked && <div className="mt-4"><ReactionBar sessionId={sessionId} /></div>}
 
       <Link to="/app" className="mt-auto pt-6 text-xs text-muted-foreground text-center hover:text-foreground">Leave session</Link>
     </div>
