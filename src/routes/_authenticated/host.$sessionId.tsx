@@ -7,10 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { ArrowRight, Eye, Square, Copy, Link2, Share2 } from "lucide-react";
+import { ArrowRight, Eye, Square, Copy, Link2, Share2, Maximize2 } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
 import { AnswerBlock, KAHOOT_COLORS } from "@/components/quiz/AnswerBlock";
 import { CircularTimer } from "@/components/quiz/CircularTimer";
 import { PodiumLeaderboard, type LbRow } from "@/components/quiz/PodiumLeaderboard";
+import { ReactionLayer, MuteToggle } from "@/components/quiz/Reactions";
+import { sfx } from "@/lib/sfx";
 
 export const Route = createFileRoute("/_authenticated/host/$sessionId")({
   head: () => ({ meta: [{ title: "Host — QuizPulse" }] }),
@@ -103,13 +106,23 @@ function HostScreen() {
   const limit = (session?.time_limit_override_s ?? current?.time_limit_s ?? 20);
   const elapsed = session?.question_started_at ? Math.max(0, (now - new Date(session.question_started_at).getTime()) / 1000) : 0;
   const remaining = Math.max(0, limit - elapsed);
+  const remSec = Math.ceil(remaining);
+  useEffect(() => {
+    if (session?.status === "active" && current && remSec > 0 && remSec <= 5) sfx.tick();
+  }, [remSec, session?.status, current]);
+  useEffect(() => { if (session?.status === "reveal") sfx.correct(); }, [session?.status]);
+  const toggleFullscreen = () => {
+    if (document.fullscreenElement) void document.exitFullscreen();
+    else void document.documentElement.requestFullscreen?.();
+  };
+
 
   const onNext = async () => {
     const nextIdx = currentIdx + 1;
     const q = questions[nextIdx];
     if (!q) return;
     setAnsweredCount(0);
-    try { await startFn({ data: { session_id: sessionId, question_id: q.id } }); } catch (e: any) { toast.error(e.message); }
+    try { await startFn({ data: { session_id: sessionId, question_id: q.id } }); sfx.start(); } catch (e: any) { toast.error(e.message); }
   };
 
   const onReveal = async () => { try { await revealFn({ data: { session_id: sessionId } }); } catch (e: any) { toast.error(e.message); } };
@@ -150,6 +163,7 @@ function HostScreen() {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <ReactionLayer sessionId={sessionId} />
       <header className="border-b border-border">
         <div className="container mx-auto flex items-center justify-between px-6 py-3">
           <Link to="/app" className="text-sm text-muted-foreground hover:text-foreground">← Dashboard</Link>
@@ -165,6 +179,8 @@ function HostScreen() {
             </button>
           </div>
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <MuteToggle />
+            <button onClick={toggleFullscreen} aria-label="Full screen for projector" className="rounded-md border border-border p-1.5 hover:text-foreground"><Maximize2 className="size-4" /></button>
             <span className="live-dot" /> {session.status.toUpperCase()}
           </div>
         </div>
@@ -176,6 +192,10 @@ function HostScreen() {
             <div className="glass-panel rounded-2xl p-12 text-center">
               <h2 className="font-display text-2xl font-bold">Lobby</h2>
               <p className="text-muted-foreground mt-2">Share code <span className="font-mono-tab text-foreground">{session.join_code}</span> with your team, or send them a join link.</p>
+              <div className="mt-5 inline-block rounded-2xl bg-card p-4 border-4 border-black/10">
+                <QRCodeSVG value={joinUrl()} size={200} level="M" bgColor="transparent" fgColor="currentColor" className="text-foreground" />
+                <p className="mt-2 text-xs font-display font-bold text-muted-foreground">Scan with your phone camera to join</p>
+              </div>
               <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
                 <Button onClick={copyCode} variant="outline" size="sm"><Copy className="size-4 mr-1" /> Copy code</Button>
                 <Button onClick={copyLink} variant="outline" size="sm"><Link2 className="size-4 mr-1" /> Copy join link</Button>
