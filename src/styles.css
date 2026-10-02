@@ -193,5 +193,11 @@
     100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
   }
   .animate-confetti { animation: kahoot-confetti linear forwards; }
+  .animate-float-up { animation: qp-float-up 3s ease-out forwards; }
+  @keyframes qp-float-up {
+    0% { transform: translateY(0) scale(0.6); opacity: 0; }
+    10% { opacity: 1; }
+    100% { transform: translateY(-85vh) scale(1.3); opacity: 0; }
+  }
 }
 
