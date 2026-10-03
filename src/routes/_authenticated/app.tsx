@@ -16,6 +16,7 @@ import { Plus, Copy, Play, LogOut, Users, Building2, Trophy, Store, Flame, Shiel
 import { useEnsureCurrentOrg } from "@/hooks/use-ensure-current-org";
 import { track } from "@/lib/track";
 import { isPlatformAdmin } from "@/lib/platform.functions";
+import { QuickStart } from "@/components/quick-start";
 
 export const Route = createFileRoute("/_authenticated/app")({
   head: () => ({ meta: [{ title: "Dashboard — QuizPulse" }] }),
@@ -162,6 +163,7 @@ function Dashboard() {
       </header>
 
       <main className="container mx-auto px-6 py-10 space-y-10">
+        <QuickStart />
         <section>
           <div className="flex items-end justify-between mb-4">
             <div>

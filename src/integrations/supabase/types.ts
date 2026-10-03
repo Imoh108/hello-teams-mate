@@ -528,6 +528,33 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_streaks: {
+        Row: {
+          best_streak: number
+          current_streak: number
+          last_played: string | null
+          total_correct: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          best_streak?: number
+          current_streak?: number
+          last_played?: string | null
+          total_correct?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          best_streak?: number
+          current_streak?: number
+          last_played?: string | null
+          total_correct?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       departments: {
         Row: {
           created_at: string
