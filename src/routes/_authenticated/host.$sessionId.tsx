@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useServerFn } from "@tanstack/react-start";
-import { startQuestion, revealAnswers, endSession } from "@/lib/quiz.functions";
+import { startQuestion, revealAnswers, endSession, setTeamMode } from "@/lib/quiz.functions";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -14,15 +14,16 @@ import { CircularTimer } from "@/components/quiz/CircularTimer";
 import { PodiumLeaderboard, type LbRow } from "@/components/quiz/PodiumLeaderboard";
 import { ReactionLayer, MuteToggle } from "@/components/quiz/Reactions";
 import { sfx } from "@/lib/sfx";
+import { TeamBoard, TeamBadge } from "@/components/quiz/TeamBoard";
 
 export const Route = createFileRoute("/_authenticated/host/$sessionId")({
   head: () => ({ meta: [{ title: "Host — QuizPulse" }] }),
   component: HostScreen,
 });
 
-type Session = { id: string; quiz_id: string; join_code: string; status: string; current_question_id: string | null; question_started_at: string | null; time_limit_override_s: number | null };
+type Session = { id: string; quiz_id: string; join_code: string; status: string; current_question_id: string | null; question_started_at: string | null; time_limit_override_s: number | null; team_count?: number };
 type Question = { id: string; position: number; prompt: string; options: string[]; correct_index: number; time_limit_s: number };
-type Player = { user_id: string; display_name: string; flagged_count: number };
+type Player = { user_id: string; display_name: string; flagged_count: number; team_index: number | null };
 
 function HostScreen() {
   const { sessionId } = Route.useParams();
@@ -30,6 +31,7 @@ function HostScreen() {
   const startFn = useServerFn(startQuestion);
   const revealFn = useServerFn(revealAnswers);
   const endFn = useServerFn(endSession);
+  const teamFn = useServerFn(setTeamMode);
 
   const [session, setSession] = useState<Session | null>(null);
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -61,7 +63,7 @@ function HostScreen() {
         const { data: qs } = await supabase.from("questions").select("*").eq("quiz_id", (s as any).quiz_id).order("position");
         setQuestions(((qs ?? []) as any).map((q: any) => ({ ...q, options: q.options as string[] })));
       }
-      const { data: ps } = await supabase.from("session_players").select("user_id,display_name,flagged_count").eq("session_id", sessionId);
+      const { data: ps } = await supabase.from("session_players").select("user_id,display_name,flagged_count,team_index").eq("session_id", sessionId);
       setPlayers((ps ?? []) as any);
     })();
 
@@ -70,7 +72,7 @@ function HostScreen() {
         (p) => setSession(p.new as any))
       .on("postgres_changes", { event: "*", schema: "public", table: "session_players", filter: `session_id=eq.${sessionId}` },
         async () => {
-          const { data } = await supabase.from("session_players").select("user_id,display_name,flagged_count").eq("session_id", sessionId);
+          const { data } = await supabase.from("session_players").select("user_id,display_name,flagged_count,team_index").eq("session_id", sessionId);
           setPlayers((data ?? []) as any);
         })
       .subscribe();
@@ -159,6 +161,12 @@ function HostScreen() {
     window.open(url, "_blank", "noopener,noreferrer");
   };
 
+  const onTeams = async (n: number) => {
+    try { await teamFn({ data: { session_id: sessionId, team_count: n } }); const { data } = await supabase.from("session_players").select("user_id,display_name,flagged_count,team_index").eq("session_id", sessionId); setPlayers((data ?? []) as any); }
+    catch (e: any) { toast.error(e.message); }
+  };
+  const teamCount = session?.team_count ?? 0;
+
   if (!session) return <div className="min-h-screen grid place-items-center text-muted-foreground">Loading…</div>;
 
   return (
@@ -220,6 +228,27 @@ function HostScreen() {
                   <Button onClick={copyTeamsLink} variant="outline" size="sm"><Copy className="size-4 mr-1" /> Copy Teams share link</Button>
                 </div>
               </div>
+              <div className="mt-6">
+                <Label className="text-xs text-muted-foreground">Game mode</Label>
+                <div className="mt-2 flex flex-wrap justify-center gap-2">
+                  {[0, 2, 3, 4].map((n) => (
+                    <Button key={n} size="sm" variant={teamCount === n ? "default" : "outline"} onClick={() => onTeams(n)}>
+                      {n === 0 ? "Solo" : `${n} teams`}
+                    </Button>
+                  ))}
+                </div>
+                {teamCount > 0 && (
+                  <div className="mt-4 grid sm:grid-cols-2 gap-2 text-left">
+                    {Array.from({ length: teamCount }, (_, i) => (
+                      <div key={i} className="rounded-xl border-2 border-border p-3">
+                        <TeamBadge index={i} />
+                        <p className="mt-2 text-sm">{players.filter((p) => p.team_index === i).map((p) => p.display_name).join(", ") || "No players yet"}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {teamCount > 0 && <p className="mt-2 text-xs text-muted-foreground">Players are shared out evenly. Click the same option again to reshuffle.</p>}
+              </div>
               <p className="text-sm text-muted-foreground mt-1">{players.length} player{players.length === 1 ? "" : "s"} joined</p>
               <Button onClick={onNext} size="lg" className="mt-6"><ArrowRight className="size-4 mr-1" /> Start first question</Button>
             </div>
@@ -270,15 +299,15 @@ function HostScreen() {
         </div>
 
         <aside className="kahoot-radius bg-card border-4 border-black/10 kahoot-shadow-sm p-5">
-          <h3 className="font-display font-black text-lg mb-3">Leaderboard</h3>
-          <Leaderboard sessionId={sessionId} players={players} />
+          <h3 className="font-display font-black text-lg mb-3">{teamCount > 0 ? "Teams" : "Leaderboard"}</h3>
+          <Leaderboard sessionId={sessionId} players={players} teamCount={teamCount} />
         </aside>
       </main>
     </div>
   );
 }
 
-function Leaderboard({ sessionId, players }: { sessionId: string; players: Player[] }) {
+function Leaderboard({ sessionId, players, teamCount }: { sessionId: string; players: Player[]; teamCount: number }) {
   const [scores, setScores] = useState<Record<string, number>>({});
   const [streaks, setStreaks] = useState<Record<string, number>>({});
 
@@ -304,5 +333,11 @@ function Leaderboard({ sessionId, players }: { sessionId: string; players: Playe
   const rows: LbRow[] = players.map((p) => ({
     user_id: p.user_id, display_name: p.display_name, score: scores[p.user_id] ?? 0, streak: streaks[p.user_id] ?? 0,
   }));
+  if (teamCount > 0) return (
+    <div className="space-y-4">
+      <TeamBoard teamCount={teamCount} members={players.map((p) => ({ user_id: p.user_id, team_index: p.team_index, score: scores[p.user_id] ?? 0 }))} />
+      <PodiumLeaderboard rows={rows} max={5} />
+    </div>
+  );
   return <PodiumLeaderboard rows={rows} max={10} />;
 }
