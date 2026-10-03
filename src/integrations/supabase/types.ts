@@ -1012,6 +1012,7 @@ export type Database = {
           id: string
           joined_at: string
           session_id: string
+          team_index: number | null
           user_id: string
         }
         Insert: {
@@ -1020,6 +1021,7 @@ export type Database = {
           id?: string
           joined_at?: string
           session_id: string
+          team_index?: number | null
           user_id: string
         }
         Update: {
@@ -1028,6 +1030,7 @@ export type Database = {
           id?: string
           joined_at?: string
           session_id?: string
+          team_index?: number | null
           user_id?: string
         }
         Relationships: [
@@ -1053,6 +1056,7 @@ export type Database = {
           question_started_at: string | null
           quiz_id: string
           status: Database["public"]["Enums"]["session_status"]
+          team_count: number
           time_limit_override_s: number | null
         }
         Insert: {
@@ -1067,6 +1071,7 @@ export type Database = {
           question_started_at?: string | null
           quiz_id: string
           status?: Database["public"]["Enums"]["session_status"]
+          team_count?: number
           time_limit_override_s?: number | null
         }
         Update: {
@@ -1081,6 +1086,7 @@ export type Database = {
           question_started_at?: string | null
           quiz_id?: string
           status?: Database["public"]["Enums"]["session_status"]
+          team_count?: number
           time_limit_override_s?: number | null
         }
         Relationships: [

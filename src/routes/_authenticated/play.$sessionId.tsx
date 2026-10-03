@@ -14,13 +14,14 @@ import { PodiumLeaderboard, type LbRow } from "@/components/quiz/PodiumLeaderboa
 import { Flame } from "lucide-react";
 import { ReactionBar, ReactionLayer, MuteToggle } from "@/components/quiz/Reactions";
 import { sfx } from "@/lib/sfx";
+import { TeamBoard, TeamBadge, type TeamMember } from "@/components/quiz/TeamBoard";
 
 export const Route = createFileRoute("/_authenticated/play/$sessionId")({
   head: () => ({ meta: [{ title: "Play — QuizPulse" }] }),
   component: PlayScreen,
 });
 
-type Session = { id: string; status: string; current_question_id: string | null; question_started_at: string | null; time_limit_override_s: number | null; join_code: string };
+type Session = { id: string; status: string; current_question_id: string | null; question_started_at: string | null; time_limit_override_s: number | null; join_code: string; team_count?: number };
 type Question = { id: string; prompt: string; options: string[]; correct_index: number; time_limit_s: number };
 
 function PlayScreen() {
@@ -39,6 +40,8 @@ function PlayScreen() {
   const [showCountdown, setShowCountdown] = useState(false);
   const [streak, setStreak] = useState(0);
   const [lbRows, setLbRows] = useState<LbRow[]>([]);
+  const [members, setMembers] = useState<TeamMember[]>([]);
+  const [myTeam, setMyTeam] = useState<number | null>(null);
   const blurredRef = useRef(false);
   const lastQuestionRef = useRef<string | null>(null);
 
@@ -48,8 +51,8 @@ function PlayScreen() {
       setUserId(data.user?.id ?? null);
       if (data.user?.id) {
         const { data: p } = await supabase.from("session_players")
-          .select("display_name").eq("session_id", sessionId).eq("user_id", data.user.id).maybeSingle();
-        if (p) setDisplayName((p as any).display_name ?? "");
+          .select("display_name,team_index").eq("session_id", sessionId).eq("user_id", data.user.id).maybeSingle();
+        if (p) { setDisplayName((p as any).display_name ?? ""); setMyTeam((p as any).team_index ?? null); }
       }
     })();
   }, [sessionId]);
@@ -64,6 +67,13 @@ function PlayScreen() {
     const ch = supabase.channel(`play-${sessionId}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "sessions", filter: `id=eq.${sessionId}` },
         (p) => setSession(p.new as any))
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "session_players", filter: `session_id=eq.${sessionId}` },
+        async () => {
+          const { data: u } = await supabase.auth.getUser();
+          if (!u.user) return;
+          const { data: me } = await supabase.from("session_players").select("team_index").eq("session_id", sessionId).eq("user_id", u.user.id).maybeSingle();
+          setMyTeam((me as any)?.team_index ?? null);
+        })
       .subscribe();
     return () => { supabase.removeChannel(ch); };
   }, [sessionId]);
@@ -140,7 +150,7 @@ function PlayScreen() {
     let cancelled = false;
     const load = async () => {
       const [{ data: players }, { data: ans }] = await Promise.all([
-        supabase.from("session_players").select("user_id,display_name").eq("session_id", sessionId),
+        supabase.from("session_players").select("user_id,display_name,team_index").eq("session_id", sessionId),
         supabase.from("answers").select("user_id,points,is_correct,created_at").eq("session_id", sessionId).order("created_at"),
       ]);
       const scores: Record<string, number> = {};
@@ -154,7 +164,7 @@ function PlayScreen() {
       const rows: LbRow[] = (players ?? []).map((p: any) => ({
         user_id: p.user_id, display_name: p.display_name, score: scores[p.user_id] ?? 0, streak: cur[p.user_id] ?? 0,
       }));
-      if (!cancelled) setLbRows(rows);
+      if (!cancelled) { setLbRows(rows); setMembers((players ?? []).map((p: any) => ({ user_id: p.user_id, team_index: p.team_index, score: scores[p.user_id] ?? 0 }))); }
     };
     load();
     const ch = supabase.channel(`lb-play-${sessionId}`)
@@ -186,6 +196,7 @@ function PlayScreen() {
           <div className="text-xs font-display font-black tracking-widest opacity-80">JOINED · {session.join_code}</div>
           <h1 className="font-display text-4xl font-black mt-3">You're in!</h1>
           {displayName && <div className="mt-2 inline-block px-4 py-1 rounded-full bg-white/20 font-display font-bold">{displayName}</div>}
+          {(session.team_count ?? 0) > 0 && myTeam != null && <div className="mt-3"><TeamBadge index={myTeam} className="text-base" /></div>}
           <p className="mt-4 text-kahoot-purple-foreground">Waiting for the host to start. Stay on this tab — leaving flags your answer.</p>
           <div className="live-dot mx-auto mt-6" />
         </div>
@@ -201,6 +212,9 @@ function PlayScreen() {
       <div className="min-h-[100dvh] px-3 sm:px-4 py-4 sm:py-6 max-w-2xl mx-auto w-full">
         <ReactionLayer sessionId={sessionId} />
         <h1 className="font-display text-2xl sm:text-3xl font-black text-center mb-4">Leaderboard</h1>
+        {(session.team_count ?? 0) > 0 && (
+          <div className="mb-6"><TeamBoard teamCount={session.team_count!} members={members} highlightTeam={myTeam} /></div>
+        )}
         <PodiumLeaderboard rows={lbRows} highlightUserId={userId} />
         <p className="text-center text-sm text-muted-foreground mt-6">Get ready for the next question…</p>
         <div className="mt-6"><ReactionBar sessionId={sessionId} /></div>
@@ -219,6 +233,7 @@ function PlayScreen() {
       <div className="flex items-center justify-between gap-3 shrink-0">
         <div className="flex items-center gap-2 text-xs text-muted-foreground min-w-0">
           <span className="font-mono-tab truncate">{session.join_code}</span>
+          {(session.team_count ?? 0) > 0 && <TeamBadge index={myTeam} />}
           {streak >= 2 && (
             <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-kahoot-yellow text-kahoot-yellow-foreground font-display font-bold shrink-0">
               <Flame className="size-3 fill-current" /> {streak}
