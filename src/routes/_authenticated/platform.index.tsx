@@ -206,7 +206,7 @@ function PlatformOverview() {
                       fetched <b className="text-foreground">{r.fetched}</b> ·
                       dedup <b className="text-foreground">{r.deduplicated}</b> ·
                       inserted{" "}
-                      <b className={lowYield ? "text-amber-600" : "text-primary"}>
+                      <b className="text-primary">
                         {r.inserted}
                       </b>
                     </span>
@@ -218,7 +218,7 @@ function PlatformOverview() {
                         </Badge>
                       )}
                       {lowYield && (
-                        <Badge className="gap-1 bg-amber-500/15 text-amber-600 hover:bg-amber-500/15">
+                        <Badge className="gap-1 border-primary/30 bg-primary/15 text-primary hover:bg-primary/20">
                           <AlertTriangle className="size-3" /> low yield
                         </Badge>
                       )}

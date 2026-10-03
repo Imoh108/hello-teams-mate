@@ -182,11 +182,11 @@ function PlayScreen() {
   if (!question && session.status !== "reveal" && session.status !== "ended") {
     return (
       <div className="min-h-screen grid place-items-center px-6">
-        <div className="kahoot-radius kahoot-shadow bg-gradient-to-br from-kahoot-purple to-kahoot-blue text-white p-10 text-center max-w-sm border-4 border-black/10">
+        <div className="kahoot-radius kahoot-shadow bg-gradient-to-br from-kahoot-purple to-kahoot-blue text-kahoot-purple-foreground p-10 text-center max-w-sm border-4 border-kahoot-purple-foreground/20">
           <div className="text-xs font-display font-black tracking-widest opacity-80">JOINED · {session.join_code}</div>
           <h1 className="font-display text-4xl font-black mt-3">You're in!</h1>
           {displayName && <div className="mt-2 inline-block px-4 py-1 rounded-full bg-white/20 font-display font-bold">{displayName}</div>}
-          <p className="mt-4 text-white/90">Waiting for the host to start. Stay on this tab — leaving flags your answer.</p>
+          <p className="mt-4 text-kahoot-purple-foreground">Waiting for the host to start. Stay on this tab — leaving flags your answer.</p>
           <div className="live-dot mx-auto mt-6" />
         </div>
         <div className="mt-6"><ReactionBar sessionId={sessionId} /></div>

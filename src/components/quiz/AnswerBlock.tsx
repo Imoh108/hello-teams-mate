@@ -38,10 +38,10 @@ export function AnswerBlock({ displayIndex, label, onClick, disabled, state = "i
         "active:translate-y-1 active:[box-shadow:0_2px_0_0_oklch(0_0_0/0.35)]",
         !disabled && "hover:scale-[1.02] hover:-translate-y-0.5 cursor-pointer",
         c.bg, c.text,
-        state === "picked" && "ring-4 ring-offset-2 ring-offset-background ring-white",
-        isCorrect && "ring-4 ring-offset-2 ring-offset-background ring-white animate-kahoot-pop",
+        state === "picked" && "ring-4 ring-offset-2 ring-offset-background ring-foreground",
+        isCorrect && "ring-4 ring-offset-2 ring-offset-background ring-foreground animate-kahoot-pop",
         isWrong && "animate-kahoot-shake",
-        dimmed && "opacity-40 saturate-50",
+        dimmed && "opacity-70 saturate-75",
         className,
       )}
     >

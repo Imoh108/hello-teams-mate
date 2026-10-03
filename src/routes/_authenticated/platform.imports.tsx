@@ -443,7 +443,7 @@ function ImportsPage() {
                             <CheckCircle2 className="size-3" /> clean
                           </Badge>
                         ) : status === "partial" ? (
-                          <Badge className="gap-1 bg-amber-500/15 text-amber-600 hover:bg-amber-500/15">
+                          <Badge className="gap-1 border-primary/30 bg-primary/15 text-primary hover:bg-primary/20">
                             <AlertTriangle className="size-3" /> partial
                           </Badge>
                         ) : (
@@ -580,7 +580,7 @@ function ImportsPage() {
                             {status === "clean" ? (
                               <Badge variant="secondary">clean</Badge>
                             ) : status === "partial" ? (
-                              <Badge className="bg-amber-500/15 text-amber-600 hover:bg-amber-500/15">
+                              <Badge className="border-primary/30 bg-primary/15 text-primary hover:bg-primary/20">
                                 partial
                               </Badge>
                             ) : (
