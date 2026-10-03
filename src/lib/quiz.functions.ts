@@ -248,12 +248,41 @@ export const joinSessionByCode = createServerFn({ method: "POST" })
     if (!session) throw new Error("Session not found.");
     if (session.status === "ended") throw new Error("This session has ended.");
     const { data: profile } = await supabase.from("profiles").select("display_name").eq("id", userId).single();
-    const { error: jErr } = await supabase.from("session_players").upsert(
-      { session_id: session.id, user_id: userId, display_name: profile?.display_name ?? "Player" },
-      { onConflict: "session_id,user_id" }
-    );
+    const row: any = { session_id: session.id, user_id: userId, display_name: profile?.display_name ?? "Player" };
+    const teamCount = (session as any).team_count ?? 0;
+    if (teamCount > 0) {
+      const { data: existing } = await supabaseAdmin.from("session_players")
+        .select("user_id,team_index").eq("session_id", session.id);
+      const mine = (existing ?? []).find((p: any) => p.user_id === userId);
+      if (mine && mine.team_index != null && mine.team_index < teamCount) row.team_index = mine.team_index;
+      else {
+        const counts = Array(teamCount).fill(0);
+        (existing ?? []).forEach((p: any) => { if (p.team_index != null && p.team_index < teamCount) counts[p.team_index]++; });
+        row.team_index = counts.indexOf(Math.min(...counts));
+      }
+    }
+    const { error: jErr } = await supabase.from("session_players").upsert(row, { onConflict: "session_id,user_id" });
     if (jErr) throw new Error(jErr.message);
     return { session_id: session.id };
+  });
+
+export const setTeamMode = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ session_id: z.string().uuid(), team_count: z.number().int().min(0).max(4) }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: session } = await supabase.from("sessions").select("host_id,status").eq("id", data.session_id).single();
+    if (!session || session.host_id !== userId) throw new Error("Not host");
+    if (session.status !== "lobby") throw new Error("Teams can only be changed in the lobby.");
+    const tc = data.team_count === 1 ? 2 : data.team_count;
+    const { error } = await supabase.from("sessions").update({ team_count: tc } as any).eq("id", data.session_id);
+    if (error) throw new Error(error.message);
+    const { data: players } = await supabase.from("session_players").select("id").eq("session_id", data.session_id).order("joined_at");
+    const shuffled = [...(players ?? [])].sort(() => Math.random() - 0.5);
+    for (let i = 0; i < shuffled.length; i++) {
+      await supabase.from("session_players").update({ team_index: tc > 0 ? i % tc : null } as any).eq("id", shuffled[i].id);
+    }
+    return { ok: true };
   });
 
 const StartQuestionSchema = z.object({
