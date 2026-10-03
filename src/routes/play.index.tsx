@@ -106,7 +106,7 @@ function JoinPage() {
     <div className="min-h-screen grid place-items-center px-4">
       <div className="w-full max-w-md kahoot-radius kahoot-shadow border-4 border-black/10 bg-card p-8">
         <div className="text-center">
-          <div className="mx-auto size-14 kahoot-radius bg-kahoot-purple grid place-items-center text-white font-display font-black text-2xl kahoot-shadow-sm">Q</div>
+          <div className="mx-auto size-14 kahoot-radius bg-kahoot-purple grid place-items-center text-kahoot-purple-foreground font-display font-black text-2xl kahoot-shadow-sm">Q</div>
           <h1 className="mt-4 font-display text-3xl font-black tracking-tight">Join a live quiz</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             {authedUserId

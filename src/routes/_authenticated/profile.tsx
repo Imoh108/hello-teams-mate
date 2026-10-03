@@ -45,8 +45,8 @@ function ProfilePage() {
         </div>
       </header>
       <main className="container mx-auto px-6 py-10 space-y-8 max-w-4xl">
-        <section className="kahoot-radius kahoot-shadow border-4 border-black/10 bg-gradient-to-br from-kahoot-purple to-kahoot-blue text-white p-6 flex items-center gap-6">
-          <Avatar className="size-24 ring-4 ring-white/40 kahoot-shadow-sm">
+        <section className="kahoot-radius kahoot-shadow border-4 border-foreground/15 bg-gradient-to-br from-kahoot-purple to-kahoot-blue text-kahoot-purple-foreground p-6 flex items-center gap-6">
+          <Avatar className="size-24 ring-4 ring-kahoot-purple-foreground/60 kahoot-shadow-sm">
             {equipped?.image_url && <AvatarImage src={equipped.image_url} />}
             <AvatarFallback className="bg-kahoot-yellow text-kahoot-yellow-foreground font-display font-black text-3xl">
               {state.profile?.display_name?.[0] ?? "U"}

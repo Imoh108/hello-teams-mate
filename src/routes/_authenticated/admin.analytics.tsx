@@ -93,17 +93,17 @@ function AnalyticsPage() {
             <AreaChart data={timeline}>
               <defs>
                 <linearGradient id="pts" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.5} />
-                  <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                  <stop offset="0%" stopColor="var(--primary)" stopOpacity={0.5} />
+                  <stop offset="100%" stopColor="var(--primary)" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid stroke="hsl(var(--border))" strokeDasharray="3 3" />
-              <XAxis dataKey="day" tick={{ fontSize: 10 }} interval={4} />
-              <YAxis tick={{ fontSize: 10 }} />
+              <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" />
+              <XAxis dataKey="day" tick={{ fontSize: 10, fill: "var(--muted-foreground)" }} interval={4} />
+              <YAxis tick={{ fontSize: 10, fill: "var(--muted-foreground)" }} />
               <Tooltip
-                contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8 }}
+                contentStyle={{ background: "var(--card)", color: "var(--card-foreground)", border: "1px solid var(--border)", borderRadius: 8 }}
               />
-              <Area type="monotone" dataKey="points" stroke="hsl(var(--primary))" fill="url(#pts)" strokeWidth={2} />
+              <Area type="monotone" dataKey="points" stroke="var(--primary)" fill="url(#pts)" strokeWidth={2} />
             </AreaChart>
           </ResponsiveContainer>
         </div>
@@ -138,13 +138,13 @@ function AnalyticsPage() {
             <div className="h-56">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={depts}>
-                  <CartesianGrid stroke="hsl(var(--border))" strokeDasharray="3 3" />
-                  <XAxis dataKey="name" tick={{ fontSize: 10 }} />
-                  <YAxis tick={{ fontSize: 10 }} />
+                  <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" />
+                  <XAxis dataKey="name" tick={{ fontSize: 10, fill: "var(--muted-foreground)" }} />
+                  <YAxis tick={{ fontSize: 10, fill: "var(--muted-foreground)" }} />
                   <Tooltip
-                    contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8 }}
+                    contentStyle={{ background: "var(--card)", color: "var(--card-foreground)", border: "1px solid var(--border)", borderRadius: 8 }}
                   />
-                  <Bar dataKey="points" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="points" fill="var(--primary)" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
