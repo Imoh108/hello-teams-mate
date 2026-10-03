@@ -33,7 +33,7 @@ function Landing() {
           <div className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1 text-xs text-muted-foreground">
             <span className="live-dot" /> Built for Microsoft Teams workflows
           </div>
-          <h1 className="mt-6 font-display text-5xl font-bold tracking-tight sm:text-6xl">
+          <h1 className="mt-6 font-display text-5xl font-bold text-foreground sm:text-6xl">
             Run moderated team quizzes <span className="text-primary">in real time.</span>
           </h1>
           <p className="mt-5 text-lg text-muted-foreground">
