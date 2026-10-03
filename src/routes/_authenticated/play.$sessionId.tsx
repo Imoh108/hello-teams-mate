@@ -255,7 +255,8 @@ function PlayScreen() {
       </div>
 
       {locked && !result && <p className="text-center text-sm text-muted-foreground mt-6 animate-pulse">Locked in. Waiting for others…</p>}
-      {locked && <div className="mt-4"><ReactionBar sessionId={sessionId} /></div>}
+      <div className="mt-4"><ReactionBar sessionId={sessionId} /></div>
+      <ReactionLayer sessionId={sessionId} />
 
       <Link to="/app" className="mt-auto pt-6 text-xs text-muted-foreground text-center hover:text-foreground">Leave session</Link>
     </div>

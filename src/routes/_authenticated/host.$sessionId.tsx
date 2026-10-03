@@ -133,7 +133,7 @@ function HostScreen() {
 
   const copyCode = () => { if (session) { navigator.clipboard.writeText(session.join_code); toast.success("Code copied"); } };
   const joinUrl = () =>
-    session ? `${window.location.origin}/play?code=${encodeURIComponent(session.join_code)}` : "";
+    session ? `${(window.location.origin.includes("id-preview--") ? "https://project--b147aad7-3ae2-4d89-8d21-625495d54b86.lovable.app" : window.location.origin)}/play?code=${encodeURIComponent(session.join_code)}` : "";
   const copyLink = () => {
     if (!session) return;
     navigator.clipboard.writeText(joinUrl());
