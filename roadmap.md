@@ -9,5 +9,5 @@
 - [x] Visual themes
 - [x] Leagues
 - [x] Scheduled quizzes
-- [ ] Full app user test
+- [x] Full app user test
 - [x] 1v1 async challenges

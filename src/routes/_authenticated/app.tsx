@@ -147,7 +147,7 @@ function Dashboard() {
             <div className="size-7 rounded-md bg-primary grid place-items-center text-primary-foreground font-display font-bold text-sm">Q</div>
             <span className="font-display font-semibold">QuizPulse</span>
           </Link>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center justify-end gap-2">
             <Input value={joinCode} onChange={(e) => setJoinCode(e.target.value.toUpperCase())} placeholder={t("nav.joinCode")} className="w-32 font-mono-tab uppercase" maxLength={8} />
             <Button onClick={onJoin} variant="outline" size="sm">{t("nav.join")}</Button>
             <Button asChild variant="ghost" size="sm"><Link to="/profile"><Trophy className="size-4 mr-1" /> {t("nav.profile")}</Link></Button>
