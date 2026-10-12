@@ -4,7 +4,7 @@
 - [x] Quick-play templates
 - [x] Type a topic → AI questions
 - [x] Daily question + streaks
-- [ ] Power-ups (50/50, 2×, time freeze)
+- [x] Power-ups (50/50, 2×, time freeze)
 - [x] Team mode
 - [ ] Visual themes
 - [ ] Leagues
