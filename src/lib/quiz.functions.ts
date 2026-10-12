@@ -361,12 +361,14 @@ export const submitAnswer = createServerFn({ method: "POST" })
     if (!q) throw new Error("Question missing");
     const startedAt = new Date(session.question_started_at!).getTime();
     const elapsedMs = Date.now() - startedAt;
-    const limitS = session.time_limit_override_s ?? q.time_limit_s;
+    let limitS = session.time_limit_override_s ?? q.time_limit_s;
+    if (usedForQ.includes("freeze")) limitS += FREEZE_BONUS_S;
     if (elapsedMs > limitS * 1000 + 500) {
       // time up — record null answer
     }
     const isCorrect = data.selected_index !== null && data.selected_index === q.correct_index;
-    const points = computePoints(isCorrect, elapsedMs, limitS);
+    let points = computePoints(isCorrect, elapsedMs, limitS);
+    if (usedForQ.includes("double")) points *= 2;
     const { error } = await supabase.from("answers").upsert({
       session_id: data.session_id,
       question_id: data.question_id,
