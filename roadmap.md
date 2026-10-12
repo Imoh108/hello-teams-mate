@@ -6,7 +6,8 @@
 - [x] Daily question + streaks
 - [x] Power-ups (50/50, 2×, time freeze)
 - [x] Team mode
-- [ ] Visual themes
-- [ ] Leagues
-- [ ] Scheduled quizzes
+- [x] Visual themes
+- [x] Leagues
+- [x] Scheduled quizzes
+- [ ] Full app user test
 - [x] 1v1 async challenges

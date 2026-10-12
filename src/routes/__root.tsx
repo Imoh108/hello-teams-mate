@@ -13,6 +13,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { useTeamsContext } from "../hooks/use-teams-context";
 import "../lib/i18n";
+import { applyStoredTheme } from "../components/theme-switcher";
 
 function NotFoundComponent() {
   const router = useRouter();
@@ -134,6 +135,7 @@ function RootComponent() {
   // Initialize the Teams SDK once at the root so child routes can read context.
   // Outside Teams this resolves quickly with inTeams: false and is a no-op.
   useTeamsContext();
+  useEffect(() => { applyStoredTheme(); }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
