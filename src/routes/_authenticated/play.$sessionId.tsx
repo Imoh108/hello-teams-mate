@@ -43,6 +43,10 @@ function PlayScreen() {
   const [lbRows, setLbRows] = useState<LbRow[]>([]);
   const [members, setMembers] = useState<TeamMember[]>([]);
   const [myTeam, setMyTeam] = useState<number | null>(null);
+  const usePowerUpFn = useServerFn(usePowerUp);
+  const [wallet, setWallet] = useState<Record<string, number>>({ fifty_fifty: 1, double: 1, freeze: 1 });
+  const [usedThisQ, setUsedThisQ] = useState<string[]>([]);
+  const [fiftyHidden, setFiftyHidden] = useState<number[]>([]);
   const blurredRef = useRef(false);
   const lastQuestionRef = useRef<string | null>(null);
 
@@ -52,8 +56,12 @@ function PlayScreen() {
       setUserId(data.user?.id ?? null);
       if (data.user?.id) {
         const { data: p } = await supabase.from("session_players")
-          .select("display_name,team_index").eq("session_id", sessionId).eq("user_id", data.user.id).maybeSingle();
-        if (p) { setDisplayName((p as any).display_name ?? ""); setMyTeam((p as any).team_index ?? null); }
+          .select("display_name,team_index,powerups").eq("session_id", sessionId).eq("user_id", data.user.id).maybeSingle();
+        if (p) {
+          setDisplayName((p as any).display_name ?? "");
+          setMyTeam((p as any).team_index ?? null);
+          setWallet((p as any).powerups ?? {});
+        }
       }
     })();
   }, [sessionId]);
@@ -72,8 +80,9 @@ function PlayScreen() {
         async () => {
           const { data: u } = await supabase.auth.getUser();
           if (!u.user) return;
-          const { data: me } = await supabase.from("session_players").select("team_index").eq("session_id", sessionId).eq("user_id", u.user.id).maybeSingle();
+          const { data: me } = await supabase.from("session_players").select("team_index,powerups").eq("session_id", sessionId).eq("user_id", u.user.id).maybeSingle();
           setMyTeam((me as any)?.team_index ?? null);
+          setWallet((me as any)?.powerups ?? {});
         })
       .subscribe();
     return () => { supabase.removeChannel(ch); };
@@ -86,6 +95,7 @@ function PlayScreen() {
       const { data } = await supabase.from("questions").select("*").eq("id", qid).single();
       if (data) setQuestion({ ...(data as any), options: (data as any).options as string[] });
       setSelected(null); setResult(null); blurredRef.current = false;
+      setUsedThisQ([]); setFiftyHidden([]);
       if (lastQuestionRef.current !== qid) {
         lastQuestionRef.current = qid;
         setShowCountdown(true);
@@ -121,8 +131,11 @@ function PlayScreen() {
   }, [question, userId]);
 
   const limit = session?.time_limit_override_s ?? question?.time_limit_s ?? 20;
+  const frozen = usedThisQ.includes("freeze");
+  const doubled = usedThisQ.includes("double");
+  const effectiveLimit = limit + (frozen ? FREEZE_BONUS_S : 0);
   const elapsed = session?.question_started_at ? Math.max(0, (now - new Date(session.question_started_at).getTime()) / 1000) : 0;
-  const remaining = Math.max(0, limit - elapsed);
+  const remaining = Math.max(0, effectiveLimit - elapsed);
   const remSec = Math.ceil(remaining);
   useEffect(() => {
     if (session?.status === "active" && question && submittedFor !== question.id && remSec > 0 && remSec <= 5) sfx.tick();
