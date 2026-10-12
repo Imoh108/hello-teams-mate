@@ -11,7 +11,14 @@ async function createSoloSession(supabase: any, userId: string, quizId: string) 
       .insert({ quiz_id: quizId, host_id: userId, join_code: code, status: "active" })
       .select("id")
       .single();
-    if (!error && row) return row.id as string;
+    if (!error && row) {
+      const { data: profile } = await supabase.from("profiles").select("display_name").eq("id", userId).single();
+      await supabase.from("session_players").upsert(
+        { session_id: row.id, user_id: userId, display_name: profile?.display_name ?? "Player" },
+        { onConflict: "session_id,user_id" }
+      );
+      return row.id as string;
+    }
     if (error && !error.message.toLowerCase().includes("duplicate")) throw new Error(error.message);
   }
   throw new Error("Could not allocate session, please retry.");
