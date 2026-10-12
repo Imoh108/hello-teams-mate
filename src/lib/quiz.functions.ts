@@ -346,8 +346,10 @@ export const submitAnswer = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     // Verify player is in session
     const { data: sp } = await supabase.from("session_players")
-      .select("id").eq("session_id", data.session_id).eq("user_id", userId).maybeSingle();
+      .select("id,powerups").eq("session_id", data.session_id).eq("user_id", userId).maybeSingle();
     if (!sp) throw new Error("Not in session");
+    const pw = (sp.powerups ?? {}) as any;
+    const usedForQ: string[] = pw.used?.[data.question_id] ?? [];
     // Server-anchored timing
     const { data: session } = await supabase.from("sessions")
       .select("current_question_id,question_started_at,status,time_limit_override_s").eq("id", data.session_id).single();
