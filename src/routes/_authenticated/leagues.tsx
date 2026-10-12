@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useCurrentOrgId } from "@/hooks/use-current-org";
+import { useEnsureCurrentOrg } from "@/hooks/use-ensure-current-org";
 import { tierForRank, weekStart } from "@/lib/leagues";
 import { Medal } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -28,7 +28,7 @@ const TIER_CLS = {
 } as const;
 
 function Leagues() {
-  const [orgId] = useCurrentOrgId();
+  const orgId = useEnsureCurrentOrg();
   const [rows, setRows] = useState<Row[] | null>(null);
   const [me, setMe] = useState<string | null>(null);
   const since = weekStart();

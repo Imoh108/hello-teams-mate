@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useServerFn } from "@tanstack/react-start";
 import { createSession } from "@/lib/quiz.functions";
-import { useCurrentOrgId } from "@/hooks/use-current-org";
+import { useEnsureCurrentOrg } from "@/hooks/use-ensure-current-org";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,7 +28,7 @@ export const Route = createFileRoute("/_authenticated/schedule")({
 type Sched = { id: string; title: string; quiz_id: string; scheduled_at: string; created_by: string; session_id: string | null };
 
 function Schedule() {
-  const [orgId] = useCurrentOrgId();
+  const orgId = useEnsureCurrentOrg();
   const navigate = useNavigate();
   const sessionFn = useServerFn(createSession);
   const [me, setMe] = useState<string | null>(null);

@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { listChallenges, joinChallenge } from "@/lib/gamification.functions";
-import { useCurrentOrgId } from "@/hooks/use-current-org";
+import { useEnsureCurrentOrg } from "@/hooks/use-ensure-current-org";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
@@ -15,7 +15,7 @@ export const Route = createFileRoute("/_authenticated/challenges")({
 });
 
 function ChallengesPage() {
-  const [orgId] = useCurrentOrgId();
+  const orgId = useEnsureCurrentOrg();
   const listFn = useServerFn(listChallenges);
   const joinFn = useServerFn(joinChallenge);
   const [items, setItems] = useState<any[]>([]);
