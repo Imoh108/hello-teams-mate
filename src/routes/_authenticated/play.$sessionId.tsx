@@ -200,6 +200,20 @@ function PlayScreen() {
     } catch (e: any) { toast.error(e.message); }
   };
 
+  const onPowerUp = async (kind: "fifty_fifty" | "double" | "freeze") => {
+    if (!question || !session || session.status !== "active" || submittedFor === question.id) return;
+    if (usedThisQ.includes(kind)) return;
+    try {
+      const r: any = await usePowerUpFn({ data: { session_id: sessionId, question_id: question.id, kind } });
+      setUsedThisQ((u) => [...u, kind]);
+      if (kind === "fifty_fifty") { setFiftyHidden(r?.hide ?? []); toast("50/50 — two wrong answers removed"); }
+      else if (kind === "double") toast("2× points armed for this question");
+      else toast(`Time frozen — ${FREEZE_BONUS_S} extra seconds`);
+      sfx.tap();
+      track("powerup_used", { kind });
+    } catch (e: any) { toast.error(e.message); }
+  };
+
   if (!session) return <div className="min-h-screen grid place-items-center text-muted-foreground">Loading…</div>;
 
   // Lobby
@@ -255,8 +269,13 @@ function PlayScreen() {
           )}
         </div>
         <div className="shrink-0 flex items-center gap-2">
+          {doubled && (
+            <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-kahoot-yellow text-kahoot-yellow-foreground font-display font-bold text-xs shrink-0">
+              <Zap className="size-3 fill-current" /> 2×
+            </span>
+          )}
           <MuteToggle />
-          <CircularTimer remaining={remaining} limit={limit} size={64} />
+          <CircularTimer remaining={remaining} limit={effectiveLimit} size={64} />
         </div>
       </div>
 
@@ -264,9 +283,33 @@ function PlayScreen() {
         <h1 className="font-display text-lg sm:text-3xl font-black leading-tight text-center">{question.prompt}</h1>
       </div>
 
+      <div className="grid grid-cols-3 gap-2 mt-3 shrink-0">
+        {([["fifty_fifty", Scissors, "50/50"], ["double", Zap, "2× points"], ["freeze", Snowflake, `+${FREEZE_BONUS_S}s`]] as const).map(([kind, Icon, label]) => {
+          const left = (wallet[kind] ?? 1) - (usedThisQ.includes(kind) ? 1 : 0);
+          const active = usedThisQ.includes(kind);
+          return (
+            <button key={kind} type="button" onClick={() => onPowerUp(kind)}
+              disabled={locked || active || left <= 0 || session.status !== "active"}
+              aria-label={`Power-up ${label}`}
+              className={cn(
+                "flex items-center justify-center gap-2 kahoot-radius border-2 border-black/10 px-2 py-2 font-display font-bold text-xs sm:text-sm kahoot-shadow-sm transition-transform",
+                active || left <= 0 ? "opacity-40 cursor-not-allowed" : "bg-card hover:-translate-y-0.5 hover:scale-[1.02] cursor-pointer",
+                kind === "freeze" && frozen && "ring-2 ring-kahoot-blue text-kahoot-blue",
+                kind === "double" && doubled && "ring-2 ring-kahoot-yellow text-kahoot-yellow",
+              )}
+            >
+              <Icon className="size-4 shrink-0" />
+              <span className="truncate">{active && kind === "freeze" ? "Frozen" : active && kind === "double" ? "2× armed" : label}</span>
+              <span className="opacity-60 shrink-0">· {Math.max(0, left)}</span>
+            </button>
+          );
+        })}
+      </div>
+
       <div className="grid grid-cols-2 grid-rows-2 gap-2 sm:gap-3 mt-4 sm:mt-6 flex-1 min-h-0">
         {permutation.map((origIdx, displayIdx) => {
           const isPicked = selected === origIdx;
+          const hidden = fiftyHidden.includes(origIdx);
           const state = isReveal
             ? (origIdx === question.correct_index ? "correct" : (isPicked ? "wrong" : "idle"))
             : (isPicked ? "picked" : "idle");
@@ -275,8 +318,10 @@ function PlayScreen() {
               key={origIdx}
               displayIndex={displayIdx as 0 | 1 | 2 | 3}
               label={question.options[origIdx]}
-              disabled={locked}
+              showLabel={!hidden}
+              disabled={locked || hidden}
               state={state as any}
+              className={hidden ? "opacity-30 saturate-50" : undefined}
               onClick={() => onPick(origIdx)}
             />
           );
