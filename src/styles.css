@@ -205,3 +205,32 @@
   }
 }
 
+
+/* Visual themes — override core tokens; all stay dark for contrast */
+[data-theme="ocean"] {
+  --background: oklch(0.17 0.04 230);
+  --card: oklch(0.22 0.045 230);
+  --surface: oklch(0.22 0.045 230);
+  --popover: oklch(0.24 0.05 230);
+  --primary: oklch(0.80 0.14 200);
+  --primary-foreground: oklch(0.16 0.03 230);
+  --ring: oklch(0.80 0.14 200);
+}
+[data-theme="neon"] {
+  --background: oklch(0.13 0.02 300);
+  --card: oklch(0.19 0.04 300);
+  --surface: oklch(0.19 0.04 300);
+  --popover: oklch(0.21 0.05 300);
+  --primary: oklch(0.85 0.22 140);
+  --primary-foreground: oklch(0.14 0.02 300);
+  --ring: oklch(0.85 0.22 140);
+}
+[data-theme="sunset"] {
+  --background: oklch(0.18 0.04 20);
+  --card: oklch(0.23 0.05 20);
+  --surface: oklch(0.23 0.05 20);
+  --popover: oklch(0.25 0.055 20);
+  --primary: oklch(0.80 0.16 55);
+  --primary-foreground: oklch(0.17 0.04 20);
+  --ring: oklch(0.80 0.16 55);
+}
