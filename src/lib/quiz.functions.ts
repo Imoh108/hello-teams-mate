@@ -346,8 +346,10 @@ export const submitAnswer = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     // Verify player is in session
     const { data: sp } = await supabase.from("session_players")
-      .select("id").eq("session_id", data.session_id).eq("user_id", userId).maybeSingle();
+      .select("id,powerups").eq("session_id", data.session_id).eq("user_id", userId).maybeSingle();
     if (!sp) throw new Error("Not in session");
+    const pw = (sp.powerups ?? {}) as any;
+    const usedForQ: string[] = pw.used?.[data.question_id] ?? [];
     // Server-anchored timing
     const { data: session } = await supabase.from("sessions")
       .select("current_question_id,question_started_at,status,time_limit_override_s").eq("id", data.session_id).single();
@@ -359,12 +361,14 @@ export const submitAnswer = createServerFn({ method: "POST" })
     if (!q) throw new Error("Question missing");
     const startedAt = new Date(session.question_started_at!).getTime();
     const elapsedMs = Date.now() - startedAt;
-    const limitS = session.time_limit_override_s ?? q.time_limit_s;
+    let limitS = session.time_limit_override_s ?? q.time_limit_s;
+    if (usedForQ.includes("freeze")) limitS += FREEZE_BONUS_S;
     if (elapsedMs > limitS * 1000 + 500) {
       // time up — record null answer
     }
     const isCorrect = data.selected_index !== null && data.selected_index === q.correct_index;
-    const points = computePoints(isCorrect, elapsedMs, limitS);
+    let points = computePoints(isCorrect, elapsedMs, limitS);
+    if (usedForQ.includes("double")) points *= 2;
     const { error } = await supabase.from("answers").upsert({
       session_id: data.session_id,
       question_id: data.question_id,
@@ -400,6 +404,54 @@ async function flaggedCount(supabase: any, sessionId: string, userId: string) {
     .eq("session_id", sessionId).eq("user_id", userId).eq("flagged", true);
   return count ?? 0;
 }
+
+// --- Power-ups (50/50 · 2× points · time freeze) ---
+// Each player gets one use of each per session; uses are recorded per question
+// in session_players.powerups = { fifty_fifty:1, double:1, freeze:1, used:{qid:[...]} }.
+export const FREEZE_BONUS_S = 10;
+
+const UsePowerUpSchema = z.object({
+  session_id: z.string().uuid(),
+  question_id: z.string().uuid(),
+  kind: z.enum(["fifty_fifty", "double", "freeze"]),
+});
+export const usePowerUp = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => UsePowerUpSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: sp } = await supabase.from("session_players")
+      .select("id,powerups").eq("session_id", data.session_id).eq("user_id", userId).maybeSingle();
+    if (!sp) throw new Error("Not in session");
+    const pw = (sp.powerups ?? {}) as any;
+    const remaining = pw[data.kind] ?? 1;
+    const used: Record<string, string[]> = pw.used ?? {};
+    const forQ: string[] = used[data.question_id] ?? [];
+    if (remaining <= 0) throw new Error("You've used this power-up");
+    if (forQ.includes(data.kind)) throw new Error("Already used on this question");
+    const { data: session } = await supabase.from("sessions")
+      .select("current_question_id,status").eq("id", data.session_id).single();
+    if (!session || session.status !== "active" || session.current_question_id !== data.question_id) {
+      throw new Error("Question not active");
+    }
+
+    let hide: number[] = [];
+    if (data.kind === "fifty_fifty") {
+      const { data: q } = await supabase.from("questions").select("correct_index").eq("id", data.question_id).single();
+      if (!q) throw new Error("Question missing");
+      const wrong = [0, 1, 2, 3].filter((i) => i !== q.correct_index).sort(() => Math.random() - 0.5);
+      hide = wrong.slice(0, 2).sort();
+    }
+
+    const next = {
+      ...pw,
+      [data.kind]: remaining - 1,
+      used: { ...used, [data.question_id]: [...forQ, data.kind] },
+    };
+    const { error } = await supabase.from("session_players").update({ powerups: next }).eq("id", sp.id);
+    if (error) throw new Error(error.message);
+    return { ok: true, hide, remaining: next[data.kind] };
+  });
 
 // --- Profile stats: total points, highest streak, podium finishes ---
 export const getProfileStats = createServerFn({ method: "GET" })
