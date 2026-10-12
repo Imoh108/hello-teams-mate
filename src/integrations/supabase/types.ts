@@ -1066,6 +1066,61 @@ export type Database = {
           },
         ]
       }
+      scheduled_quizzes: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          org_id: string
+          quiz_id: string
+          scheduled_at: string
+          session_id: string | null
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          org_id: string
+          quiz_id: string
+          scheduled_at: string
+          session_id?: string | null
+          title: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          org_id?: string
+          quiz_id?: string
+          scheduled_at?: string
+          session_id?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scheduled_quizzes_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scheduled_quizzes_quiz_id_fkey"
+            columns: ["quiz_id"]
+            isOneToOne: false
+            referencedRelation: "quizzes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scheduled_quizzes_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       session_players: {
         Row: {
           display_name: string
@@ -1457,6 +1512,15 @@ export type Database = {
       tier_rank: {
         Args: { _t: Database["public"]["Enums"]["subscription_tier"] }
         Returns: number
+      }
+      weekly_league: {
+        Args: { _org: string; _since: string }
+        Returns: {
+          answers: number
+          display_name: string
+          points: number
+          user_id: string
+        }[]
       }
     }
     Enums: {

@@ -12,7 +12,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { toast } from "sonner";
-import { Plus, Copy, Play, LogOut, Users, Building2, Trophy, Store, Flame, Shield, Swords } from "lucide-react";
+import { Plus, Copy, Play, LogOut, Users, Building2, Trophy, Store, Flame, Shield, Swords, Medal, CalendarClock } from "lucide-react";
+import { ThemeSwitcher } from "@/components/theme-switcher";
 import { useEnsureCurrentOrg } from "@/hooks/use-ensure-current-org";
 import { track } from "@/lib/track";
 import { isPlatformAdmin } from "@/lib/platform.functions";
@@ -146,13 +147,16 @@ function Dashboard() {
             <div className="size-7 rounded-md bg-primary grid place-items-center text-primary-foreground font-display font-bold text-sm">Q</div>
             <span className="font-display font-semibold">QuizPulse</span>
           </Link>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center justify-end gap-2">
             <Input value={joinCode} onChange={(e) => setJoinCode(e.target.value.toUpperCase())} placeholder={t("nav.joinCode")} className="w-32 font-mono-tab uppercase" maxLength={8} />
             <Button onClick={onJoin} variant="outline" size="sm">{t("nav.join")}</Button>
             <Button asChild variant="ghost" size="sm"><Link to="/profile"><Trophy className="size-4 mr-1" /> {t("nav.profile")}</Link></Button>
             <Button asChild variant="ghost" size="sm"><Link to="/shop"><Store className="size-4 mr-1" /> {t("nav.shop")}</Link></Button>
             <Button asChild variant="ghost" size="sm"><Link to="/challenges"><Flame className="size-4 mr-1" /> {t("nav.challenges")}</Link></Button>
             <Button asChild variant="ghost" size="sm"><Link to="/duels"><Swords className="size-4 mr-1" /> Duels</Link></Button>
+            <Button asChild variant="ghost" size="sm"><Link to="/leagues"><Medal className="size-4 mr-1" /> League</Link></Button>
+            <Button asChild variant="ghost" size="sm"><Link to="/schedule"><CalendarClock className="size-4 mr-1" /> Schedule</Link></Button>
+            <ThemeSwitcher />
             <Button asChild variant="ghost" size="sm"><Link to="/admin"><Building2 className="size-4 mr-1" /> {t("nav.admin")}</Link></Button>
             {isSuper && (
               <Button asChild variant="ghost" size="sm"><Link to="/platform"><Shield className="size-4 mr-1" /> Platform</Link></Button>

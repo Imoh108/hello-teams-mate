@@ -15,6 +15,13 @@
       "when": 1791783081687,
       "tag": "0001_create_quiz_challenges",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791785976901,
+      "tag": "0002_leagues_and_schedules",
+      "breakpoints": true
     }
   ]
 }

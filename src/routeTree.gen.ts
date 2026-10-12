@@ -16,9 +16,11 @@ import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
 import { Route as AuthenticatedChallengesRouteImport } from './routes/_authenticated/challenges'
 import { Route as AuthenticatedDuelsRouteImport } from './routes/_authenticated/duels'
+import { Route as AuthenticatedLeaguesRouteImport } from './routes/_authenticated/leagues'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedPlatformRouteImport } from './routes/_authenticated/platform'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
+import { Route as AuthenticatedScheduleRouteImport } from './routes/_authenticated/schedule'
 import { Route as AuthenticatedShopRouteImport } from './routes/_authenticated/shop'
 import { Route as AuthTeamsEndRouteImport } from './routes/auth.teams-end'
 import { Route as AuthTeamsStartRouteImport } from './routes/auth.teams-start'
@@ -85,6 +87,11 @@ const AuthenticatedDuelsRoute = AuthenticatedDuelsRouteImport.update({
   path: '/duels',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedLeaguesRoute = AuthenticatedLeaguesRouteImport.update({
+  id: '/leagues',
+  path: '/leagues',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
@@ -98,6 +105,11 @@ const AuthenticatedPlatformRoute = AuthenticatedPlatformRouteImport.update({
 const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedScheduleRoute = AuthenticatedScheduleRouteImport.update({
+  id: '/schedule',
+  path: '/schedule',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedShopRoute = AuthenticatedShopRouteImport.update({
@@ -285,9 +297,11 @@ export interface FileRoutesByFullPath {
   '/app': typeof AuthenticatedAppRoute
   '/challenges': typeof AuthenticatedChallengesRoute
   '/duels': typeof AuthenticatedDuelsRoute
+  '/leagues': typeof AuthenticatedLeaguesRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/platform': typeof AuthenticatedPlatformRouteWithChildren
   '/profile': typeof AuthenticatedProfileRoute
+  '/schedule': typeof AuthenticatedScheduleRoute
   '/shop': typeof AuthenticatedShopRoute
   '/auth/teams-end': typeof AuthTeamsEndRoute
   '/auth/teams-start': typeof AuthTeamsStartRoute
@@ -326,8 +340,10 @@ export interface FileRoutesByTo {
   '/app': typeof AuthenticatedAppRoute
   '/challenges': typeof AuthenticatedChallengesRoute
   '/duels': typeof AuthenticatedDuelsRoute
+  '/leagues': typeof AuthenticatedLeaguesRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/schedule': typeof AuthenticatedScheduleRoute
   '/shop': typeof AuthenticatedShopRoute
   '/auth/teams-end': typeof AuthTeamsEndRoute
   '/auth/teams-start': typeof AuthTeamsStartRoute
@@ -369,9 +385,11 @@ export interface FileRoutesById {
   '/_authenticated/app': typeof AuthenticatedAppRoute
   '/_authenticated/challenges': typeof AuthenticatedChallengesRoute
   '/_authenticated/duels': typeof AuthenticatedDuelsRoute
+  '/_authenticated/leagues': typeof AuthenticatedLeaguesRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/platform': typeof AuthenticatedPlatformRouteWithChildren
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
+  '/_authenticated/schedule': typeof AuthenticatedScheduleRoute
   '/_authenticated/shop': typeof AuthenticatedShopRoute
   '/auth/teams-end': typeof AuthTeamsEndRoute
   '/auth/teams-start': typeof AuthTeamsStartRoute
@@ -413,9 +431,11 @@ export interface FileRouteTypes {
     | '/app'
     | '/challenges'
     | '/duels'
+    | '/leagues'
     | '/onboarding'
     | '/platform'
     | '/profile'
+    | '/schedule'
     | '/shop'
     | '/auth/teams-end'
     | '/auth/teams-start'
@@ -454,8 +474,10 @@ export interface FileRouteTypes {
     | '/app'
     | '/challenges'
     | '/duels'
+    | '/leagues'
     | '/onboarding'
     | '/profile'
+    | '/schedule'
     | '/shop'
     | '/auth/teams-end'
     | '/auth/teams-start'
@@ -496,9 +518,11 @@ export interface FileRouteTypes {
     | '/_authenticated/app'
     | '/_authenticated/challenges'
     | '/_authenticated/duels'
+    | '/_authenticated/leagues'
     | '/_authenticated/onboarding'
     | '/_authenticated/platform'
     | '/_authenticated/profile'
+    | '/_authenticated/schedule'
     | '/_authenticated/shop'
     | '/auth/teams-end'
     | '/auth/teams-start'
@@ -590,6 +614,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDuelsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/leagues': {
+      id: '/_authenticated/leagues'
+      path: '/leagues'
+      fullPath: '/leagues'
+      preLoaderRoute: typeof AuthenticatedLeaguesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/onboarding': {
       id: '/_authenticated/onboarding'
       path: '/onboarding'
@@ -609,6 +640,13 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof AuthenticatedProfileRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/schedule': {
+      id: '/_authenticated/schedule'
+      path: '/schedule'
+      fullPath: '/schedule'
+      preLoaderRoute: typeof AuthenticatedScheduleRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/shop': {
@@ -908,9 +946,11 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAppRoute: typeof AuthenticatedAppRoute
   AuthenticatedChallengesRoute: typeof AuthenticatedChallengesRoute
   AuthenticatedDuelsRoute: typeof AuthenticatedDuelsRoute
+  AuthenticatedLeaguesRoute: typeof AuthenticatedLeaguesRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
   AuthenticatedPlatformRoute: typeof AuthenticatedPlatformRouteWithChildren
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
+  AuthenticatedScheduleRoute: typeof AuthenticatedScheduleRoute
   AuthenticatedShopRoute: typeof AuthenticatedShopRoute
   AuthenticatedDuelIdRoute: typeof AuthenticatedDuelIdRoute
   AuthenticatedHostSessionIdRoute: typeof AuthenticatedHostSessionIdRoute
@@ -926,9 +966,11 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAppRoute: AuthenticatedAppRoute,
   AuthenticatedChallengesRoute: AuthenticatedChallengesRoute,
   AuthenticatedDuelsRoute: AuthenticatedDuelsRoute,
+  AuthenticatedLeaguesRoute: AuthenticatedLeaguesRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
   AuthenticatedPlatformRoute: AuthenticatedPlatformRouteWithChildren,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
+  AuthenticatedScheduleRoute: AuthenticatedScheduleRoute,
   AuthenticatedShopRoute: AuthenticatedShopRoute,
   AuthenticatedDuelIdRoute: AuthenticatedDuelIdRoute,
   AuthenticatedHostSessionIdRoute: AuthenticatedHostSessionIdRoute,
