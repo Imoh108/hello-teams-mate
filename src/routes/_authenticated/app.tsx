@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { toast } from "sonner";
-import { Plus, Copy, Play, LogOut, Users, Building2, Trophy, Store, Flame, Shield } from "lucide-react";
+import { Plus, Copy, Play, LogOut, Users, Building2, Trophy, Store, Flame, Shield, Swords } from "lucide-react";
 import { useEnsureCurrentOrg } from "@/hooks/use-ensure-current-org";
 import { track } from "@/lib/track";
 import { isPlatformAdmin } from "@/lib/platform.functions";
