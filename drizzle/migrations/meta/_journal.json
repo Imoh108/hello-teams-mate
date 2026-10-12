@@ -8,6 +8,13 @@
       "when": 1791780208850,
       "tag": "0000_powerups_jsonb",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791783081687,
+      "tag": "0001_create_quiz_challenges",
+      "breakpoints": true
     }
   ]
 }

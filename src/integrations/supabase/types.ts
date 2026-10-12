@@ -954,6 +954,67 @@ export type Database = {
           },
         ]
       }
+      quiz_challenges: {
+        Row: {
+          challenger_id: string
+          challenger_session_id: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          opponent_id: string | null
+          opponent_session_id: string | null
+          quiz_id: string
+          status: string
+          winner_id: string | null
+        }
+        Insert: {
+          challenger_id: string
+          challenger_session_id?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          opponent_id?: string | null
+          opponent_session_id?: string | null
+          quiz_id: string
+          status?: string
+          winner_id?: string | null
+        }
+        Update: {
+          challenger_id?: string
+          challenger_session_id?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          opponent_id?: string | null
+          opponent_session_id?: string | null
+          quiz_id?: string
+          status?: string
+          winner_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_challenges_challenger_session_id_fkey"
+            columns: ["challenger_session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quiz_challenges_opponent_session_id_fkey"
+            columns: ["opponent_session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quiz_challenges_quiz_id_fkey"
+            columns: ["quiz_id"]
+            isOneToOne: false
+            referencedRelation: "quizzes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       quizzes: {
         Row: {
           created_at: string
