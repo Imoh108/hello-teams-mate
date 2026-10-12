@@ -1,0 +1,13 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1791780208850,
+      "tag": "0000_powerups_jsonb",
+      "breakpoints": true
+    }
+  ]
+}

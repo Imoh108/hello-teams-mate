@@ -1011,6 +1011,7 @@ export type Database = {
           flagged_count: number
           id: string
           joined_at: string
+          powerups: Json
           session_id: string
           team_index: number | null
           user_id: string
@@ -1020,6 +1021,7 @@ export type Database = {
           flagged_count?: number
           id?: string
           joined_at?: string
+          powerups?: Json
           session_id: string
           team_index?: number | null
           user_id: string
@@ -1029,6 +1031,7 @@ export type Database = {
           flagged_count?: number
           id?: string
           joined_at?: string
+          powerups?: Json
           session_id?: string
           team_index?: number | null
           user_id?: string
