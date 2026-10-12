@@ -152,6 +152,7 @@ function Dashboard() {
             <Button asChild variant="ghost" size="sm"><Link to="/profile"><Trophy className="size-4 mr-1" /> {t("nav.profile")}</Link></Button>
             <Button asChild variant="ghost" size="sm"><Link to="/shop"><Store className="size-4 mr-1" /> {t("nav.shop")}</Link></Button>
             <Button asChild variant="ghost" size="sm"><Link to="/challenges"><Flame className="size-4 mr-1" /> {t("nav.challenges")}</Link></Button>
+            <Button asChild variant="ghost" size="sm"><Link to="/duels"><Swords className="size-4 mr-1" /> Duels</Link></Button>
             <Button asChild variant="ghost" size="sm"><Link to="/admin"><Building2 className="size-4 mr-1" /> {t("nav.admin")}</Link></Button>
             {isSuper && (
               <Button asChild variant="ghost" size="sm"><Link to="/platform"><Shield className="size-4 mr-1" /> Platform</Link></Button>

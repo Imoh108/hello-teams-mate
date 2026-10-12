@@ -15,6 +15,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
 import { Route as AuthenticatedChallengesRouteImport } from './routes/_authenticated/challenges'
+import { Route as AuthenticatedDuelsRouteImport } from './routes/_authenticated/duels'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedPlatformRouteImport } from './routes/_authenticated/platform'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
@@ -32,6 +33,7 @@ import { Route as AuthenticatedAdminDocumentsRouteImport } from './routes/_authe
 import { Route as AuthenticatedAdminItemsRouteImport } from './routes/_authenticated/admin.items'
 import { Route as AuthenticatedAdminMembersRouteImport } from './routes/_authenticated/admin.members'
 import { Route as AuthenticatedAdminUpgradeRouteImport } from './routes/_authenticated/admin.upgrade'
+import { Route as AuthenticatedDuelIdRouteImport } from './routes/_authenticated/duel.$id'
 import { Route as AuthenticatedHostSessionIdRouteImport } from './routes/_authenticated/host.$sessionId'
 import { Route as AuthenticatedInviteTokenRouteImport } from './routes/_authenticated/invite.$token'
 import { Route as AuthenticatedPlatformIndexRouteImport } from './routes/_authenticated/platform.index'
@@ -76,6 +78,11 @@ const AuthenticatedAppRoute = AuthenticatedAppRouteImport.update({
 const AuthenticatedChallengesRoute = AuthenticatedChallengesRouteImport.update({
   id: '/challenges',
   path: '/challenges',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedDuelsRoute = AuthenticatedDuelsRouteImport.update({
+  id: '/duels',
+  path: '/duels',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
@@ -170,6 +177,11 @@ const AuthenticatedAdminUpgradeRoute =
     path: '/upgrade',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedDuelIdRoute = AuthenticatedDuelIdRouteImport.update({
+  id: '/duel/$id',
+  path: '/duel/$id',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedHostSessionIdRoute =
   AuthenticatedHostSessionIdRouteImport.update({
     id: '/host/$sessionId',
@@ -272,6 +284,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/app': typeof AuthenticatedAppRoute
   '/challenges': typeof AuthenticatedChallengesRoute
+  '/duels': typeof AuthenticatedDuelsRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/platform': typeof AuthenticatedPlatformRouteWithChildren
   '/profile': typeof AuthenticatedProfileRoute
@@ -288,6 +301,7 @@ export interface FileRoutesByFullPath {
   '/admin/items': typeof AuthenticatedAdminItemsRoute
   '/admin/members': typeof AuthenticatedAdminMembersRoute
   '/admin/upgrade': typeof AuthenticatedAdminUpgradeRoute
+  '/duel/$id': typeof AuthenticatedDuelIdRoute
   '/host/$sessionId': typeof AuthenticatedHostSessionIdRoute
   '/invite/$token': typeof AuthenticatedInviteTokenRoute
   '/platform/billing': typeof AuthenticatedPlatformBillingRoute
@@ -311,6 +325,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRouteWithChildren
   '/app': typeof AuthenticatedAppRoute
   '/challenges': typeof AuthenticatedChallengesRoute
+  '/duels': typeof AuthenticatedDuelsRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/shop': typeof AuthenticatedShopRoute
@@ -326,6 +341,7 @@ export interface FileRoutesByTo {
   '/admin/items': typeof AuthenticatedAdminItemsRoute
   '/admin/members': typeof AuthenticatedAdminMembersRoute
   '/admin/upgrade': typeof AuthenticatedAdminUpgradeRoute
+  '/duel/$id': typeof AuthenticatedDuelIdRoute
   '/host/$sessionId': typeof AuthenticatedHostSessionIdRoute
   '/invite/$token': typeof AuthenticatedInviteTokenRoute
   '/platform/billing': typeof AuthenticatedPlatformBillingRoute
@@ -352,6 +368,7 @@ export interface FileRoutesById {
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/app': typeof AuthenticatedAppRoute
   '/_authenticated/challenges': typeof AuthenticatedChallengesRoute
+  '/_authenticated/duels': typeof AuthenticatedDuelsRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/platform': typeof AuthenticatedPlatformRouteWithChildren
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
@@ -368,6 +385,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/items': typeof AuthenticatedAdminItemsRoute
   '/_authenticated/admin/members': typeof AuthenticatedAdminMembersRoute
   '/_authenticated/admin/upgrade': typeof AuthenticatedAdminUpgradeRoute
+  '/_authenticated/duel/$id': typeof AuthenticatedDuelIdRoute
   '/_authenticated/host/$sessionId': typeof AuthenticatedHostSessionIdRoute
   '/_authenticated/invite/$token': typeof AuthenticatedInviteTokenRoute
   '/_authenticated/platform/billing': typeof AuthenticatedPlatformBillingRoute
@@ -394,6 +412,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/app'
     | '/challenges'
+    | '/duels'
     | '/onboarding'
     | '/platform'
     | '/profile'
@@ -410,6 +429,7 @@ export interface FileRouteTypes {
     | '/admin/items'
     | '/admin/members'
     | '/admin/upgrade'
+    | '/duel/$id'
     | '/host/$sessionId'
     | '/invite/$token'
     | '/platform/billing'
@@ -433,6 +453,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/app'
     | '/challenges'
+    | '/duels'
     | '/onboarding'
     | '/profile'
     | '/shop'
@@ -448,6 +469,7 @@ export interface FileRouteTypes {
     | '/admin/items'
     | '/admin/members'
     | '/admin/upgrade'
+    | '/duel/$id'
     | '/host/$sessionId'
     | '/invite/$token'
     | '/platform/billing'
@@ -473,6 +495,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin'
     | '/_authenticated/app'
     | '/_authenticated/challenges'
+    | '/_authenticated/duels'
     | '/_authenticated/onboarding'
     | '/_authenticated/platform'
     | '/_authenticated/profile'
@@ -489,6 +512,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/items'
     | '/_authenticated/admin/members'
     | '/_authenticated/admin/upgrade'
+    | '/_authenticated/duel/$id'
     | '/_authenticated/host/$sessionId'
     | '/_authenticated/invite/$token'
     | '/_authenticated/platform/billing'
@@ -557,6 +581,13 @@ declare module '@tanstack/react-router' {
       path: '/challenges'
       fullPath: '/challenges'
       preLoaderRoute: typeof AuthenticatedChallengesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/duels': {
+      id: '/_authenticated/duels'
+      path: '/duels'
+      fullPath: '/duels'
+      preLoaderRoute: typeof AuthenticatedDuelsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/onboarding': {
@@ -677,6 +708,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/upgrade'
       preLoaderRoute: typeof AuthenticatedAdminUpgradeRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/duel/$id': {
+      id: '/_authenticated/duel/$id'
+      path: '/duel/$id'
+      fullPath: '/duel/$id'
+      preLoaderRoute: typeof AuthenticatedDuelIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/host/$sessionId': {
       id: '/_authenticated/host/$sessionId'
@@ -869,10 +907,12 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
   AuthenticatedAppRoute: typeof AuthenticatedAppRoute
   AuthenticatedChallengesRoute: typeof AuthenticatedChallengesRoute
+  AuthenticatedDuelsRoute: typeof AuthenticatedDuelsRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
   AuthenticatedPlatformRoute: typeof AuthenticatedPlatformRouteWithChildren
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedShopRoute: typeof AuthenticatedShopRoute
+  AuthenticatedDuelIdRoute: typeof AuthenticatedDuelIdRoute
   AuthenticatedHostSessionIdRoute: typeof AuthenticatedHostSessionIdRoute
   AuthenticatedInviteTokenRoute: typeof AuthenticatedInviteTokenRoute
   AuthenticatedPlaySessionIdRoute: typeof AuthenticatedPlaySessionIdRoute
@@ -885,10 +925,12 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
   AuthenticatedAppRoute: AuthenticatedAppRoute,
   AuthenticatedChallengesRoute: AuthenticatedChallengesRoute,
+  AuthenticatedDuelsRoute: AuthenticatedDuelsRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
   AuthenticatedPlatformRoute: AuthenticatedPlatformRouteWithChildren,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedShopRoute: AuthenticatedShopRoute,
+  AuthenticatedDuelIdRoute: AuthenticatedDuelIdRoute,
   AuthenticatedHostSessionIdRoute: AuthenticatedHostSessionIdRoute,
   AuthenticatedInviteTokenRoute: AuthenticatedInviteTokenRoute,
   AuthenticatedPlaySessionIdRoute: AuthenticatedPlaySessionIdRoute,

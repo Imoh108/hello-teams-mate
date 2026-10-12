@@ -9,4 +9,4 @@
 - [ ] Visual themes
 - [ ] Leagues
 - [ ] Scheduled quizzes
-- [ ] 1v1 async challenges
+- [x] 1v1 async challenges

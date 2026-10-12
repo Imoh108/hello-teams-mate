@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { getDuel, acceptDuel } from "@/lib/duels.functions";
 import { startQuestion, submitAnswer, endSession } from "@/lib/quiz.functions";
-import { AnswerBlock } from "@/components/quiz/CircularTimer";
+import { AnswerBlock } from "@/components/quiz/AnswerBlock";
 import { CircularTimer } from "@/components/quiz/CircularTimer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
