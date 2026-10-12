@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useServerFn } from "@tanstack/react-start";
-import { submitAnswer } from "@/lib/quiz.functions";
+import { submitAnswer, usePowerUp, FREEZE_BONUS_S } from "@/lib/quiz.functions";
 import { permutationFor } from "@/lib/scoring";
 import { track } from "@/lib/track";
 import { toast } from "sonner";
@@ -11,10 +11,11 @@ import { CircularTimer } from "@/components/quiz/CircularTimer";
 import { FeedbackOverlay } from "@/components/quiz/FeedbackOverlay";
 import { CountdownGo } from "@/components/quiz/CountdownGo";
 import { PodiumLeaderboard, type LbRow } from "@/components/quiz/PodiumLeaderboard";
-import { Flame } from "lucide-react";
+import { Flame, Scissors, Zap, Snowflake } from "lucide-react";
 import { ReactionBar, ReactionLayer, MuteToggle } from "@/components/quiz/Reactions";
 import { sfx } from "@/lib/sfx";
 import { TeamBoard, TeamBadge, type TeamMember } from "@/components/quiz/TeamBoard";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/play/$sessionId")({
   head: () => ({ meta: [{ title: "Play — QuizPulse" }] }),
