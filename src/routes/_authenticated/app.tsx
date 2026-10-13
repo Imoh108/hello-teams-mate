@@ -162,6 +162,7 @@ function Dashboard() {
               <Button asChild variant="ghost" size="sm"><Link to="/platform"><Shield className="size-4 mr-1" /> Platform</Link></Button>
             )}
             <LanguageSwitcher compact />
+            <Button asChild variant="ghost" size="sm"><Link to="/how-to-play">How to play</Link></Button>
             <Button onClick={onSignOut} variant="ghost" size="sm"><LogOut className="size-4" /></Button>
           </div>
         </div>

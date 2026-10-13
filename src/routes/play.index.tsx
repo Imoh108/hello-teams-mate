@@ -22,6 +22,10 @@ export const Route = createFileRoute("/play/")({
     meta: [
       { title: "Join a quiz — QuizPulse" },
       { name: "description", content: "Enter the join code your host shared to jump into a live quiz round. No account required." },
+      { property: "og:title", content: "Join a quiz — QuizPulse" },
+      { property: "og:description", content: "Enter your host's code and join a live QuizPulse game." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: JoinPage,
@@ -181,6 +185,7 @@ function JoinPage() {
         )}
 
         <div className="mt-6 text-center text-xs text-muted-foreground">
+          <Button asChild variant="link" size="sm"><Link to="/how-to-play">How to play</Link></Button>
           <Link to="/" className="hover:text-foreground">Back home</Link>
         </div>
       </div>

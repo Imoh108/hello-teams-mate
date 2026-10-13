@@ -9,6 +9,8 @@ export const Route = createFileRoute("/")({
       { name: "description", content: "Moderated, real-time trivia for the workplace. Strict anti-cheating, live leaderboards, manager controls — ready to embed in Microsoft Teams." },
       { property: "og:title", content: "QuizPulse — Live Team Quizzes" },
       { property: "og:description", content: "Moderated real-time trivia with strict anti-cheating and live leaderboards." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: Landing,
@@ -17,12 +19,13 @@ export const Route = createFileRoute("/")({
 function Landing() {
   return (
     <div className="min-h-screen">
-      <header className="container mx-auto flex items-center justify-between px-6 py-6">
+      <header className="container mx-auto flex flex-wrap gap-3 items-center justify-between px-6 py-6">
         <div className="flex items-center gap-2">
           <div className="size-8 rounded-md bg-primary grid place-items-center text-primary-foreground font-display font-bold">Q</div>
           <span className="font-display text-lg font-semibold tracking-tight">QuizPulse</span>
         </div>
         <nav className="flex items-center gap-3">
+          <Button asChild size="sm" variant="ghost"><Link to="/how-to-play">How to play</Link></Button>
           <Link to="/auth" search={{ redirect: undefined }} className="text-sm text-muted-foreground hover:text-foreground">Sign in</Link>
           <Button asChild size="sm"><Link to="/auth" search={{ redirect: undefined }}>Get started</Link></Button>
         </nav>
