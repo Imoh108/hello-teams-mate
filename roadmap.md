@@ -11,3 +11,4 @@
 - [x] Scheduled quizzes
 - [x] Full app user test
 - [x] 1v1 async challenges
+- [x] Simple how-to guide for the app and every game mode
