@@ -20,7 +20,14 @@ import { isPlatformAdmin } from "@/lib/platform.functions";
 import { QuickStart } from "@/components/quick-start";
 
 export const Route = createFileRoute("/_authenticated/app")({
-  head: () => ({ meta: [{ title: "Dashboard — QuizPulse" }] }),
+  head: () => ({ meta: [
+    { title: "Dashboard — QuizPulse" },
+    { name: "description", content: "Create quizzes, launch live games and explore your QuizPulse workspace." },
+    { property: "og:title", content: "Dashboard — QuizPulse" },
+    { property: "og:description", content: "Your quizzes, quick play and workspace activities in QuizPulse." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
   component: Dashboard,
 });
 
